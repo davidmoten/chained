@@ -5,47 +5,6 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>chained</name>
-  <!-- TODO: UPDATE URLS -->
-  <description>Please refer to https://github.com/toolisticon/chained</description>
-  <url>https://github.com/holisticon/chained</url>
-  <!-- TODO: Add Organisation -->
-  <organization>
-    <name/>
-    <url/>
-  </organization>
-  <!-- TODO:  Add developers-->
-  <developers>
-    <!--
-        <developer>
-            <name></name>
-            <email></email>
-            <organization></organization>
-            <organizationUrl></organizationUrl>
-        </developer>
-        -->
-  </developers>
-  <!-- TODO: Update License -->
-  <licenses>
-    <license>
-      <name>MIT License</name>
-      <url>https://en.wikipedia.org/wiki/MIT_License</url>
-      <comments>s. LICENSE file</comments>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <inceptionYear>2024</inceptionYear>
-  <!-- TODO: Update issue management -->
-  <issueManagement>
-    <url>https://github.com/toolisticon/chained/issues</url>
-    <system>GitHub Issues</system>
-  </issueManagement>
-  <!-- TODO: Configure SCM -->
-  <scm>
-    <connection>scm:git:git@github.com:toolisticon/chained.git</connection>
-    <developerConnection>scm:git:git@github.com:toolisticon/chained.git</developerConnection>
-    <url>git@github.com:toolisticon/chained.git</url>
-    <tag>HEAD</tag>
-  </scm>
   <properties>
     <!-- Common build settings -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -370,7 +329,6 @@
                 <configuration>
                   <configLocation>${session.executionRootDirectory}/config/sun_checks.xml
                                     </configLocation>
-                  <encoding>UTF-8</encoding>
                   <consoleOutput>true</consoleOutput>
                   <failOnViolation>true</failOnViolation>
                   <failsOnError>true</failsOnError>
