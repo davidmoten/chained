@@ -1,0 +1,6 @@
+Sets the x-coordinate of the point. This fragment comes from defined prerendered javadoc. 
+
+<p>Should be between 0 and 1000000 inclusive.
+
+@returns the builder
+@throws IllegalArgumentException if the x-coordinate is not between 0 and 1000000 inclusive

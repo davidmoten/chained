@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>chained-unit-test</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.github.davidmoten</groupId>
+        <artifactId>chained</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <name>${project.artifactId}</name>
+    <description>Unit tests for chained</description>
+    
+    <dependencies>
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>chained-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        
+        <!-- required ony in chained project to enforce build order -->
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>chained-processor</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
+       <!-- Test Dependencies -->
+       <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <verbose>true</verbose>
+                    <source>17</source>
+                    <target>17</target>
+                    <verbose>false</verbose>
+                    <generatedTestSourcesDirectory>
+                        ${project.build.directory}/generated-test-sources/test-annotations</generatedTestSourcesDirectory>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>com.github.davidmoten</groupId>
+                            <artifactId>chained-processor</artifactId>
+                            <version>${project.parent.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-AjavadocDir=${project.basedir}/src/main/javadoc</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>
+                                    ${project.build.directory}/generated-test-sources/test-annotations</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-javadoc-plugin</artifactId>
+               <configuration>
+                   <skip>true</skip>
+               </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
