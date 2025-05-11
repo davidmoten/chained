@@ -1,5 +1,5 @@
 # chained
-Java annotation processor to generate chained builders
+Java annotation processor to generate chained immutable builders
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/${groupId}/${rootArtifactId}/badge.svg)](https://maven-badges.herokuapp.com/maven-central/${groupId}/${rootArtifactId})
 [![Build Status](https://travis-ci.org/toolisticon/${rootArtifactId}.svg?branch=master)](https://travis-ci.org/toolisticon/${rootArtifactId})
