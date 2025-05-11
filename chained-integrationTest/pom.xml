@@ -90,7 +90,7 @@
 						<configuration>
 							<sources>
 								<source>
-									${project.build.directory}/generated-sources/annotations</source>
+									${project.build.directory}/generated-test-sources/test-annotations</source>
 							</sources>
 						</configuration>
 					</execution>
