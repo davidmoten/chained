@@ -100,7 +100,7 @@
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration combine.self="append">
+                <configuration>
                     <verbose>true</verbose>
                     <annotationProcessorPaths>
                         <path>
