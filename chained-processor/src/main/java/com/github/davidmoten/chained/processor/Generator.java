@@ -20,7 +20,7 @@ public final class Generator {
         Output o = new Output();
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
-        final String firstBuilderSimpleClassName = Util.simpleClassName(className);
+        final String firstBuilderSimpleClassName = Util.simpleClassName(builderClassName);
         if (mandatory.isEmpty()) {
             return simpleBuilder(className, builderClassName, parameters);
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
