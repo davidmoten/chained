@@ -1,0 +1,17 @@
+package com.github.davidmoten.chained.integrationtest;
+
+import com.github.davidmoten.chained.api.Builder;
+
+@Builder("GeneratedClass")
+public class TestcaseValidUsage {
+
+    private String field;
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+}
