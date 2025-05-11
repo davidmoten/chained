@@ -30,18 +30,7 @@ public final class Generator {
             o.close();
             return o.toString();
         } else {
-            o.line("public static %s builder() {", firstBuilderSimpleClassName);
-            o.close();
-            o.line();
-            {
-                Parameter p = mandatory.get(0);
-                String nextBuilder = builderClassName(p.name());
-                o.line("public static %s %s(%s %s) {", nextBuilder, p.name(), p.type(), p.name());
-                o.line("return builder().%s(%s);", p.name(), p.name());
-                o.close();
-            }
-            o.line();
-            o.line("public final static class %s {", firstBuilderSimpleClassName);
+            o.line("public final class %s {", firstBuilderSimpleClassName);
             o.line();
             for (Parameter p : parameters) {
                 if (p.isOptional()) {
@@ -52,12 +41,23 @@ public final class Generator {
             }
             privateConstructor(o, firstBuilderSimpleClassName);
             o.line();
+            o.line("public static %s builder() {", firstBuilderSimpleClassName);
+            o.line("return new %s();", firstBuilderSimpleClassName);
+            o.close();
+            o.line();
+            {
+                Parameter p = mandatory.get(0);
+                String nextBuilder = builderClassName(p.name());
+                o.line("public static %s %s(%s %s) {", nextBuilder, p.name(), p.type(), p.name());
+                o.line("return builder().%s(%s);", p.name(), p.name());
+                o.close();
+            }
+            o.line();
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", className);
             String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
             o.line("return new %s(%s);", className, params);
-            o.close();
             o.close();
 
             for (int i = 0; i < mandatory.size() - 1; i++) {
@@ -120,6 +120,7 @@ public final class Generator {
             o.line("return _b.build();");
             o.close();
             o.close();
+            o.close();
             return o.toString();
         }
     }
@@ -150,7 +151,7 @@ public final class Generator {
     private static void privateConstructor(Output o, String className) {
         o.line();
         o.line("private %s {", className);
-        o.line("// prevent instantiation");
+        o.line("// force static builder method use");
         o.close();
     }
 

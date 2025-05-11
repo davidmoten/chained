@@ -1,31 +1,25 @@
 package com.github.davidmoten.chained.processor;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+
 import com.github.davidmoten.chained.api.Builder;
 
 import io.toolisticon.aptk.compilermessage.api.DeclareCompilerMessage;
 import io.toolisticon.aptk.compilermessage.api.DeclareCompilerMessageCodePrefix;
 import io.toolisticon.aptk.tools.AbstractAnnotationProcessor;
-import io.toolisticon.aptk.tools.ElementUtils;
 import io.toolisticon.aptk.tools.FilerUtils;
-import io.toolisticon.aptk.tools.MessagerUtils;
 import io.toolisticon.aptk.tools.corematcher.AptkCoreMatchers;
-import io.toolisticon.aptk.tools.fluentvalidator.FluentElementValidator;
 import io.toolisticon.aptk.tools.generators.SimpleJavaWriter;
 import io.toolisticon.aptk.tools.wrapper.TypeElementWrapper;
 import io.toolisticon.spiap.api.SpiService;
-
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Annotation Processor for {@link com.github.davidmoten.chained.api.Builder}.
@@ -120,8 +114,8 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
         
 
         // Now create class
-        String packageName = pkg(className);
-        String simpleClassName = simpleClassName(className);
+        String packageName = Util.pkg(className);
+        String simpleClassName = Util.simpleClassName(className);
 
         // Fill Model
         Map<String, Object> model = new HashMap<String, Object>();
