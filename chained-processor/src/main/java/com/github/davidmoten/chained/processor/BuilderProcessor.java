@@ -118,7 +118,6 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
                 .replace("${pkg}", wrappedTypeElement.getPackageName()) //
                 .replace("${simpleName}", wrappedTypeElement.getSimpleName());
         
-        System.out.println(templatedFullClassName  + " -> " + className);
 
         // Now create class
         String packageName = pkg(className);
