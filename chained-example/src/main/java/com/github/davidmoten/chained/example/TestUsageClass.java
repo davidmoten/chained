@@ -8,7 +8,6 @@ public class TestUsageClass {
 
         System.out.println(instance.getClass().getCanonicalName());
 
-
     }
 
 

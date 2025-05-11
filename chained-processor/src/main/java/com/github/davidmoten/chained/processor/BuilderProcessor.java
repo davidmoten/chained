@@ -113,24 +113,47 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
     @DeclareCompilerMessage(code = "ERROR_001", enumValueName = "ERROR_COULD_NOT_CREATE_CLASS", message = "Could not create class ${0} : ${1}")
     private void createClass(TypeElementWrapper wrappedTypeElement, BuilderWrapper annotation) {
 
+        String templatedFullClassName = annotation.value();
+        String className = templatedFullClassName //
+                .replace("${pkg}", wrappedTypeElement.getPackageName()) //
+                .replace("${simpleName}", wrappedTypeElement.getSimpleName());
+        
+        System.out.println(templatedFullClassName  + " -> " + className);
 
         // Now create class
-        String packageName = wrappedTypeElement.getPackageName();
-        String className = annotation.value();
+        String packageName = pkg(className);
+        String simpleClassName = simpleClassName(className);
 
         // Fill Model
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("packageName", packageName);
-        model.put("className", className);
+        model.put("className", simpleClassName);
 
         // create the class
-        String filePath = packageName + "." + className;
         try {
-            SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(filePath, wrappedTypeElement.unwrap());
+            SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(className, wrappedTypeElement.unwrap());
             javaWriter.writeTemplate("/Builder.tpl", model);
             javaWriter.close();
         } catch (IOException e) {
-            wrappedTypeElement.compilerMessage().asError().write(BuilderProcessorCompilerMessages.ERROR_COULD_NOT_CREATE_CLASS, filePath, e.getMessage());
+            wrappedTypeElement.compilerMessage().asError().write(BuilderProcessorCompilerMessages.ERROR_COULD_NOT_CREATE_CLASS, className, e.getMessage());
+        }
+    }
+
+    private static String simpleClassName(String className) {
+        int lastDot = className.lastIndexOf('.');
+        if (lastDot == -1) {
+            return className;
+        } else {
+            return className.substring(lastDot + 1);
+        }
+    }
+
+    private static String pkg(String className) {
+        int lastDot = className.lastIndexOf('.');
+        if (lastDot == -1) {
+            return "";
+        } else {
+            return className.substring(0, lastDot);
         }
     }
 

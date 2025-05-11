@@ -23,7 +23,7 @@ public @interface Builder {
      * Value must not be empty String.
      * @return the value
      */
-    String value();
+    String value() default "${pkg}.builder.${simpleName}Builder";
 
 
 }
