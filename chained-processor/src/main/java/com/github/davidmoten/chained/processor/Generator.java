@@ -3,7 +3,6 @@ package com.github.davidmoten.chained.processor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,33 +15,27 @@ public final class Generator {
         // prevent instantiation
     }
 
+    // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters) {
         Output o = new Output();
+        o.line("package %s;", Util.pkg(builderClassName));
+        o.line();
+        o.line("public final class %s {", Util.simpleClassName(builderClassName));
+        o.line();
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
-        final String firstBuilderSimpleClassName = Util.simpleClassName(builderClassName);
         if (mandatory.isEmpty()) {
-            return simpleBuilder(className, builderClassName, parameters);
+            return simpleBuilder(className, parameters);
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", className, p.type(), p.name());
             o.line("return new %s(%s);", className, p.name());
             o.close();
+            o.close();
             return o.toString();
         } else {
-            o.line("public final class %s {", firstBuilderSimpleClassName);
-            o.line();
-            for (Parameter p : parameters) {
-                if (p.isOptional()) {
-                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), p.name());
-                } else {
-                    o.line("private %s %s;", p.type(), p.name());
-                }
-            }
-            privateConstructor(o, firstBuilderSimpleClassName);
-            o.line();
-            o.line("public static %s builder() {", firstBuilderSimpleClassName);
-            o.line("return new %s();", firstBuilderSimpleClassName);
+            o.line("public static Builder builder() {");
+            o.line("return new Builder();");
             o.close();
             o.line();
             {
@@ -53,11 +46,23 @@ public final class Generator {
                 o.close();
             }
             o.line();
+            o.line("public final static class Builder {");
+            o.line();
+            for (Parameter p : parameters) {
+                if (p.isOptional()) {
+                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), p.name());
+                } else {
+                    o.line("private %s %s;", p.type(), p.name());
+                }
+            }
+            privateConstructor(o, "Builder");
+            o.line();
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", className);
             String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
             o.line("return new %s(%s);", className, params);
+            o.close();
             o.close();
 
             for (int i = 0; i < mandatory.size() - 1; i++) {
@@ -66,9 +71,9 @@ public final class Generator {
                 o.line();
                 o.line("public final static class %s {", builder);
                 o.line();
-                o.line("private final %s _b;", firstBuilderSimpleClassName);
+                o.line("private final Builder _b;");
                 o.line();
-                o.line("private %s(%s _b) {", builder, firstBuilderSimpleClassName);
+                o.line("private %s(Builder _b) {", builder);
                 o.line("this._b = _b;");
                 o.close();
 
@@ -78,6 +83,7 @@ public final class Generator {
                     writeNullCheck(o, q);
                     o.line("this._b.%s = %s;", q.name(), q.name());
                     o.line("return _b.build();");
+                    o.close();
                     o.close();
                     o.close();
                     return o.toString();
@@ -96,9 +102,9 @@ public final class Generator {
             o.line();
             o.line("public final static class %s {", lastBuilder);
             o.line();
-            o.line("private final %s _b;", firstBuilderSimpleClassName);
+            o.line("private final Builder _b;");
             o.line();
-            o.line("private %s(%s _b) {", lastBuilder, firstBuilderSimpleClassName);
+            o.line("private %s(Builder _b) {", lastBuilder);
             o.line("this._b = _b;");
             o.close();
             for (Parameter p : optionals) {
@@ -151,7 +157,7 @@ public final class Generator {
     private static void privateConstructor(Output o, String className) {
         o.line();
         o.line("private %s {", className);
-        o.line("// force static builder method use");
+        o.line("// prevent instantiation");
         o.close();
     }
 
@@ -178,14 +184,13 @@ public final class Generator {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    private static String simpleBuilder(String className, String builderClassName, List<Parameter> parameters) {
+    private static String simpleBuilder(String className, List<Parameter> parameters) {
         Output o = new Output().right();
-        final String firstBuilderSimpleClassName = Util.simpleClassName(builderClassName);
-        o.line("public static %s builder() {", firstBuilderSimpleClassName);
-        o.line("return new %s();", firstBuilderSimpleClassName);
+        o.line("public static Builder builder() {");
+        o.line("return new Builder();");
         o.close();
         o.line();
-        o.line("public final static class %s {", firstBuilderSimpleClassName);
+        o.line("public final static class Builder {");
         o.line();
         for (Parameter p : parameters) {
             if (p.isOptional()) {
@@ -200,14 +205,14 @@ public final class Generator {
                 String wrappedType = wrappedType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
-                o.line("public %s %s(%s %s) {", firstBuilderSimpleClassName, p.name(), wrappedType, p.name());
+                o.line("public Builder %s(%s %s) {", p.name(), wrappedType, p.name());
                 o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
                 o.line("this.%s = %s.of(%s);", p.name(), wrappedType(p.type()), p.name());
                 o.line("return this;");
                 o.close();
             }
             o.line();
-            o.line("public %s %s(%s %s) {", firstBuilderSimpleClassName, p.name(), p.type(), p.name());
+            o.line("public Builder %s(%s %s) {", p.name(), p.type(), p.name());
             o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");
@@ -292,16 +297,16 @@ public final class Generator {
         private final String type;
         private final String name;
 
-        public Parameter(String type, String name) {
+        Parameter(String type, String name) {
             this.type = type;
             this.name = name;
         }
 
-        public String type() {
+        String type() {
             return type;
         }
 
-        public String name() {
+        String name() {
             return name;
         }
 
@@ -313,29 +318,4 @@ public final class Generator {
             return PRIMITIVES.contains(type);
         }
     }
-
-    private static boolean isWhitespace(String s) {
-        return s != null && s.trim().isEmpty();
-    }
-
-    private static String skipWhitespace(String token, StringBuilder b, Iterator<String> it) {
-        if (token == null) {
-            // EOF
-            return null;
-        }
-        while (isWhitespace(token)) {
-            token = next(b, it);
-        }
-        return token;
-    }
-
-    private static String next(StringBuilder b, Iterator<String> it) {
-        if (!it.hasNext()) {
-            return null;
-        }
-        String token = it.next();
-        b.append(token);
-        return skipWhitespace(token, b, it);
-    }
-
 }

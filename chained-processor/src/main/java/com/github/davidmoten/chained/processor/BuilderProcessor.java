@@ -1,7 +1,10 @@
 package com.github.davidmoten.chained.processor;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +14,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 import com.github.davidmoten.chained.api.Builder;
+import com.github.davidmoten.chained.processor.Generator.Parameter;
 
 import io.toolisticon.aptk.compilermessage.api.DeclareCompilerMessage;
 import io.toolisticon.aptk.compilermessage.api.DeclareCompilerMessageCodePrefix;
@@ -108,14 +112,14 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
     private void createClass(TypeElementWrapper wrappedTypeElement, BuilderWrapper annotation) {
 
         String templatedFullClassName = annotation.value();
-        String className = templatedFullClassName //
+        String builderClassName = templatedFullClassName //
                 .replace("${pkg}", wrappedTypeElement.getPackageName()) //
                 .replace("${simpleName}", wrappedTypeElement.getSimpleName());
         
 
-        // Now create class
-        String packageName = Util.pkg(className);
-        String simpleClassName = Util.simpleClassName(className);
+        // Extract components for templating the class 
+        String packageName = Util.pkg(builderClassName);
+        String simpleClassName = Util.simpleClassName(builderClassName);
 
         // Fill Model
         Map<String, Object> model = new HashMap<String, Object>();
@@ -124,11 +128,15 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
 
         // create the class
         try {
-            SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(className, wrappedTypeElement.unwrap());
-            javaWriter.writeTemplate("/Builder.tpl", model);
+            SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(builderClassName, wrappedTypeElement.unwrap());
+            List<Parameter> list = new ArrayList<>();
+            list.add(new Parameter("String", "name"));
+            list.add(new Parameter("java.util.Optional<Integer>", "age"));
+            javaWriter.append(Generator.chainedBuilder(wrappedTypeElement.getQualifiedName(), builderClassName, list ));
+//            javaWriter.writeTemplate("/Builder.tpl", model);
             javaWriter.close();
         } catch (IOException e) {
-            wrappedTypeElement.compilerMessage().asError().write(BuilderProcessorCompilerMessages.ERROR_COULD_NOT_CREATE_CLASS, className, e.getMessage());
+            wrappedTypeElement.compilerMessage().asError().write(BuilderProcessorCompilerMessages.ERROR_COULD_NOT_CREATE_CLASS, builderClassName, e.getMessage());
         }
     }
 
