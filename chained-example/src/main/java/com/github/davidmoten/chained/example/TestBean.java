@@ -2,7 +2,7 @@ package com.github.davidmoten.chained.example;
 
 import com.github.davidmoten.chained.api.Builder;
 
-@Builder("${pkg}.GeneratedClass")
+@Builder("${pkg}.TestBeanBuilder")
 public class TestBean {
 
     private Long longField;

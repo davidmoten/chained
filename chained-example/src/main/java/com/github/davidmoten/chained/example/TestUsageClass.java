@@ -4,7 +4,7 @@ public class TestUsageClass {
 
     public static void main(String[] args) {
 
-        GeneratedClass instance = new GeneratedClass();
+        TestBean instance = TestBeanBuilder.builder().longField(123L).stringField("abc");
 
         System.out.println(instance.getClass().getCanonicalName());
 
