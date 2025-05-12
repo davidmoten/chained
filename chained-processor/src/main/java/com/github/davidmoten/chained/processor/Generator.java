@@ -20,6 +20,8 @@ public final class Generator {
         Output o = new Output();
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
+        o.line("import com.github.davidmoten.chained.api.Preconditions;");
+        o.line();
         o.line("public final class %s {", Util.simpleClassName(builderClassName));
         o.line();
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
@@ -50,7 +52,7 @@ public final class Generator {
             o.line();
             for (Parameter p : parameters) {
                 if (p.isOptional()) {
-                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), p.name());
+                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), "java.util.Optional");
                 } else {
                     o.line("private %s %s;", p.type(), p.name());
                 }
@@ -156,7 +158,7 @@ public final class Generator {
 
     private static void privateConstructor(Output o, String className) {
         o.line();
-        o.line("private %s {", className);
+        o.line("private %s() {", className);
         o.line("// prevent instantiation");
         o.close();
     }
