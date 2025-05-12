@@ -8,4 +8,8 @@ public class TestBean {
     private Long longField;
     private String stringField;
 
+    public TestBean(Long longField, String stringField) {
+        this.longField = longField;
+        this.stringField = stringField;
+    }
 }

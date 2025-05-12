@@ -86,7 +86,7 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
         // Some example validations : Annotation may only be applied on Classes with Noarg constructor.
         boolean result = wrappedTypeElement.validateWithFluentElementValidator()
             .is(AptkCoreMatchers.IS_CLASS)
-            .applyValidator(AptkCoreMatchers.HAS_PUBLIC_NOARG_CONSTRUCTOR)
+            //.applyValidator(AptkCoreMatchers.HAS_PUBLIC_NOARG_CONSTRUCTOR)
             .validateAndIssueMessages();
 
         if(annotation.value().isEmpty()) {

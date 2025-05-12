@@ -120,10 +120,6 @@
           <artifactId>fluapigen-api</artifactId>
           <groupId>io.toolisticon.fluapigen</groupId>
         </exclusion>
-        <exclusion>
-          <artifactId>extension-modulesupport</artifactId>
-          <groupId>io.toolisticon.cute</groupId>
-        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
