@@ -1,11 +1,14 @@
 package com.github.davidmoten.chained.processor;
 
+import java.util.Collections;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import io.toolisticon.aptk.tools.MessagerUtils;
 import io.toolisticon.aptk.tools.corematcher.CoreMatcherValidationMessages;
 import io.toolisticon.cute.Cute;
 import io.toolisticon.cute.CuteApi;
-import org.junit.Before;
-import org.junit.Test;
 
 
 
@@ -27,7 +30,7 @@ public class BuilderProcessorTest {
         compileTestBuilder = Cute
                 .blackBoxTest()
                 .given()
-                .processors(BuilderProcessor.class);
+                .processors(Collections.singletonList(BuilderProcessor.class));
     }
 
 
