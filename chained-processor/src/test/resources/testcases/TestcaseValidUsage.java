@@ -6,6 +6,10 @@ import com.github.davidmoten.chained.api.Builder;
 public class TestcaseValidUsage {
 
     private String field;
+    
+    public TestcaseValidUsage(String field) {
+        this.field = field;
+    }
 
     public String getField() {
         return field;

@@ -2,7 +2,6 @@ package com.github.davidmoten.chained.processor;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -130,8 +129,11 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
         try {
             SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(builderClassName, wrappedTypeElement.unwrap());
             List<Parameter> list = new ArrayList<>();
-            list.add(new Parameter("String", "name"));
-            list.add(new Parameter("java.util.Optional<Integer>", "age"));
+            wrappedTypeElement.getFields().forEach(f -> {
+                String type = f.asType().toString();
+                String name = f.getSimpleName().toString();
+                list.add(new Parameter(type, name));
+            });
             javaWriter.append(Generator.chainedBuilder(wrappedTypeElement.getQualifiedName(), builderClassName, list ));
 //            javaWriter.writeTemplate("/Builder.tpl", model);
             javaWriter.close();
