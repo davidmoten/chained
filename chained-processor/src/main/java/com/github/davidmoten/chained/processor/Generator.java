@@ -16,7 +16,7 @@ public final class Generator {
     }
 
     // VisibleForTesting
-    static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters) {
+    static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters, boolean constructorVisible) {
         Output o = new Output();
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();

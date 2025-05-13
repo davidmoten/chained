@@ -120,18 +120,13 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
                 .replace("${simpleName}", wrappedTypeElement.getSimpleName());
 
         // Extract components for templating the class
-        String packageName = Util.pkg(builderClassName);
-        String simpleClassName = Util.simpleClassName(builderClassName);
-
-        // Fill Model
-        Map<String, Object> model = new HashMap<String, Object>();
-        model.put("packageName", packageName);
-        model.put("className", simpleClassName);
+        String builderPackageName = Util.pkg(builderClassName);
 
         // create the class
         try {
             SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(builderClassName, wrappedTypeElement.unwrap());
-            List<Parameter> list = constructor(wrappedTypeElement) //
+            ExecutableElementWrapper constructor = constructor(wrappedTypeElement);
+            List<Parameter> list = constructor //
                     .getParameters() //
                     .stream() //
                     .map(f -> {
@@ -139,7 +134,11 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
                         String name = f.getSimpleName().toString();
                         return new Parameter(type, name);
                     }).collect(Collectors.toList());
-            javaWriter.append(Generator.chainedBuilder(wrappedTypeElement.getQualifiedName(), builderClassName, list));
+            boolean constructorVisible = wrappedTypeElement.getModifiers().contains(Modifier.PUBLIC)
+                    || wrappedTypeElement.getModifiers().contains(Modifier.DEFAULT)
+                            && wrappedTypeElement.getPackageName().equals(builderPackageName);
+            javaWriter.append(Generator.chainedBuilder(wrappedTypeElement.getQualifiedName(), builderClassName, list,
+                    constructorVisible));
             javaWriter.close();
         } catch (IOException e) {
             wrappedTypeElement.compilerMessage().asError().write(
