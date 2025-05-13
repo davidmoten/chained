@@ -1,5 +1,6 @@
 package com.github.davidmoten.chained.processor;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +17,8 @@ public final class Generator {
     }
 
     // VisibleForTesting
-    static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters, boolean constructorVisible) {
+    static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
+            boolean constructorVisible) {
         Output o = new Output();
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
@@ -27,7 +29,7 @@ public final class Generator {
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
         if (mandatory.isEmpty()) {
-            return simpleBuilder(className, parameters);
+            return simpleBuilder(className, parameters, constructorVisible);
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", className, p.type(), p.name());
@@ -66,8 +68,7 @@ public final class Generator {
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", className);
-            String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
-            o.line("return new %s(%s);", className, params);
+            writeBuildStatement(o, className, parameters, constructorVisible);
             o.close();
             o.close();
 
@@ -83,7 +84,7 @@ public final class Generator {
                 o.line("this._b = _b;");
                 o.close();
                 o.line();
-                
+
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     o.line("public %s %s(%s %s) {", className, q.name(), q.type(), q.name());
@@ -192,7 +193,7 @@ public final class Generator {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    private static String simpleBuilder(String className, List<Parameter> parameters) {
+    private static String simpleBuilder(String className, List<Parameter> parameters, boolean constructorVisible) {
         Output o = new Output().right();
         o.line("public static Builder builder() {");
         o.line("return new Builder();");
@@ -228,11 +229,39 @@ public final class Generator {
         }
         o.line();
         o.line("public %s build() {", className);
-        String params = parameters.stream().map(p -> p.name()).collect(Collectors.joining(", "));
-        o.line("return new %s(%s);", className, params);
+        writeBuildStatement(o, className, parameters, constructorVisible);
         o.close();
         o.close();
         return o.toString();
+    }
+
+    private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
+            boolean constructorVisible) {
+        String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
+        if (constructorVisible && false) {
+            o.line("return new %s(%s);", className, params);
+        } else {
+            String parameterClassNames = parameters.stream().map(x -> baseType(x.type()) + ".class")
+                    .collect(Collectors.joining(", "));
+            o.line("try {");
+            o.line("java.lang.reflect.Constructor<%s> _c = %s.class.getConstructor(%s);", className, className,
+                    parameterClassNames);
+            o.line("_c.setAccessible(true);");
+            o.line("return _c.newInstance(%s);", params);
+            o.close();
+            o.line("catch (java.lang.reflect.InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException  e) {");
+            o.line("throw new RuntimeException(e);");
+            o.close();
+        }
+    }
+
+    private static String baseType(String type) {
+        int i = type.indexOf("<");
+        if (i == -1) {
+            return type;
+        } else {
+            return type.substring(0, i);
+        }
     }
 
     public static final class Output {
