@@ -2,8 +2,12 @@ package com.github.davidmoten.chained.example;
 
 import com.github.davidmoten.chained.api.Builder;
 
-@Builder("${pkg}.ImmutableTestBean")
+@Builder("${pkg}.TestBeanFactory")
 public class TestBean {
+    
+    public static TestBeanFactory.Builder builder() {
+          return TestBeanFactory.builder();
+    }
 
     private long longField;
     private String stringField;

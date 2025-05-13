@@ -42,7 +42,7 @@
 								<path>
 									<groupId>com.github.davidmoten</groupId>
 									<artifactId>chained-processor</artifactId>
-									<version>${project.version}</version>
+									<version>${project.parent.version}</version>
 								</path>
 							</annotationProcessorPaths>
 						</configuration>
