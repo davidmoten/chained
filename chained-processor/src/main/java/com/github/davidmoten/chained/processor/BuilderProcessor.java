@@ -69,28 +69,31 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
 
     void processAnnotation(TypeElementWrapper wrappedTypeElement, BuilderWrapper annotation) {
 
-        // ----------------------------------------------------------
-        // TODO: replace the following code by your business logic
-        // ----------------------------------------------------------
-
         createClass(wrappedTypeElement, annotation);
 
     }
 
     @DeclareCompilerMessage(code = "ERROR_002", enumValueName = "ERROR_VALUE_MUST_NOT_BE_EMPTY", message = "Value must not be empty")
+    @DeclareCompilerMessage(code = "ERROR_003", enumValueName = "ERROR_TYPE_MUST_BE_CLASS_OR_RECORD", message = "Type must be class or record")
     boolean validateUsage(TypeElementWrapper wrappedTypeElement, BuilderWrapper annotation) {
 
-        // ----------------------------------------------------------
-        // TODO: replace the following code by your business logic
-        // ----------------------------------------------------------
+//        boolean result = wrappedTypeElement.validateWithFluentElementValidator() //
+//                .is(AptkCoreMatchers.IS_CLASS)
+//                // .applyValidator(AptkCoreMatchers.HAS_PUBLIC_NOARG_CONSTRUCTOR)
+//                .validateAndIssueMessages() ||
+//                wrappedTypeElement.validateWithFluentElementValidator() //
+//                .is(AptkCoreMatchers.IS_RECORD)
+//                // .applyValidator(AptkCoreMatchers.HAS_PUBLIC_NOARG_CONSTRUCTOR)
+//                .validateAndIssueMessages()
+//                ;
 
-        // Some example validations : Annotation may only be applied on Classes with
-        // Noarg constructor.
-        boolean result = wrappedTypeElement.validateWithFluentElementValidator().is(AptkCoreMatchers.IS_CLASS)
-                // .applyValidator(AptkCoreMatchers.HAS_PUBLIC_NOARG_CONSTRUCTOR)
-                .validateAndIssueMessages();
-
-        if (annotation.value().isEmpty()) {
+        boolean result = wrappedTypeElement.isClass() //
+                || wrappedTypeElement.isRecord();
+        System.out.println(">>>>>>> " + wrappedTypeElement.getQualifiedName() + " " + result);
+        if (!result) {
+            wrappedTypeElement.compilerMessage().asError()
+                    .write(BuilderProcessorCompilerMessages.ERROR_TYPE_MUST_BE_CLASS_OR_RECORD);
+        } else if (annotation.value().isEmpty()) {
             wrappedTypeElement.compilerMessage().asError()
                     .write(BuilderProcessorCompilerMessages.ERROR_VALUE_MUST_NOT_BE_EMPTY);
             result = false;
@@ -101,10 +104,6 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
 
     /**
      * Generates a class.
-     *
-     * Example how to use the templating engine.
-     *
-     * TODO: remove this
      *
      * @param wrappedTypeElement The TypeElement representing the annotated class
      * @param annotation         The Builder annotation

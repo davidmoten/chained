@@ -62,7 +62,7 @@ public class BuilderProcessorTest {
                 .andSourceFiles("testcases/TestcaseInvalidUsageOnEnum.java")
                 .whenCompiled()
                 .thenExpectThat().compilationFails()
-                .andThat().compilerMessage().ofKindError().contains(CoreMatcherValidationMessages.IS_CLASS.getCode())
+                .andThat().compilerMessage().ofKindError().contains(BuilderProcessorCompilerMessages.ERROR_TYPE_MUST_BE_CLASS_OR_RECORD.getCode())
                 .executeTest();
     }
 
@@ -73,7 +73,7 @@ public class BuilderProcessorTest {
                 .andSourceFiles("testcases/TestcaseInvalidUsageOnInterface.java")
                 .whenCompiled()
                 .thenExpectThat().compilationFails()
-                .andThat().compilerMessage().ofKindError().contains(CoreMatcherValidationMessages.IS_CLASS.getCode())
+                .andThat().compilerMessage().ofKindError().contains(BuilderProcessorCompilerMessages.ERROR_TYPE_MUST_BE_CLASS_OR_RECORD.getCode())
                 .executeTest();
     }
 
