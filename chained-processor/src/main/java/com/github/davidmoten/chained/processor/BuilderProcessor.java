@@ -2,7 +2,6 @@ package com.github.davidmoten.chained.processor;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
