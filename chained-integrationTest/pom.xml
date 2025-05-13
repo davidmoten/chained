@@ -23,6 +23,8 @@
                         <verbose>true</verbose>
                         <source>${java.compile.source.version}</source>
                         <target>${java.compile.target.version}</target>
+                        <generatedTestSourcesDirectory>
+                            ${project.build.directory}/generated-test-sources/test-annotations</generatedTestSourcesDirectory>
                         <annotationProcessorPaths>
                             <path>
 					            <groupId>com.github.davidmoten</groupId>
