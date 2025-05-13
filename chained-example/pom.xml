@@ -19,6 +19,7 @@
 		<dependency>
 			<groupId>com.github.davidmoten</groupId>
 			<artifactId>chained-api</artifactId>
+			<version>${project.parent.version}</version>
 		</dependency>
 	</dependencies>
 
