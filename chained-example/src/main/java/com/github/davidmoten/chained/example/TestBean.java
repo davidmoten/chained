@@ -3,14 +3,15 @@ package com.github.davidmoten.chained.example;
 import com.github.davidmoten.chained.api.Builder;
 
 @Builder("${pkg}.TestBeanFactory")
-public class TestBean {
+public final class TestBean {
     
-    public static TestBeanFactory.Builder builder() {
-          return TestBeanFactory.builder();
-    }
-
     private long longField;
     private String stringField;
+
+    // this works!
+    public static TestBeanFactory.Builder builder() {
+        return TestBeanFactory.builder();
+    }
 
     public TestBean(long longField, String stringField) {
         this.longField = longField;
