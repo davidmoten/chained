@@ -27,27 +27,18 @@
 
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>apply-annotation-processor</id>
-						<goals>
-							<goal>compile</goal>
-						</goals>
-						<phase>generate-sources</phase>
-						<configuration>
-							<verbose>true</verbose>
-							<generatedSourcesDirectory>
-								${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>com.github.davidmoten</groupId>
-									<artifactId>chained-processor</artifactId>
-									<version>${project.parent.version}</version>
-								</path>
-							</annotationProcessorPaths>
-						</configuration>
-					</execution>
-				</executions>
+				<configuration>
+					<verbose>true</verbose>
+					<generatedSourcesDirectory>
+						${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>com.github.davidmoten</groupId>
+							<artifactId>chained-processor</artifactId>
+							<version>${project.parent.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>

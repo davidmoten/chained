@@ -8,7 +8,8 @@ public final class TestBean {
     private long longField;
     private String stringField;
 
-    // this works!
+    // this works because generation of TestBeanFactory happens in the first 
+    // annotation processing round of the java compiler
     public static TestBeanFactory.Builder builder() {
         return TestBeanFactory.builder();
     }
@@ -25,5 +26,4 @@ public final class TestBean {
     public String stringField() {
         return stringField;
     }
-    
 }
