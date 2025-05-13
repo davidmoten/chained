@@ -114,6 +114,7 @@ public final class Generator {
             o.line("private %s(Builder _b) {", lastBuilder);
             o.line("this._b = _b;");
             o.close();
+            o.line();
             for (Parameter p : optionals) {
                 o.line();
                 o.line("public %s %s(%s %s) {", lastBuilder, p.name(), toPrimitive(wrappedType(p.type())), p.name());

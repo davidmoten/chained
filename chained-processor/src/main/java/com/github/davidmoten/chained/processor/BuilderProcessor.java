@@ -14,6 +14,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 
 import com.github.davidmoten.chained.api.Builder;
+import com.github.davidmoten.chained.api.BuilderConstructor;
 import com.github.davidmoten.chained.api.BuilderIgnore;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
@@ -134,7 +135,6 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
             List<Parameter> list = constructor(wrappedTypeElement) //
                     .getParameters() //
                     .stream() //
-                    .filter(f -> !f.getAnnotation(BuilderIgnore.class).isPresent()) //
                     .map(f -> {
                         String type = f.asType().toString();
                         String name = f.getSimpleName().toString();
@@ -152,17 +152,27 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
         List<ExecutableElementWrapper> list = element.getConstructors() //
                 .stream() //
                 .filter(c -> c.getModifiers().contains(Modifier.PUBLIC)) //
+                .filter(c -> !c.getAnnotation(BuilderIgnore.class).isPresent()) //
                 .collect(Collectors.toList());
 
-        ExecutableElementWrapper max = list.stream()
-                .max((c1, c2) -> Integer.compare(c1.getParameters().size(), c2.getParameters().size()))
-                .orElseThrow(() -> new IllegalStateException("No public constructor found"));
-
-        if (list.stream().filter(c -> c.getParameters().size() == max.getParameters().size()).count() > 1) {
-            throw new IllegalStateException(
-                    "Multiple max-length public constructors found, there should be just one with maximum length");
+        List<ExecutableElementWrapper> defined = list //
+                .stream() //
+                .filter(c -> c.getAnnotation(BuilderConstructor.class).isPresent()) //
+                .collect(Collectors.toList());
+        if (defined.size() > 1) {
+            throw new IllegalStateException("Multiple constructors with BuilderConstructor annotation found");
+        } else if (defined.size() == 1) {
+            return defined.get(0);
+        } else {
+            ExecutableElementWrapper max = list.stream()
+                    .max((c1, c2) -> Integer.compare(c1.getParameters().size(), c2.getParameters().size()))
+                    .orElseThrow(() -> new IllegalStateException("No public constructor found"));
+            if (list.stream().filter(c -> c.getParameters().size() == max.getParameters().size()).count() > 1) {
+                throw new IllegalStateException(
+                        "Multiple max-length public constructors found, there should be just one with maximum length without a BuilderIgnore annotation");
+            }
+            return max;
         }
-        return max;
     }
 
 }
