@@ -33,7 +33,7 @@ public final class TestBean {
     }
 
     @BuilderConstructor
-    public TestBean(long longField, String stringField, Optional<String> description) {
+    private TestBean(long longField, String stringField, Optional<String> description) {
         this.longField = longField;
         this.stringField = stringField;
         this.calculated = longField + 1;

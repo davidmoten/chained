@@ -56,9 +56,9 @@ public class BuilderProcessor extends AbstractProcessor {
                                 .collect(Collectors.toList());
 
                         boolean constructorVisible = //
-                                typeElement.getModifiers().contains(Modifier.PUBLIC) //
+                                constructor.getModifiers().contains(Modifier.PUBLIC) //
                                         || //
-                                        typeElement.getModifiers().contains(Modifier.DEFAULT)
+                                        constructor.getModifiers().contains(Modifier.DEFAULT)
                                                 && packageName.equals(builderPackageName);
                         out.print(Generator.chainedBuilder( //
                                 typeElement.getQualifiedName().toString(), //
