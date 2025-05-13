@@ -354,5 +354,10 @@ public final class Generator {
         boolean isPrimitive() {
             return PRIMITIVES.contains(type);
         }
+
+        @Override
+        public String toString() {
+            return "Parameter [type=" + type + ", name=" + name + "]";
+        }
     }
 }

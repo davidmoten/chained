@@ -66,9 +66,11 @@ public class BuilderProcessor2 extends AbstractProcessor {
                                 parameters, //
                                 constructorVisible));
                     }
-                } catch (IOException e) {
-                    throw new UncheckedIOException("Could not create class " + builderClassName + ": " + e.getMessage(),
-                            e);
+                } catch (IOException | RuntimeException e) {
+                    processingEnv //
+                            .getMessager() //
+                            .printMessage(javax.tools.Diagnostic.Kind.ERROR, e.getMessage(), element);
+                    return false;
                 }
             }
         }
