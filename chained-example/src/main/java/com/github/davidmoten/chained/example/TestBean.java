@@ -16,7 +16,7 @@ public final class TestBean {
 
     // this works because generation of TestBeanFactory happens in the first
     // annotation processing round of the java compiler
-    public static TestBeanBuilder.Builder builder() {
+    public static TestBeanBuilder builder() {
         return TestBeanBuilder.create();
     }
     

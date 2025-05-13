@@ -23,7 +23,8 @@ public final class Generator {
         o.line();
         o.line("import com.github.davidmoten.chained.api.Preconditions;");
         o.line();
-        o.line("public final class %s {", Util.simpleClassName(builderClassName));
+        String builderSimpleClassName = Util.simpleClassName(builderClassName);
+        o.line("public final class %s {", builderSimpleClassName);
         o.line();
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
@@ -38,24 +39,6 @@ public final class Generator {
             o.close();
             return o.toString();
         } else {
-            o.line("public static Builder builder() {");
-            o.line("return new Builder();");
-            o.close();
-            o.line();
-            o.line("public static Builder create() {");
-            o.line("return builder();");
-            o.close();
-            o.line();
-            {
-                Parameter p = mandatory.get(0);
-                String nextBuilder = builderClassName(p.name());
-                o.line("public static %s %s(%s %s) {", nextBuilder, p.name(), p.type(), p.name());
-                o.line("return builder().%s(%s);", p.name(), p.name());
-                o.close();
-            }
-            o.line();
-            o.line("public final static class Builder {");
-            o.line();
             for (Parameter p : parameters) {
                 if (p.isOptional()) {
                     o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), "java.util.Optional");
@@ -63,13 +46,20 @@ public final class Generator {
                     o.line("private %s %s;", p.type(), p.name());
                 }
             }
-            privateConstructor(o, "Builder");
+            privateConstructor(o, builderSimpleClassName);
+            o.line();
+            o.line("public static %s builder() {", builderSimpleClassName);
+            o.line("return new %s();", builderSimpleClassName);
+            o.close();
+            o.line();
+            o.line("public static %s create() {", builderSimpleClassName);
+            o.line("return builder();");
+            o.close();
             o.line();
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", className);
             writeBuildStatement(o, className, parameters, constructorVisible);
-            o.close();
             o.close();
 
             for (int i = 0; i < mandatory.size() - 1; i++) {
@@ -78,9 +68,9 @@ public final class Generator {
                 o.line();
                 o.line("public final static class %s {", builder);
                 o.line();
-                o.line("private final Builder _b;");
+                o.line("private final %s _b;", builderSimpleClassName);
                 o.line();
-                o.line("private %s(Builder _b) {", builder);
+                o.line("private %s(%s _b) {", builder, builderSimpleClassName);
                 o.line("this._b = _b;");
                 o.close();
                 o.line();
@@ -110,9 +100,9 @@ public final class Generator {
             o.line();
             o.line("public final static class %s {", lastBuilder);
             o.line();
-            o.line("private final Builder _b;");
+            o.line("private final %s _b;", builderSimpleClassName);
             o.line();
-            o.line("private %s(Builder _b) {", lastBuilder);
+            o.line("private %s(%s _b) {", lastBuilder, builderSimpleClassName);
             o.line("this._b = _b;");
             o.close();
             for (Parameter p : optionals) {
