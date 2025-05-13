@@ -239,7 +239,12 @@ public final class Generator {
             o.line("_c.setAccessible(true);");
             o.line("return _c.newInstance(%s);", params);
             o.close();
-            o.line("catch (java.lang.reflect.InvocationTargetException | NoSuchMethodException | InstantiationException | IllegalAccessException  e) {");
+            o.line("catch (java.lang.reflect.InvocationTargetException");
+            o.right().right();
+            o.line("| NoSuchMethodException");
+            o.line("| InstantiationException");
+            o.line("| IllegalAccessException e) {");
+            o.left().left();
             o.line("throw new RuntimeException(e);");
             o.close();
         }
