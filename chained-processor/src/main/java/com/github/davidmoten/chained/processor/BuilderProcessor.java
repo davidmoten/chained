@@ -89,7 +89,6 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
 
         boolean result = wrappedTypeElement.isClass() //
                 || wrappedTypeElement.isRecord();
-        System.out.println(">>>>>>> " + wrappedTypeElement.getQualifiedName() + " " + result);
         if (!result) {
             wrappedTypeElement.compilerMessage().asError()
                     .write(BuilderProcessorCompilerMessages.ERROR_TYPE_MUST_BE_CLASS_OR_RECORD);
