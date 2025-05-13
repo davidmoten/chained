@@ -238,11 +238,12 @@ public final class Generator {
     private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
             boolean constructorVisible) {
         String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
-        if (constructorVisible && false) {
+        if (constructorVisible) {
             o.line("return new %s(%s);", className, params);
         } else {
             String parameterClassNames = parameters.stream().map(x -> baseType(x.type()) + ".class")
                     .collect(Collectors.joining(", "));
+            o.line("// use reflection to call non-visible constructor");
             o.line("try {");
             o.line("java.lang.reflect.Constructor<%s> _c = %s.class.getConstructor(%s);", className, className,
                     parameterClassNames);
