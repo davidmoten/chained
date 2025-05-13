@@ -149,12 +149,20 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
     }
 
     private static ExecutableElementWrapper constructor(TypeElementWrapper element) {
-        return element.getConstructors() //
+        List<ExecutableElementWrapper> list = element.getConstructors() //
                 .stream() //
                 .filter(c -> c.getModifiers().contains(Modifier.PUBLIC)) //
-                .max((c1, c2) -> Integer.compare(c1.getParameters().size(), c2.getParameters().size())) //
-                .orElseThrow(() -> new IllegalStateException("No constructor found"));
-        
+                .collect(Collectors.toList());
+
+        ExecutableElementWrapper max = list.stream()
+                .max((c1, c2) -> Integer.compare(c1.getParameters().size(), c2.getParameters().size()))
+                .orElseThrow(() -> new IllegalStateException("No public constructor found"));
+
+        if (list.stream().filter(c -> c.getParameters().size() == max.getParameters().size()).count() > 1) {
+            throw new IllegalStateException(
+                    "Multiple max-length public constructors found, there should be just one with maximum length");
+        }
+        return max;
     }
 
 }
