@@ -15,7 +15,6 @@
     <name>chained-integrationTest</name>
 
     <build>
-
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -24,10 +23,16 @@
                         <verbose>true</verbose>
                         <source>${java.compile.source.version}</source>
                         <target>${java.compile.target.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+					            <groupId>com.github.davidmoten</groupId>
+					            <artifactId>chained-processor</artifactId>
+					            <version>${project.parent.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
                     </configuration>
                 </plugin>
             </plugins>
-
         </pluginManagement>
 
         <plugins>
@@ -107,11 +112,6 @@
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>chained-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.davidmoten</groupId>
-            <artifactId>chained-processor</artifactId>
         </dependency>
 
     </dependencies>

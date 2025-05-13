@@ -2,7 +2,7 @@ package com.github.davidmoten.chained.integrationtest;
 
 import com.github.davidmoten.chained.api.Builder;
 
-@Builder("${pkg}.GeneratedClass")
+@Builder("${pkg}.TestcaseValidUsageBuilder")
 public class TestcaseValidUsage {
 
     private String field;

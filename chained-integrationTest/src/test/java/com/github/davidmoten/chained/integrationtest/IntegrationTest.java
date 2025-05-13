@@ -6,7 +6,7 @@ public class IntegrationTest {
 
     @Test
     public void testValidUsage() {
-        new GeneratedClass();
+        TestcaseValidUsageBuilder.of("thing");
     }
 
 }
