@@ -40,6 +40,10 @@ public final class Generator {
             o.line("return new Builder();");
             o.close();
             o.line();
+            o.line("public static Builder create() {");
+            o.line("return builder();");
+            o.close();
+            o.line();
             {
                 Parameter p = mandatory.get(0);
                 String nextBuilder = builderClassName(p.name());
