@@ -15,7 +15,6 @@ import javax.lang.model.element.TypeElement;
 
 import com.github.davidmoten.chained.api.Builder;
 import com.github.davidmoten.chained.api.BuilderConstructor;
-import com.github.davidmoten.chained.api.BuilderIgnore;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
 import io.toolisticon.aptk.compilermessage.api.DeclareCompilerMessage;
@@ -152,7 +151,6 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
         List<ExecutableElementWrapper> list = element.getConstructors() //
                 .stream() //
                 .filter(c -> c.getModifiers().contains(Modifier.PUBLIC)) //
-                .filter(c -> !c.getAnnotation(BuilderIgnore.class).isPresent()) //
                 .collect(Collectors.toList());
 
         List<ExecutableElementWrapper> defined = list //
@@ -169,7 +167,7 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
                     .orElseThrow(() -> new IllegalStateException("No public constructor found"));
             if (list.stream().filter(c -> c.getParameters().size() == max.getParameters().size()).count() > 1) {
                 throw new IllegalStateException(
-                        "Multiple max-length public constructors found, there should be just one with maximum length without a BuilderIgnore annotation");
+                        "Multiple max-length public constructors found, there should be just one with maximum length or one with BuilderConstructor annotation");
             }
             return max;
         }

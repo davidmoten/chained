@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import com.github.davidmoten.chained.api.Builder;
 import com.github.davidmoten.chained.api.BuilderConstructor;
-import com.github.davidmoten.chained.api.BuilderIgnore;
 
 @Builder("${pkg}.TestBeanBuilder")
 public final class TestBean {
@@ -21,7 +20,6 @@ public final class TestBean {
         return TestBeanBuilder.create();
     }
     
-    @BuilderIgnore
     public TestBean(String longField, String stringField, Optional<String> description) {
         this(Long.parseLong(longField), stringField, description);
     }
