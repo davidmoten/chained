@@ -1,4 +1,4 @@
-package com.github.davidmoten.chained.integrationtest;
+package com.github.davidmoten.chained.unittest;
 
 import com.github.davidmoten.chained.api.Builder;
 
