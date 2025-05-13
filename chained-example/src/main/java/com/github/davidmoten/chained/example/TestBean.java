@@ -20,6 +20,10 @@ public final class TestBean {
         return TestBeanBuilder.create();
     }
     
+    public static TestBeanBuilder.BuilderWithLongField longField(long longField) {
+        return builder().longField(longField);
+    }
+    
     public TestBean(String longField, String stringField, Optional<String> description) {
         this(Long.parseLong(longField), stringField, description);
     }

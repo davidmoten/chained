@@ -23,6 +23,6 @@
     <module>chained-api</module>
     <module>chained-processor</module>
     <module>chained-example</module>
-    <module>chained-integrationTest</module>
+    <module>chained-unit-test</module>
   </modules>
 </project>
