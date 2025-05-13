@@ -1,5 +1,7 @@
 package com.github.davidmoten.chained.example;
 
+import java.util.Optional;
+
 import com.github.davidmoten.chained.api.Builder;
 import com.github.davidmoten.chained.api.BuilderConstructor;
 import com.github.davidmoten.chained.api.BuilderIgnore;
@@ -9,6 +11,7 @@ public final class TestBean {
 
     private final long longField;
     private final String stringField;
+    private final Optional<String> description;
     private final long calculated;
     
 
@@ -19,19 +22,20 @@ public final class TestBean {
     }
     
     @BuilderIgnore
-    public TestBean(String longField, String stringField) {
-        this(Long.parseLong(longField), stringField);
+    public TestBean(String longField, String stringField, Optional<String> description) {
+        this(Long.parseLong(longField), stringField, description);
     }
     
-    public TestBean(String longField, long stringField) {
-        this(Long.parseLong(longField), stringField + "");
+    public TestBean(String longField, long stringField, Optional<String> description) {
+        this(Long.parseLong(longField), stringField + "", description);
     }
 
     @BuilderConstructor
-    public TestBean(long longField, String stringField) {
+    public TestBean(long longField, String stringField, Optional<String> description) {
         this.longField = longField;
         this.stringField = stringField;
         this.calculated = longField + 1;
+        this.description = description;
     }
 
     public long longField() {
@@ -44,5 +48,9 @@ public final class TestBean {
 
     public long calculated() {
         return calculated;
+    }
+    
+    public Optional<String> description() {
+        return description;
     }
 }
