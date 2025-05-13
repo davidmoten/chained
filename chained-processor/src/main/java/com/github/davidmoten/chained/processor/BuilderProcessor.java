@@ -64,6 +64,7 @@ public class BuilderProcessor extends AbstractProcessor {
                                 builderClassName, //
                                 parameters, //
                                 constructorVisible));
+                        out.println();
                     }
                 } catch (IOException | RuntimeException e) {
                     processingEnv //
