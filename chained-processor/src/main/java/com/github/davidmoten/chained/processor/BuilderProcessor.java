@@ -1,9 +1,7 @@
 package com.github.davidmoten.chained.processor;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -119,12 +117,11 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
                 .replace("${pkg}", wrappedTypeElement.getPackageName()) //
                 .replace("${simpleName}", wrappedTypeElement.getSimpleName());
 
-        // Extract components for templating the class
         String builderPackageName = Util.pkg(builderClassName);
 
         // create the class
         try {
-            SimpleJavaWriter javaWriter = FilerUtils.createSourceFile(builderClassName, wrappedTypeElement.unwrap());
+            SimpleJavaWriter w = FilerUtils.createSourceFile(builderClassName, wrappedTypeElement.unwrap());
             ExecutableElementWrapper constructor = constructor(wrappedTypeElement);
             List<Parameter> list = constructor //
                     .getParameters() //
@@ -134,12 +131,17 @@ public class BuilderProcessor extends AbstractAnnotationProcessor {
                         String name = f.getSimpleName().toString();
                         return new Parameter(type, name);
                     }).collect(Collectors.toList());
-            boolean constructorVisible = wrappedTypeElement.getModifiers().contains(Modifier.PUBLIC)
-                    || wrappedTypeElement.getModifiers().contains(Modifier.DEFAULT)
-                            && wrappedTypeElement.getPackageName().equals(builderPackageName);
-            javaWriter.append(Generator.chainedBuilder(wrappedTypeElement.getQualifiedName(), builderClassName, list,
+            boolean constructorVisible = //
+                    wrappedTypeElement.getModifiers().contains(Modifier.PUBLIC) //
+                            || //
+                            wrappedTypeElement.getModifiers().contains(Modifier.DEFAULT)
+                                    && wrappedTypeElement.getPackageName().equals(builderPackageName);
+            w.append(Generator.chainedBuilder( //
+                    wrappedTypeElement.getQualifiedName(), //
+                    builderClassName, //
+                    list, //
                     constructorVisible));
-            javaWriter.close();
+            w.close();
         } catch (IOException e) {
             wrappedTypeElement.compilerMessage().asError().write(
                     BuilderProcessorCompilerMessages.ERROR_COULD_NOT_CREATE_CLASS, builderClassName, e.getMessage());

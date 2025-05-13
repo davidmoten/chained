@@ -1,6 +1,5 @@
 package com.github.davidmoten.chained.processor;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
