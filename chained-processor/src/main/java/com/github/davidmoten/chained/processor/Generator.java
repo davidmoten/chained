@@ -82,7 +82,8 @@ public final class Generator {
                 o.line("private %s(Builder _b) {", builder);
                 o.line("this._b = _b;");
                 o.close();
-
+                o.line();
+                
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     o.line("public %s %s(%s %s) {", className, q.name(), q.type(), q.name());
