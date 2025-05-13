@@ -32,6 +32,7 @@ public final class Generator {
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", className, p.type(), p.name());
+            // TODO use reflection to call non-visible constructor
             o.line("return new %s(%s);", className, p.name());
             o.close();
             o.close();
@@ -114,7 +115,6 @@ public final class Generator {
             o.line("private %s(Builder _b) {", lastBuilder);
             o.line("this._b = _b;");
             o.close();
-            o.line();
             for (Parameter p : optionals) {
                 o.line();
                 o.line("public %s %s(%s %s) {", lastBuilder, p.name(), toPrimitive(wrappedType(p.type())), p.name());
