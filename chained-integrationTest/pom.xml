@@ -110,12 +110,19 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>chained-api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
-
+        
+            <!-- Test Dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     
     
