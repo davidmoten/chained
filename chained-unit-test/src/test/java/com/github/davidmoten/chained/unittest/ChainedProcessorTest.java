@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Optional;
 
 import org.junit.Test;
 
@@ -13,11 +14,6 @@ import com.github.davidmoten.chained.unittest.builder.SingleMandatoryBuilder;
 import com.github.davidmoten.chained.unittest.builder.SingleOptionalBuilder;
 
 public class ChainedProcessorTest {
-
-    @Test
-    public void testValidUsage() {
-        TestcaseValidUsageBuilder.of("thing");
-    }
 
     @Test
     public void testSingleMandatory() {
@@ -70,5 +66,19 @@ public class ChainedProcessorTest {
         TwoMandatoryIncludeBuilderMethod s = TwoMandatoryIncludeBuilderMethod.name("fred").age(10).build();
         assertEquals("fred", s.name());
         assertEquals(10, s.age());
+    }
+    
+    @Test
+    public void testTwoOptionalEmpty() {
+         TwoOptional s = TwoOptional.builder().build();
+         assertEquals(java.util.Optional.empty(), s.name());
+         assertEquals(java.util.Optional.empty(), s.age());
+    }
+    
+    @Test
+    public void testTwoOptionalPresent() {
+         TwoOptional s = TwoOptional.builder().name("hi there").age(Optional.of(12)).build();
+         assertEquals("hi there", s.name().get());
+         assertEquals(12, (int) s.age().get());
     }
 }
