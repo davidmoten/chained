@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.davidmoten.chained.api.Preconditions;
+
 public final class Generator {
 
     private Generator() {
@@ -21,7 +23,7 @@ public final class Generator {
         Output o = new Output();
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
-        o.line("import com.github.davidmoten.chained.api.Preconditions;");
+        o.importsHere();
         o.line();
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
         o.line("public final class %s {", builderSimpleClassName);
@@ -183,7 +185,7 @@ public final class Generator {
 
     private static void writeNullCheck(Output o, Parameter p) {
         if (!p.isPrimitive()) {
-            o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
+            o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
         }
     }
 
@@ -215,14 +217,14 @@ public final class Generator {
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
                 o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), wrappedType, p.name());
-                o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
+                o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
                 o.line("this.%s = %s.of(%s);", p.name(), wrappingType(p.type()), p.name());
                 o.line("return this;");
                 o.close();
             }
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), p.type(), p.name());
-            o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
+            o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");
             o.close();
@@ -271,7 +273,9 @@ public final class Generator {
 
     public static final class Output {
 
+        private static final String IMPORTS_HERE = "<<IMPORTS_HERE>>";
         private StringBuilder b = new StringBuilder();
+        private Imports imports = new Imports();
 
         private String indent = "";
 
@@ -280,17 +284,30 @@ public final class Generator {
             return this;
         }
 
+        public void importsHere() {
+            line(IMPORTS_HERE);
+        }
+
         public Output right() {
             indent += "    ";
             return this;
         }
-
+        
         public void line() {
             b.append("\n");
         }
 
         public void line(String fmt, Object... args) {
-            b.append(String.format("\n" + indent + fmt, args));
+            Object[] args2 = // copy args
+                    new Object[args.length];
+            for (int i = 0; i < args.length; i++) {
+                Object o = args[i];
+                if (o instanceof Class) {
+                    o = imports.add((Class<?>) o);
+                }
+                args2[i] = o;
+            }
+            b.append(String.format("\n" + indent + fmt, args2));
             if (fmt.endsWith("{")) {
                 right();
             }
@@ -300,10 +317,11 @@ public final class Generator {
             left();
             line("}");
         }
-
+        
         @Override
         public String toString() {
-            return b.toString();
+            String s = b.toString();
+            return s.replace(IMPORTS_HERE + "\n", imports.toCode());
         }
     }
 
