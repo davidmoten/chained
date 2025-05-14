@@ -32,5 +32,13 @@ public class ChainedProcessorTest{
         assertEquals("fred", s.name());
         assertEquals(10, s.age());
     }
-
+    
+    @Test
+    public void testMixed() {
+        Mixed a = Mixed.name("fred").city("London").age(10).description("someone").build();
+        assertEquals("fred", a.name());
+        assertEquals("London", a.city());
+        assertEquals("someone", a.description().get());
+        assertEquals(10, (long) a.age().get());
+    }
 }
