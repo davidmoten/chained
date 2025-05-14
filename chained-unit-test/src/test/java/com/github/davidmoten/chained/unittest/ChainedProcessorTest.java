@@ -25,5 +25,12 @@ public class ChainedProcessorTest{
         SingleOptional s = SingleOptionalBuilder.builder().name("thing").build();
         assertEquals("thing", s.name().get());
     }
+    
+    @Test
+    public void testTwoMandatory() {
+        TwoMandatory s = TwoMandatory.name("fred").age(10);
+        assertEquals("fred", s.name());
+        assertEquals(10, s.age());
+    }
 
 }
