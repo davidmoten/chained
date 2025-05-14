@@ -14,7 +14,7 @@ public class GeneratorTest {
         List<Parameter> list = new ArrayList<>();
         list.add(new Parameter("String", "name"));
         list.add(new Parameter("java.util.Optional<Integer>", "age"));
-        String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, true);
+        String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, true, false);
         System.out.println(code);
     }
 

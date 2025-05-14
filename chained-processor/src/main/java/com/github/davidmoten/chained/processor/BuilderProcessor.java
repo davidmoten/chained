@@ -37,7 +37,8 @@ public class BuilderProcessor extends AbstractProcessor {
                         .getPackageOf(typeElement) //
                         .getQualifiedName().toString();
                 String simpleClassName = typeElement.getSimpleName().toString();
-                String templatedBuilderClassName = typeElement.getAnnotation(Builder.class).value();
+                Builder annotation = typeElement.getAnnotation(Builder.class);
+                String templatedBuilderClassName = annotation.value();
                 String builderClassName = templatedBuilderClassName //
                         .replace("${pkg}", packageName) //
                         .replace("${simpleName}", simpleClassName);
@@ -65,7 +66,8 @@ public class BuilderProcessor extends AbstractProcessor {
                                 typeElement.getQualifiedName().toString(), //
                                 builderClassName, //
                                 parameters, //
-                                constructorVisible));
+                                constructorVisible,
+                                annotation.alwaysIncludeBuildMethod()));
                         out.println();
                     }
                 } catch (IOException | RuntimeException e) {

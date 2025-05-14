@@ -17,7 +17,7 @@ public final class Generator {
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
-            boolean constructorVisible) {
+            boolean constructorVisible, boolean alwaysIncludeBuildMethod) {
         Output o = new Output();
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
@@ -78,11 +78,23 @@ public final class Generator {
 
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
-                    o.line("public %s %s(%s %s) {", className, q.name(), q.type(), q.name());
-                    writeNullCheck(o, q);
-                    o.line("this._b.%s = %s;", q.name(), q.name());
-                    o.line("return _b.build();");
-                    o.close();
+                    if (!alwaysIncludeBuildMethod) {
+                        o.line("public %s %s(%s %s) {", className, q.name(), q.type(), q.name());
+                        writeNullCheck(o, q);
+                        o.line("this._b.%s = %s;", q.name(), q.name());
+                        o.line("return _b.build();");
+                        o.close();
+                    } else {
+                        o.line("public %s %s(%s %s) {", builder, q.name(), q.type(), q.name());
+                        writeNullCheck(o, q);
+                        o.line("this._b.%s = %s;", q.name(), q.name());
+                        o.line("return this;");
+                        o.close();
+                        o.line();
+                        o.line("public %s build() {", className);
+                        o.line("return _b.build();");
+                        o.close();
+                    }
                     o.close();
                     o.close();
                     return o.toString();
@@ -183,14 +195,15 @@ public final class Generator {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName, List<Parameter> parameters, boolean constructorVisible) {
+    private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
+            List<Parameter> parameters, boolean constructorVisible) {
         o.line("public static %s builder() {", builderSimpleClassName);
         o.line("return new %s();", builderSimpleClassName);
         o.close();
         o.line();
         for (Parameter p : parameters) {
             if (p.isOptional()) {
-                o.line("private %s %s = %s.empty();", p.type(),p.name(),wrappingType(p.type()));
+                o.line("private %s %s = %s.empty();", p.type(), p.name(), wrappingType(p.type()));
             } else {
                 o.line("private %s %s;", p.type(), p.name());
             }

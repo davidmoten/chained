@@ -12,4 +12,5 @@ import java.lang.annotation.Target;
 public @interface Builder {
 
     String value() default "${pkg}.builder.${simpleName}Builder";
+    boolean alwaysIncludeBuildMethod() default false;
 }

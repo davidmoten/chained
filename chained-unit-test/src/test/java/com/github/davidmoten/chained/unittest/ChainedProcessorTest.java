@@ -64,4 +64,9 @@ public class ChainedProcessorTest {
                 .toPath());
         assertFalse(code.contains("java.lang.reflect.Constructor"));
     }
+
+    @Test
+    public void testTwoMandatoryIncludeBuilderMethod() {
+        TwoMandatoryIncludeBuilderMethod s = TwoMandatoryIncludeBuilderMethod.name("fred").age(10).build();
+    }
 }
