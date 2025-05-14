@@ -5,8 +5,13 @@ import java.util.TreeMap;
 
 public final class Imports {
 
-    private Map<String, String> imports = new TreeMap<>();
+    private final String ownerClassName;
+    private final Map<String, String> imports = new TreeMap<>();
 
+    public Imports(String ownerClassName) {
+        this.ownerClassName = ownerClassName;
+    }
+    
     public String add(Class<?> cls) {
         return add(cls.getCanonicalName());
     }
@@ -53,7 +58,7 @@ public final class Imports {
         StringBuilder b = new StringBuilder();
         for (String className : imports.keySet()) {
             String simpleName = imports.get(className);
-            if (!className.equals(simpleName)) {
+            if (!className.equals(simpleName) && !Util.pkg(className).equals(Util.pkg(ownerClassName))) {
                 b.append("import ").append(className).append(";\n");
             }
         }

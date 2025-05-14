@@ -11,7 +11,7 @@ public class ImportsTest {
     
     @Test
     public void testImports() {
-        Imports imports = new Imports();
+        Imports imports = new Imports("blah");
         imports.add(Optional.class);
         imports.add(String.class);
         imports.add(Builder.class);
@@ -21,7 +21,7 @@ public class ImportsTest {
     
     @Test
     public void testOutput() {
-        Output o = new Output();
+        Output o = new Output("blah");
         o.line("package boo");
         o.line();
         o.importsHere();

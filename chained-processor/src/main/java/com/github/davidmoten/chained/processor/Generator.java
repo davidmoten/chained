@@ -23,7 +23,7 @@ public final class Generator {
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
             boolean constructorVisible, boolean alwaysIncludeBuildMethod) {
-        Output o = new Output();
+        Output o = new Output(builderClassName);
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
         o.importsHere();
@@ -278,8 +278,12 @@ public final class Generator {
     public static final class Output {
 
         private static final String IMPORTS_HERE = "<<IMPORTS_HERE>>";
-        private StringBuilder b = new StringBuilder();
-        private Imports imports = new Imports();
+        private final Imports imports;
+        private final StringBuilder b = new StringBuilder();
+        
+        public Output(String ownerClassName) {
+            this.imports = new Imports(ownerClassName);
+        }
 
         private String indent = "";
 
