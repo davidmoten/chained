@@ -81,4 +81,10 @@ public class ChainedProcessorTest {
          assertEquals("hi there", s.name().get());
          assertEquals(12, (int) s.age().get());
     }
+    
+    @Test
+    public void testOfPrivateConstructorSamePackage() {
+        OfPrivateConstructorSamePackage a = OfPrivateConstructorSamePackage.of("fred");
+        assertEquals("fred", a.name());
+    }
 }

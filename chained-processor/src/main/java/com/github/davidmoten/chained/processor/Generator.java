@@ -39,8 +39,7 @@ public final class Generator {
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", o.add(className), o.add(p.type()), p.name());
-            // TODO use reflection to call non-visible constructor
-            o.line("return new %s(%s);", o.add(className), p.name());
+            writeBuildStatement(o, className, parameters, constructorVisible);
             o.close();
             o.close();
             return o.toString();
