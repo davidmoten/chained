@@ -44,6 +44,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>${build.helper.version}</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -63,6 +64,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>${source.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -84,46 +86,9 @@
 				</executions>
 			</plugin>
 
-			<!-- revoke enforcer limitations for example -->
-			<plugin>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>enforce</id>
-						<goals>
-							<goal>enforce</goal>
-						</goals>
-						<configuration>
-							<rules>
-								<requireMavenVersion>
-									<version>[3.0.0,)</version>
-								</requireMavenVersion>
-								<requireJavaVersion>
-									<version>${java.version}</version>
-								</requireJavaVersion>
-								<bannedDependencies>
-									<searchTransitive>false</searchTransitive>
-									<includes>
-										<include>*</include>
-									</includes>
-								</bannedDependencies>
-							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
