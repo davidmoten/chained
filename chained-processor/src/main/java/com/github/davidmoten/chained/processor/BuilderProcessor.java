@@ -54,10 +54,12 @@ public class BuilderProcessor extends AbstractProcessor {
                                 .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString()))
                                 .collect(Collectors.toList());
 
+                        Set<Modifier> modifiers = constructor.getModifiers();
                         boolean constructorVisible = //
-                                constructor.getModifiers().contains(Modifier.PUBLIC) //
+                                modifiers.contains(Modifier.PUBLIC) //
                                         || //
-                                        constructor.getModifiers().contains(Modifier.DEFAULT)
+                                        !modifiers.contains(Modifier.PRIVATE) //
+                                                && !modifiers.contains(Modifier.PROTECTED) //
                                                 && packageName.equals(builderPackageName);
                         out.print(Generator.chainedBuilder( //
                                 typeElement.getQualifiedName().toString(), //
