@@ -1,11 +1,14 @@
 package com.github.davidmoten.chained.processor;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,16 +38,16 @@ public final class Generator {
             return o.toString();
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
-            o.line("public static %s of(%s %s) {", className, p.type(), p.name());
+            o.line("public static %s of(%s %s) {", o.add(className), o.add(p.type()), p.name());
             // TODO use reflection to call non-visible constructor
-            o.line("return new %s(%s);", className, p.name());
+            o.line("return new %s(%s);", o.add(className), p.name());
             o.close();
             o.close();
             return o.toString();
         } else {
             for (Parameter p : parameters) {
                 if (p.isOptional()) {
-                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), "java.util.Optional");
+                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), Optional.class);
                 } else {
                     o.line("private %s %s;", p.type(), p.name());
                 }
@@ -81,7 +84,7 @@ public final class Generator {
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     if (!alwaysIncludeBuildMethod) {
-                        o.line("public %s %s(%s %s) {", className, q.name(), q.type(), q.name());
+                        o.line("public %s %s(%s %s) {", o.add(className), q.name(), q.type(), q.name());
                         writeNullCheck(o, q);
                         o.line("this._b.%s = %s;", q.name(), q.name());
                         o.line("return _b.build();");
@@ -93,7 +96,7 @@ public final class Generator {
                         o.line("return this;");
                         o.close();
                         o.line();
-                        o.line("public %s build() {", className);
+                        o.line("public %s build() {", o.add(className));
                         o.line("return _b.build();");
                         o.close();
                     }
@@ -135,7 +138,7 @@ public final class Generator {
                 o.close();
             }
             o.line();
-            o.line("public %s build() {", className);
+            o.line("public %s build() {", o.add(className));
             o.line("return _b.build();");
             o.close();
             o.close();
@@ -167,9 +170,9 @@ public final class Generator {
         }
     }
 
-    private static void privateConstructor(Output o, String className) {
+    private static void privateConstructor(Output o, String simpleClassName) {
         o.line();
-        o.line("private %s() {", className);
+        o.line("private %s() {", simpleClassName);
         o.line("// prevent instantiation");
         o.close();
     }
@@ -230,7 +233,7 @@ public final class Generator {
             o.close();
         }
         o.line();
-        o.line("public %s build() {", className);
+        o.line("public %s build() {", o.add(className));
         writeBuildStatement(o, className, parameters, constructorVisible);
         o.close();
         o.close();
@@ -240,18 +243,18 @@ public final class Generator {
             boolean constructorVisible) {
         String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
         if (constructorVisible) {
-            o.line("return new %s(%s);", className, params);
+            o.line("return new %s(%s);", o.add(className), params);
         } else {
             String parameterClassNames = parameters.stream().map(x -> baseType(x.type()) + ".class")
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
             o.line("try {");
-            o.line("java.lang.reflect.Constructor<%s> _c = %s.class.getDeclaredConstructor(%s);", className, className,
+            o.line("%s<%s> _c = %s.class.getDeclaredConstructor(%s);", Constructor.class, className, className,
                     parameterClassNames);
             o.line("_c.setAccessible(true);");
             o.line("return _c.newInstance(%s);", params);
             o.close();
-            o.line("catch (java.lang.reflect.InvocationTargetException");
+            o.line("catch (%s", InvocationTargetException.class);
             o.right().right();
             o.line("| NoSuchMethodException");
             o.line("| InstantiationException");
@@ -292,9 +295,13 @@ public final class Generator {
             indent += "    ";
             return this;
         }
-        
+
         public void line() {
             b.append("\n");
+        }
+
+        public String add(String className) {
+            return imports.add(className);
         }
 
         public void line(String fmt, Object... args) {
@@ -317,7 +324,7 @@ public final class Generator {
             left();
             line("}");
         }
-        
+
         @Override
         public String toString() {
             String s = b.toString();
