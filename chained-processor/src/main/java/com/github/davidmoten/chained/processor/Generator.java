@@ -29,7 +29,8 @@ public final class Generator {
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
         if (mandatory.isEmpty()) {
-            return simpleBuilder(className, parameters, constructorVisible);
+            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, constructorVisible);
+            return o.toString();
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", className, p.type(), p.name());
@@ -182,35 +183,32 @@ public final class Generator {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    private static String simpleBuilder(String className, List<Parameter> parameters, boolean constructorVisible) {
-        Output o = new Output().right();
-        o.line("public static Builder builder() {");
-        o.line("return new Builder();");
+    private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName, List<Parameter> parameters, boolean constructorVisible) {
+        o.line("public static %s builder() {", builderSimpleClassName);
+        o.line("return new %s();", builderSimpleClassName);
         o.close();
-        o.line();
-        o.line("public final static class Builder {");
         o.line();
         for (Parameter p : parameters) {
             if (p.isOptional()) {
-                o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.type()), p.name());
+                o.line("private %s %s = %s.empty();", p.type(),p.name(),wrappingType(p.type()));
             } else {
                 o.line("private %s %s;", p.type(), p.name());
             }
         }
-        privateConstructor(o, "Builder");
+        privateConstructor(o, builderSimpleClassName);
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 String wrappedType = wrappedType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
-                o.line("public Builder %s(%s %s) {", p.name(), wrappedType, p.name());
+                o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), wrappedType, p.name());
                 o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
-                o.line("this.%s = %s.of(%s);", p.name(), wrappedType(p.type()), p.name());
+                o.line("this.%s = %s.of(%s);", p.name(), wrappingType(p.type()), p.name());
                 o.line("return this;");
                 o.close();
             }
             o.line();
-            o.line("public Builder %s(%s %s) {", p.name(), p.type(), p.name());
+            o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), p.type(), p.name());
             o.line("Preconditions.checkNotNull(%s, \"%s\");", p.name(), p.name());
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");
@@ -221,7 +219,6 @@ public final class Generator {
         writeBuildStatement(o, className, parameters, constructorVisible);
         o.close();
         o.close();
-        return o.toString();
     }
 
     private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
