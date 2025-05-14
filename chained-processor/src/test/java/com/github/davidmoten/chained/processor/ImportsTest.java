@@ -15,6 +15,8 @@ public class ImportsTest {
         imports.add(Optional.class);
         imports.add(String.class);
         imports.add(Builder.class);
+        System.out.println(imports.add("java.util.Map<java.util.List<? extends java.lang.String>, java.util.Optional<java.lang.Integer>>"));
+        
     }
     
     @Test

@@ -47,9 +47,10 @@ public final class Generator {
         } else {
             for (Parameter p : parameters) {
                 if (p.isOptional()) {
-                    o.line("private %s %s = %s.empty();", p.type(), wrappingType(p.name()), Optional.class);
+                    o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(wrappingType(p.name())),
+                            Optional.class);
                 } else {
-                    o.line("private %s %s;", p.type(), p.name());
+                    o.line("private %s %s;", o.add(p.type()), p.name());
                 }
             }
             privateConstructor(o, builderSimpleClassName);
@@ -84,13 +85,13 @@ public final class Generator {
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     if (!alwaysIncludeBuildMethod) {
-                        o.line("public %s %s(%s %s) {", o.add(className), q.name(), q.type(), q.name());
+                        o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
                         o.line("this._b.%s = %s;", q.name(), q.name());
                         o.line("return _b.build();");
                         o.close();
                     } else {
-                        o.line("public %s %s(%s %s) {", builder, q.name(), q.type(), q.name());
+                        o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
                         o.line("this._b.%s = %s;", q.name(), q.name());
                         o.line("return this;");
@@ -105,7 +106,7 @@ public final class Generator {
                     return o.toString();
                 } else {
                     String nextBuilder = builderClassName(q.name());
-                    o.line("public %s %s(%s %s) {", nextBuilder, q.name(), q.type(), q.name());
+                    o.line("public %s %s(%s %s) {", nextBuilder, q.name(), o.add(q.type()), q.name());
                     writeNullCheck(o, q);
                     o.line("this._b.%s = %s;", q.name(), q.name());
                     o.line("return new %s(_b);", nextBuilder);
@@ -125,13 +126,14 @@ public final class Generator {
             o.close();
             for (Parameter p : optionals) {
                 o.line();
-                o.line("public %s %s(%s %s) {", lastBuilder, p.name(), toPrimitive(wrappedType(p.type())), p.name());
+                o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(toPrimitive(wrappedType(p.type()))),
+                        p.name());
                 writeNullCheck(o, p);
-                o.line("this._b.%s = %s.of(%s);", p.name(), wrappingType(p.type()), p.name());
+                o.line("this._b.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
                 o.line("return this;");
                 o.close();
                 o.line();
-                o.line("public %s %s(%s %s) {", lastBuilder, p.name(), p.type(), p.name());
+                o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(p.type()), p.name());
                 writeNullCheck(o, p);
                 o.line("this._b.%s = %s;", p.name(), p.name());
                 o.line("return this;");
@@ -179,7 +181,7 @@ public final class Generator {
 
     private static void writeMandatorySetter(Output o, Parameter p) {
         String nextBuilder = builderClassName(p.name());
-        o.line("public %s %s(%s %s) {", nextBuilder, p.name(), p.type(), p.name());
+        o.line("public %s %s(%s %s) {", nextBuilder, p.name(), o.add(p.type()), p.name());
         writeNullCheck(o, p);
         o.line("this.%s = %s;", p.name(), p.name());
         o.line("return new %s(this);", nextBuilder);
@@ -208,9 +210,9 @@ public final class Generator {
         o.line();
         for (Parameter p : parameters) {
             if (p.isOptional()) {
-                o.line("private %s %s = %s.empty();", p.type(), p.name(), wrappingType(p.type()));
+                o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(wrappingType(p.type())));
             } else {
-                o.line("private %s %s;", p.type(), p.name());
+                o.line("private %s %s;", o.add(p.type()), p.name());
             }
         }
         privateConstructor(o, builderSimpleClassName);
@@ -219,14 +221,14 @@ public final class Generator {
                 String wrappedType = wrappedType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
-                o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), wrappedType, p.name());
+                o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(wrappedType), p.name());
                 o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
-                o.line("this.%s = %s.of(%s);", p.name(), wrappingType(p.type()), p.name());
+                o.line("this.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
                 o.line("return this;");
                 o.close();
             }
             o.line();
-            o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), p.type(), p.name());
+            o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
             o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");

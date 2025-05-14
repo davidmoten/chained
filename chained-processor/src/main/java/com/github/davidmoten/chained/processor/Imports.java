@@ -12,6 +12,29 @@ public final class Imports {
     }
 
     public String add(String className) {
+        if (className.contains("<")) {
+            StringBuilder b = new StringBuilder();
+            StringBuilder cls = new StringBuilder();
+            for (int i = 0; i < className.length(); i++) {
+                char c = className.charAt(i);
+                if (c == '<' || c == '>' || c == ',' || c == '?' || c == ' ') {
+                    b.append(addNoGenerics(cls.toString()));
+                    b.append(c);
+                    cls.setLength(0);
+                } else {
+                    cls.append(c);
+                }
+            }
+            if (cls.length() > 0) {
+                b.append(addNoGenerics(cls.toString()));
+            }
+            return b.toString();
+        } else {
+            return addNoGenerics(className);
+        }
+    }
+
+    private String addNoGenerics(String className) {
         if (imports.containsKey(className)) {
             return imports.get(className);
         } else {
@@ -25,7 +48,7 @@ public final class Imports {
             }
         }
     }
-
+    
     public String toCode() {
         StringBuilder b = new StringBuilder();
         for (String className : imports.keySet()) {
