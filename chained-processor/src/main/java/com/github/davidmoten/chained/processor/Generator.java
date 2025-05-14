@@ -231,7 +231,7 @@ public final class Generator {
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
             o.line("try {");
-            o.line("java.lang.reflect.Constructor<%s> _c = %s.class.getConstructor(%s);", className, className,
+            o.line("java.lang.reflect.Constructor<%s> _c = %s.class.getDeclaredConstructor(%s);", className, className,
                     parameterClassNames);
             o.line("_c.setAccessible(true);");
             o.line("return _c.newInstance(%s);", params);

@@ -41,4 +41,11 @@ public class ChainedProcessorTest{
         assertEquals("someone", a.description().get());
         assertEquals(10, (long) a.age().get());
     }
+    
+    @Test
+    public void testPrivateConstructor() {
+        PrivateConstructor a = PrivateConstructor.name("fred").city("Canberra");
+        assertEquals("fred", a.name());
+        assertEquals("Canberra", a.city());
+    }
 }
