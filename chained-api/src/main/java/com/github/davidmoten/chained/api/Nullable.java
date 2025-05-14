@@ -7,8 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.CLASS)
-@Target(value = {ElementType.CONSTRUCTOR})
+@Target(value = { ElementType.PARAMETER })
 @Documented
-public @interface BuilderConstructor {
+public @interface Nullable {
 
 }

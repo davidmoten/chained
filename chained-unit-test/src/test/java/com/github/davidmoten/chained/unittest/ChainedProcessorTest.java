@@ -68,5 +68,7 @@ public class ChainedProcessorTest {
     @Test
     public void testTwoMandatoryIncludeBuilderMethod() {
         TwoMandatoryIncludeBuilderMethod s = TwoMandatoryIncludeBuilderMethod.name("fred").age(10).build();
+        assertEquals("fred", s.name());
+        assertEquals(10, s.age());
     }
 }
