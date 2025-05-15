@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -86,5 +87,10 @@ public class ChainedProcessorTest {
     public void testOfPrivateConstructorSamePackage() {
         OfPrivateConstructorSamePackage a = OfPrivateConstructorSamePackage.of("fred");
         assertEquals("fred", a.name());
+    }
+    
+    @Test
+    public void testHasMap() {
+        HasMap a = HasMap.name("fred").map(Map.of("a", 1, "b", 2));
     }
 }

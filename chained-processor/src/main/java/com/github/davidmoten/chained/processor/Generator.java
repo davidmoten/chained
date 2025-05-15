@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,6 +49,8 @@ public final class Generator {
                 if (p.isOptional()) {
                     o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(wrappingType(p.name())),
                             Optional.class);
+                } else if (p.type().startsWith("java.util.Map<")) {
+                    o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), LinkedHashMap.class);
                 } else {
                     o.line("private %s %s;", o.add(p.type()), p.name());
                 }
@@ -221,14 +224,14 @@ public final class Generator {
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
                 o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(wrappedType), p.name());
-                o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
+                writeNullCheck(o, p);
                 o.line("this.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
                 o.line("return this;");
                 o.close();
             }
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
-            o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
+            writeNullCheck(o, p);
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");
             o.close();
@@ -280,7 +283,7 @@ public final class Generator {
         private static final String IMPORTS_HERE = "<<IMPORTS_HERE>>";
         private final Imports imports;
         private final StringBuilder b = new StringBuilder();
-        
+
         public Output(String ownerClassName) {
             this.imports = new Imports(ownerClassName);
         }

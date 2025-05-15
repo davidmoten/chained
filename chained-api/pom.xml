@@ -18,11 +18,18 @@
     <build>
 
         <plugins>
-
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
+<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.github.davidmoten.chained.chained_api</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
-
         </plugins>
 
     </build>
