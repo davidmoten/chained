@@ -242,15 +242,22 @@ public final class Generator {
         o.close();
         o.close();
     }
-
-    private static void assignField(Output o, Parameter p) {
-        o.line("this.%s = %s;", p.name(), p.name());        
+    
+    private static void assignField(Output o, Parameter p, String variable) {
+        if (p.type().startsWith("java.util.Map<")) {
+            o.line("%s.%s.putAll(%s);", variable, p.name(), p.name());
+        } else {
+            o.line("%s.%s = %s;", variable , p.name(), p.name());
+        }
     }
     
-    private static void assignBuilderField(Output o, Parameter p) {
-        o.line("this._b.%s = %s;", p.name(), p.name());        
+    private static void assignField(Output o, Parameter p) {
+        assignField(o, p, "this");
     }
 
+    private static void assignBuilderField(Output o, Parameter p) {
+        assignField(o, p, "_b");
+    }
 
     private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
             boolean constructorVisible) {
