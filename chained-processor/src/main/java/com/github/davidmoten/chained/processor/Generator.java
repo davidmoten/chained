@@ -89,13 +89,13 @@ public final class Generator {
                     if (!alwaysIncludeBuildMethod) {
                         o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
-                        o.line("this._b.%s = %s;", q.name(), q.name());
+                        assignBuilderField(o, q);
                         o.line("return _b.build();");
                         o.close();
                     } else {
                         o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
-                        o.line("this._b.%s = %s;", q.name(), q.name());
+                        assignBuilderField(o, q);
                         o.line("return this;");
                         o.close();
                         o.line();
@@ -110,7 +110,7 @@ public final class Generator {
                     String nextBuilder = builderClassName(q.name());
                     o.line("public %s %s(%s %s) {", nextBuilder, q.name(), o.add(q.type()), q.name());
                     writeNullCheck(o, q);
-                    o.line("this._b.%s = %s;", q.name(), q.name());
+                    assignBuilderField(o, q);
                     o.line("return new %s(_b);", nextBuilder);
                     o.close();
                     o.close();
@@ -137,7 +137,7 @@ public final class Generator {
                 o.line();
                 o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(p.type()), p.name());
                 writeNullCheck(o, p);
-                o.line("this._b.%s = %s;", p.name(), p.name());
+                assignBuilderField(o, p);
                 o.line("return this;");
                 o.close();
             }
@@ -232,7 +232,7 @@ public final class Generator {
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
             writeNullCheck(o, p);
-            o.line("this.%s = %s;", p.name(), p.name());
+            assignField(o, p);
             o.line("return this;");
             o.close();
         }
@@ -242,6 +242,15 @@ public final class Generator {
         o.close();
         o.close();
     }
+
+    private static void assignField(Output o, Parameter p) {
+        o.line("this.%s = %s;", p.name(), p.name());        
+    }
+    
+    private static void assignBuilderField(Output o, Parameter p) {
+        o.line("this._b.%s = %s;", p.name(), p.name());        
+    }
+
 
     private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
             boolean constructorVisible) {
