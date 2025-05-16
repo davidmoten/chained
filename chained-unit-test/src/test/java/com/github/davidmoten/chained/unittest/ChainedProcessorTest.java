@@ -6,7 +6,8 @@ import static org.junit.Assert.assertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -91,14 +92,23 @@ public class ChainedProcessorTest {
     }
 
     @Test
-    public void testHasMap() {
+    public void testHasMapAllMandatory() {
         Map<String, Integer> map = Map.of("a", 1, "b", 2);
         HasMap a = HasMap.name("fred").map(map);
         assertEquals("fred", a.name());
         assertEquals(map, a.map());
         HasMap b = HasMap.name("fred").map().put("a", 1).put("b", 2).buildMap();
-        assertEquals("fred", b.name());
-        assertEquals(map, b.map());
+        assertEquals(a, b);
+    }
+
+    @Test
+    public void testHasListAllMandatory() {
+        List<Integer> list = Arrays.asList(1, 2, 3);
+        HasList a = HasList.name("julia").list(list);
+        assertEquals("julia", a.name());
+        assertEquals(list, a.list());
+        HasList b = HasList.name("julia").list().add(1).add(2).add(3).buildList();
+        assertEquals(a, b);
     }
 
 }

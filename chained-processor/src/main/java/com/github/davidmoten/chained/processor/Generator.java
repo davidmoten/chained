@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
 
@@ -54,6 +55,8 @@ public final class Generator {
                             Optional.class);
                 } else if (p.type().startsWith("java.util.Map<")) {
                     o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), LinkedHashMap.class);
+                } else if (p.type().startsWith("java.util.List<")) {
+                    o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), ArrayList.class);
                 } else {
                     o.line("private %s %s;", o.add(p.type()), p.name());
                 }
@@ -82,7 +85,7 @@ public final class Generator {
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     if (!alwaysIncludeBuildMethod) {
-                        writeBuilderForMaps(o, q, o.add(className), "_b.", "_b.build()");
+                        writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
                         o.line();
                         o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
@@ -90,7 +93,7 @@ public final class Generator {
                         o.line("return _b.build();");
                         o.close();
                     } else {
-                        writeBuilderForMaps(o, q, builder, "_b.", "this");
+                        writeBuilderForCollection(o, q, builder, "_b.", "this");
                         o.line();
                         o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
@@ -239,7 +242,7 @@ public final class Generator {
                 o.line("return this;");
                 o.close();
             }
-            writeBuilderForMaps(o, p, builderSimpleClassName, "this", "this");
+            writeBuilderForCollection(o, p, builderSimpleClassName, "this", "this");
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
             writeNullCheck(o, p);
@@ -254,15 +257,34 @@ public final class Generator {
         o.close();
     }
 
-    private static void writeBuilderForMaps(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix, String returnExpression) {
+    private static void writeBuilderForCollection(Output o, Parameter p, String builderSimpleClassName,
+            String fieldPrefix, String returnExpression) {
+        writeBuilderForMap(o, p, builderSimpleClassName, fieldPrefix, returnExpression);
+        writeBuilderForList(o, p, builderSimpleClassName, fieldPrefix, returnExpression);
+    }
+
+    private static void writeBuilderForMap(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix,
+            String returnExpression) {
         TypeModel tm = typeModel(p.type());
         if (tm.baseType.equals("java.util.Map") && tm.typeArguments.size() == 2) {
             o.line();
             String keyType = tm.typeArguments.get(0).render();
             String valueType = tm.typeArguments.get(1).render();
-            o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, o.add(keyType), o.add(valueType), builderSimpleClassName,
-                    p.name());
+            o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, o.add(keyType), o.add(valueType),
+                    builderSimpleClassName, p.name());
             o.line("return new %s<>(() -> %s, %s%s);", MapBuilder.class, returnExpression, fieldPrefix, p.name());
+            o.close();
+        }
+    }
+
+    private static void writeBuilderForList(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix,
+            String returnExpression) {
+        TypeModel tm = typeModel(p.type());
+        if (tm.baseType.equals("java.util.List") && tm.typeArguments.size() == 1) {
+            o.line();
+            String genericType = tm.typeArguments.get(0).render();
+            o.line("public %s<%s, %s> %s() {", ListBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
+            o.line("return new %s<>(() -> %s, %s%s);", ListBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
     }
@@ -311,11 +333,11 @@ public final class Generator {
             this.baseType = baseType;
             this.typeArguments = typeArguments;
         }
-        
+
         public String render() {
             return render(x -> x);
         }
-        
+
         public String render(UnaryOperator<String> transform) {
             if (typeArguments.isEmpty()) {
                 return transform.apply(baseType);
@@ -354,8 +376,8 @@ public final class Generator {
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
             o.line("try {");
-            o.line("%s<%s> _c = %s.class.getDeclaredConstructor(%s);", Constructor.class, o.add(className), o.add(className),
-                    parameterClassNames);
+            o.line("%s<%s> _c = %s.class.getDeclaredConstructor(%s);", Constructor.class, o.add(className),
+                    o.add(className), parameterClassNames);
             o.line("_c.setAccessible(true);");
             o.line("return _c.newInstance(%s);", params);
             o.close();
