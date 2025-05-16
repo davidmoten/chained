@@ -81,6 +81,7 @@ public final class Generator {
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     if (!alwaysIncludeBuildMethod) {
+                        writeBuilderForMaps(o, q, builder, "_b.");
                         o.line();
                         o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
@@ -88,7 +89,7 @@ public final class Generator {
                         o.line("return _b.build();");
                         o.close();
                     } else {
-                        writeBuilderForMaps(o, q, builderSimpleClassName);
+                        writeBuilderForMaps(o, q, builder, "_b.");
                         o.line();
                         o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
@@ -237,7 +238,7 @@ public final class Generator {
                 o.line("return this;");
                 o.close();
             }
-            writeBuilderForMaps(o, p, builderSimpleClassName);
+            writeBuilderForMaps(o, p, builderSimpleClassName, "this");
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
             writeNullCheck(o, p);
@@ -252,7 +253,7 @@ public final class Generator {
         o.close();
     }
 
-    private static void writeBuilderForMaps(Output o, Parameter p, String builderSimpleClassName) {
+    private static void writeBuilderForMaps(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix) {
         TypeModel tm = typeModel(p.type());
         if (tm.baseType.equals("java.util.Map") && tm.typeArguments.size() == 2) {
             o.line();
@@ -260,7 +261,7 @@ public final class Generator {
             String valueType = tm.typeArguments.get(1).render();
             o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, keyType, valueType, builderSimpleClassName,
                     p.name());
-            o.line("return new %s<>(this, (k, v) -> %.put(k, v));", MapBuilder.class, p.name());
+            o.line("return new %s<>(this, (k, v) -> %s%s.put(k, v));", MapBuilder.class, fieldPrefix, p.name());
             o.close();
         }
     }
