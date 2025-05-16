@@ -99,7 +99,7 @@ public final class Generator {
                         o.close();
                         o.line();
                         o.line("public %s build() {", o.add(className));
-                        o.line("return b.build();");
+                        o.line("return _b.build();");
                         o.close();
                     }
                     o.close();
