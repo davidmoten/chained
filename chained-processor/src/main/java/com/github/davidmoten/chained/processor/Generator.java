@@ -261,7 +261,7 @@ public final class Generator {
             String valueType = tm.typeArguments.get(1).render();
             o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, keyType, valueType, builderSimpleClassName,
                     p.name());
-            o.line("return new %s<>(this, (k, v) -> %s%s.put(k, v));", MapBuilder.class, fieldPrefix, p.name());
+            o.line("return new %s<>(this, %s%s);", MapBuilder.class, fieldPrefix, p.name());
             o.close();
         }
     }

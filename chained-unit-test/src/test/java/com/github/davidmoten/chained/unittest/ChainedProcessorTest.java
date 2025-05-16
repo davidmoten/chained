@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -92,6 +93,7 @@ public class ChainedProcessorTest {
     @Test
     public void testHasMap() {
         HasMap a = HasMap.name("fred").map(Map.of("a", 1, "b", 2));
+        HasMap.name("fred").map().put("a", 1).put("b", 2).buildMap().map(Collections.emptyMap());
     }
 
 }

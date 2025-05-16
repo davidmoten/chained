@@ -1,22 +1,32 @@
 package com.github.davidmoten.chained.api;
 
-import java.util.function.BiConsumer;
+import java.util.Map;
 
 public final class MapBuilder<K, V, T> {
 
     private final T returnObject;
-    private final BiConsumer<K, V> action;
+    private final Map<K, V> map;
 
-    public MapBuilder(T returnObject, BiConsumer<K, V> action) {
+    public MapBuilder(T returnObject, Map<K, V> map) {
         this.returnObject = returnObject;
-        this.action = action;
+        this.map = map;
     }
-
+    
     public MapBuilder<K, V, T> put(K key, V value) {
-        action.accept(key, value);
+        map.put(key, value);
         return this;
     }
 
+    public MapBuilder<K, V, T> putAll(Map<? extends K, ? extends V> m) {
+        map.putAll(m);
+        return this;
+    }
+    
+    public MapBuilder<K, V, T> set(Map<? extends K, ? extends V> m) {
+        map.clear();
+        return putAll(m);
+    }
+    
     public T buildMap() {
         return returnObject;
     }
