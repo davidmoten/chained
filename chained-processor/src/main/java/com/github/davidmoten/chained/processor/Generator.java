@@ -323,7 +323,7 @@ public final class Generator {
                 String args = typeArguments.stream() //
                         .map(x -> x.render(transform)) //
                         .collect(Collectors.joining(", "));
-                return baseType + "<" + args + ">";
+                return transform.apply(baseType) + "<" + args + ">";
             }
         }
     }
