@@ -3,6 +3,7 @@ package com.github.davidmoten.chained.processor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
 
 public final class Generator {
@@ -56,14 +58,7 @@ public final class Generator {
                 }
             }
             privateConstructor(o, builderSimpleClassName);
-            o.line();
-            o.line("public static %s builder() {", builderSimpleClassName);
-            o.line("return new %s();", builderSimpleClassName);
-            o.close();
-            o.line();
-            o.line("public static %s create() {", builderSimpleClassName);
-            o.line("return builder();");
-            o.close();
+            writeStaticCreators(o, builderSimpleClassName);
             o.line();
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
@@ -82,17 +77,19 @@ public final class Generator {
                 o.line("private %s(%s _b) {", builder, builderSimpleClassName);
                 o.line("this._b = _b;");
                 o.close();
-                o.line();
 
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     if (!alwaysIncludeBuildMethod) {
+                        o.line();
                         o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
                         assignBuilderField(o, q);
                         o.line("return _b.build();");
                         o.close();
                     } else {
+                        writeBuilderForMaps(o, q, builderSimpleClassName);
+                        o.line();
                         o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
                         assignBuilderField(o, q);
@@ -108,6 +105,7 @@ public final class Generator {
                     return o.toString();
                 } else {
                     String nextBuilder = builderClassName(q.name());
+                    o.line();
                     o.line("public %s %s(%s %s) {", nextBuilder, q.name(), o.add(q.type()), q.name());
                     writeNullCheck(o, q);
                     assignBuilderField(o, q);
@@ -149,6 +147,17 @@ public final class Generator {
             o.close();
             return o.toString();
         }
+    }
+
+    private static void writeStaticCreators(Output o, String builderSimpleClassName) {
+        o.line();
+        o.line("public static %s builder() {", builderSimpleClassName);
+        o.line("return new %s();", builderSimpleClassName);
+        o.close();
+        o.line();
+        o.line("public static %s create() {", builderSimpleClassName);
+        o.line("return builder();");
+        o.close();
     }
 
     private static String wrappedType(String type) {
@@ -206,10 +215,6 @@ public final class Generator {
 
     private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
             List<Parameter> parameters, boolean constructorVisible) {
-        o.line("public static %s builder() {", builderSimpleClassName);
-        o.line("return new %s();", builderSimpleClassName);
-        o.close();
-        o.line();
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(wrappingType(p.type())));
@@ -218,6 +223,9 @@ public final class Generator {
             }
         }
         privateConstructor(o, builderSimpleClassName);
+
+        writeStaticCreators(o, builderSimpleClassName);
+
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 String wrappedType = wrappedType(p.type());
@@ -229,6 +237,7 @@ public final class Generator {
                 o.line("return this;");
                 o.close();
             }
+            writeBuilderForMaps(o, p, builderSimpleClassName);
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
             writeNullCheck(o, p);
@@ -242,15 +251,83 @@ public final class Generator {
         o.close();
         o.close();
     }
-    
+
+    private static void writeBuilderForMaps(Output o, Parameter p, String builderSimpleClassName) {
+        TypeModel tm = typeModel(p.type());
+        if (tm.baseType.equals("java.util.Map") && tm.typeArguments.size() == 2) {
+            o.line();
+            String keyType = tm.typeArguments.get(0).render();
+            String valueType = tm.typeArguments.get(1).render();
+            o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, keyType, valueType, builderSimpleClassName,
+                    p.name());
+            o.line("return new %s<>(this, (k, v) -> %.put(k, v));", MapBuilder.class, p.name());
+            o.close();
+        }
+    }
+
+    // VisibleForTesting
+    static TypeModel typeModel(String type) {
+        int i = type.indexOf("<");
+        if (i == -1) {
+            return new TypeModel(type, Collections.emptyList());
+        } else {
+            int j = type.lastIndexOf(">");
+            if (j == -1) {
+                throw new RuntimeException("unexpected lack of closing > in type name: " + type);
+            } else {
+                String baseType = type.substring(0, i);
+                String args = type.substring(i + 1, j);
+                List<TypeModel> list = new ArrayList<>();
+                int k = 0;
+                int depth = 0;
+                for (int r = 0; r < args.length(); r++) {
+                    char c = args.charAt(r);
+                    if (c == '<') {
+                        depth++;
+                    } else if (c == '>') {
+                        depth--;
+                    } else if (c == ',' && depth == 0) {
+                        String s = args.substring(k, r);
+                        list.add(typeModel(s.trim()));
+                        k = r + 1;
+                    }
+                }
+                if (k < args.length()) {
+                    list.add(typeModel(args.substring(k).trim()));
+                }
+                return new TypeModel(baseType, list);
+            }
+        }
+    }
+
+    // VisibleForTesting
+    static final class TypeModel {
+        final String baseType;
+        final List<TypeModel> typeArguments;
+
+        TypeModel(String baseType, List<TypeModel> typeArguments) {
+            this.baseType = baseType;
+            this.typeArguments = typeArguments;
+        }
+
+        public String render() {
+            if (typeArguments.isEmpty()) {
+                return baseType;
+            } else {
+                String args = typeArguments.stream().map(x -> x.toString()).collect(Collectors.joining(", "));
+                return baseType + "<" + args + ">";
+            }
+        }
+    }
+
     private static void assignField(Output o, Parameter p, String variable) {
         if (p.type().startsWith("java.util.Map<")) {
             o.line("%s.%s.putAll(%s);", variable, p.name(), p.name());
         } else {
-            o.line("%s.%s = %s;", variable , p.name(), p.name());
+            o.line("%s.%s = %s;", variable, p.name(), p.name());
         }
     }
-    
+
     private static void assignField(Output o, Parameter p) {
         assignField(o, p, "this");
     }

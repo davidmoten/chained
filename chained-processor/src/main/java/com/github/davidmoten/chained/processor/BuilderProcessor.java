@@ -1,7 +1,9 @@
 package com.github.davidmoten.chained.processor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,19 +68,24 @@ public class BuilderProcessor extends AbstractProcessor {
                                 typeElement.getQualifiedName().toString(), //
                                 builderClassName, //
                                 parameters, //
-                                constructorVisible,
-                                annotation.alwaysIncludeBuildMethod()));
+                                constructorVisible, annotation.alwaysIncludeBuildMethod()));
                         out.println();
                     }
                 } catch (IOException | RuntimeException e) {
+                    ByteArrayOutputStream b = new ByteArrayOutputStream();
+                    try (PrintWriter writer = new PrintWriter(b)) {
+                        e.printStackTrace(writer);
+                    }
                     processingEnv //
                             .getMessager() //
-                            .printMessage(javax.tools.Diagnostic.Kind.ERROR, e.getMessage(), element);
+                            .printMessage(javax.tools.Diagnostic.Kind.ERROR,
+                                    new String(b.toByteArray(), StandardCharsets.UTF_8), element);
                     return false;
                 }
             }
         }
         return true;
+
     }
 
     private static ExecutableElement constructor(TypeElement element) {

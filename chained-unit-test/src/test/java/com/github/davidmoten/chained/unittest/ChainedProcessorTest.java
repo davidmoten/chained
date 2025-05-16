@@ -68,29 +68,30 @@ public class ChainedProcessorTest {
         assertEquals("fred", s.name());
         assertEquals(10, s.age());
     }
-    
+
     @Test
     public void testTwoOptionalEmpty() {
-         TwoOptional s = TwoOptional.builder().build();
-         assertEquals(java.util.Optional.empty(), s.name());
-         assertEquals(java.util.Optional.empty(), s.age());
+        TwoOptional s = TwoOptional.builder().build();
+        assertEquals(java.util.Optional.empty(), s.name());
+        assertEquals(java.util.Optional.empty(), s.age());
     }
-    
+
     @Test
     public void testTwoOptionalPresent() {
-         TwoOptional s = TwoOptional.builder().name("hi there").age(Optional.of(12)).build();
-         assertEquals("hi there", s.name().get());
-         assertEquals(12, (int) s.age().get());
+        TwoOptional s = TwoOptional.builder().name("hi there").age(Optional.of(12)).build();
+        assertEquals("hi there", s.name().get());
+        assertEquals(12, (int) s.age().get());
     }
-    
+
     @Test
     public void testOfPrivateConstructorSamePackage() {
         OfPrivateConstructorSamePackage a = OfPrivateConstructorSamePackage.of("fred");
         assertEquals("fred", a.name());
     }
-    
+
     @Test
     public void testHasMap() {
         HasMap a = HasMap.name("fred").map(Map.of("a", 1, "b", 2));
     }
+
 }
