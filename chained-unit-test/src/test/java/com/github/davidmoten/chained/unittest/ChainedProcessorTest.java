@@ -92,8 +92,13 @@ public class ChainedProcessorTest {
 
     @Test
     public void testHasMap() {
-        HasMap a = HasMap.name("fred").map(Map.of("a", 1, "b", 2));
+        Map<String, Integer> map = Map.of("a", 1, "b", 2);
+        HasMap a = HasMap.name("fred").map(map);
+        assertEquals("fred", a.name());
+        assertEquals(map, a.map());
         HasMap b = HasMap.name("fred").map().put("a", 1).put("b", 2).buildMap();
+        assertEquals("fred", b.name());
+        assertEquals(map, b.map());
     }
 
 }
