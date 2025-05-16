@@ -2,8 +2,8 @@ package com.github.davidmoten.chained.example;
 
 import java.util.Optional;
 
-import com.github.davidmoten.chained.api.Builder;
-import com.github.davidmoten.chained.api.BuilderConstructor;
+import com.github.davidmoten.chained.api.annotation.Builder;
+import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
 
 @Builder("${pkg}.TestBeanBuilder")
 public final class TestBean {

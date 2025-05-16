@@ -1,4 +1,4 @@
-package com.github.davidmoten.chained.api;
+package com.github.davidmoten.chained.api.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

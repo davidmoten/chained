@@ -21,11 +21,11 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
 
-import com.github.davidmoten.chained.api.Builder;
-import com.github.davidmoten.chained.api.BuilderConstructor;
+import com.github.davidmoten.chained.api.annotation.Builder;
+import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
-@SupportedAnnotationTypes("com.github.davidmoten.chained.api.Builder")
+@SupportedAnnotationTypes("com.github.davidmoten.chained.api.annotation.Builder")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class BuilderProcessor extends AbstractProcessor {
 

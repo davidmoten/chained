@@ -1,4 +1,4 @@
-package com.github.davidmoten.chained.api;
+package com.github.davidmoten.chained.api.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,8 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.CLASS)
-@Target(value = {ElementType.CONSTRUCTOR})
+@Target(value = { ElementType.PARAMETER })
 @Documented
-public @interface BuilderConstructor {
+public @interface Nullable {
 
 }

@@ -1,6 +1,6 @@
 package com.github.davidmoten.chained.unittest;
 
-import com.github.davidmoten.chained.api.Builder;
+import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.unittest.builder.PrivateConstructorBuilder;
 import com.github.davidmoten.chained.unittest.builder.PrivateConstructorBuilder.BuilderWithName;
 

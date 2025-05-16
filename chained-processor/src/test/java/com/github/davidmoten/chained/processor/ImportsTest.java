@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-import com.github.davidmoten.chained.api.Builder;
+import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.processor.Generator.Output;
 
 public class ImportsTest {
