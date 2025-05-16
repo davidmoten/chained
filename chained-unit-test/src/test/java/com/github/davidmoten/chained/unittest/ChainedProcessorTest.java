@@ -107,7 +107,8 @@ public class ChainedProcessorTest {
         HasList a = HasList.name("julia").list(list);
         assertEquals("julia", a.name());
         assertEquals(list, a.list());
-        HasList b = HasList.name("julia").list().add(1).add(2).add(3).buildList();
+        List<Integer> more = Arrays.asList(2, 3);
+        HasList b = HasList.name("julia").list().add(1).addAll(more).buildList();
         assertEquals(a, b);
     }
 
