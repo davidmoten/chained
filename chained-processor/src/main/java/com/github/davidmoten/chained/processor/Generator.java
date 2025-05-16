@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import com.github.davidmoten.chained.api.MapBuilder;
@@ -62,7 +63,7 @@ public final class Generator {
             o.line();
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
-            o.line("private %s build() {", className);
+            o.line("private %s build() {", o.add(className));
             writeBuildStatement(o, className, parameters, constructorVisible);
             o.close();
 
@@ -98,7 +99,7 @@ public final class Generator {
                         o.close();
                         o.line();
                         o.line("public %s build() {", o.add(className));
-                        o.line("return _b.build();");
+                        o.line("return b.build();");
                         o.close();
                     }
                     o.close();
@@ -259,7 +260,7 @@ public final class Generator {
             o.line();
             String keyType = tm.typeArguments.get(0).render();
             String valueType = tm.typeArguments.get(1).render();
-            o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, keyType, valueType, builderSimpleClassName,
+            o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, o.add(keyType), o.add(valueType), builderSimpleClassName,
                     p.name());
             o.line("return new %s<>(this, %s%s);", MapBuilder.class, fieldPrefix, p.name());
             o.close();
@@ -310,12 +311,18 @@ public final class Generator {
             this.baseType = baseType;
             this.typeArguments = typeArguments;
         }
-
+        
         public String render() {
+            return render(x -> x);
+        }
+        
+        public String render(UnaryOperator<String> transform) {
             if (typeArguments.isEmpty()) {
-                return baseType;
+                return transform.apply(baseType);
             } else {
-                String args = typeArguments.stream().map(x -> x.toString()).collect(Collectors.joining(", "));
+                String args = typeArguments.stream() //
+                        .map(x -> x.render(transform)) //
+                        .collect(Collectors.joining(", "));
                 return baseType + "<" + args + ">";
             }
         }
@@ -347,7 +354,7 @@ public final class Generator {
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
             o.line("try {");
-            o.line("%s<%s> _c = %s.class.getDeclaredConstructor(%s);", Constructor.class, className, className,
+            o.line("%s<%s> _c = %s.class.getDeclaredConstructor(%s);", Constructor.class, o.add(className), o.add(className),
                     parameterClassNames);
             o.line("_c.setAccessible(true);");
             o.line("return _c.newInstance(%s);", params);
@@ -402,8 +409,12 @@ public final class Generator {
             b.append("\n");
         }
 
-        public String add(String className) {
-            return imports.add(className);
+        public String add(String type) {
+            return add(typeModel(type));
+        }
+
+        private String add(TypeModel tm) {
+            return tm.render(x -> imports.add(x));
         }
 
         public void line(String fmt, Object... args) {
