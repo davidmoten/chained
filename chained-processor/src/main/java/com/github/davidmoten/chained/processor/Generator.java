@@ -82,7 +82,7 @@ public final class Generator {
                 Parameter q = mandatory.get(i + 1);
                 if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
                     if (!alwaysIncludeBuildMethod) {
-                        writeBuilderForMaps(o, q, builder, "_b.");
+                        writeBuilderForMaps(o, q, o.add(className), "_b.", "_b.build()");
                         o.line();
                         o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
@@ -90,7 +90,7 @@ public final class Generator {
                         o.line("return _b.build();");
                         o.close();
                     } else {
-                        writeBuilderForMaps(o, q, builder, "_b.");
+                        writeBuilderForMaps(o, q, builder, "_b.", "this");
                         o.line();
                         o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
                         writeNullCheck(o, q);
@@ -239,7 +239,7 @@ public final class Generator {
                 o.line("return this;");
                 o.close();
             }
-            writeBuilderForMaps(o, p, builderSimpleClassName, "this");
+            writeBuilderForMaps(o, p, builderSimpleClassName, "this", "this");
             o.line();
             o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
             writeNullCheck(o, p);
@@ -254,7 +254,7 @@ public final class Generator {
         o.close();
     }
 
-    private static void writeBuilderForMaps(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix) {
+    private static void writeBuilderForMaps(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix, String returnExpression) {
         TypeModel tm = typeModel(p.type());
         if (tm.baseType.equals("java.util.Map") && tm.typeArguments.size() == 2) {
             o.line();
@@ -262,7 +262,7 @@ public final class Generator {
             String valueType = tm.typeArguments.get(1).render();
             o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, o.add(keyType), o.add(valueType), builderSimpleClassName,
                     p.name());
-            o.line("return new %s<>(this, %s%s);", MapBuilder.class, fieldPrefix, p.name());
+            o.line("return new %s<>(() -> %s, %s%s);", MapBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
     }

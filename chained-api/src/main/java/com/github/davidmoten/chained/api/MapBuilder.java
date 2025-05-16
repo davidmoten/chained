@@ -1,13 +1,14 @@
 package com.github.davidmoten.chained.api;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 public final class MapBuilder<K, V, T> {
 
-    private final T returnObject;
+    private final Supplier<T> returnObject;
     private final Map<K, V> map;
 
-    public MapBuilder(T returnObject, Map<K, V> map) {
+    public MapBuilder(Supplier<T> returnObject, Map<K, V> map) {
         this.returnObject = returnObject;
         this.map = map;
     }
@@ -28,6 +29,6 @@ public final class MapBuilder<K, V, T> {
     }
     
     public T buildMap() {
-        return returnObject;
+        return returnObject.get();
     }
 }
