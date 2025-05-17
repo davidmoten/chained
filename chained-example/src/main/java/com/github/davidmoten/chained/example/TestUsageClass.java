@@ -4,6 +4,6 @@ public class TestUsageClass {
 
     public static void main(String[] args) {
         @SuppressWarnings("unused")
-        TestBean instance = TestBean.longField(123L).stringField("abc").description("hello").build();
+        TestBean instance = TestBean.number(123L).name("abc").description("hello").build();
     }
 }

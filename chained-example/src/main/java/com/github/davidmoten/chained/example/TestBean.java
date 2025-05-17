@@ -8,8 +8,8 @@ import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
 @Builder("${pkg}.${simpleName}Builder")
 public final class TestBean {
 
-    private final long longField;
-    private final String stringField;
+    private final long number;
+    private final String name;
     private final Optional<String> description;
     private final long calculated;
     
@@ -20,32 +20,32 @@ public final class TestBean {
         return TestBeanBuilder.create();
     }
     
-    public static TestBeanBuilder.BuilderWithLongField longField(long longField) {
-        return builder().longField(longField);
+    public static TestBeanBuilder.BuilderWithNumber number(long number) {
+        return builder().number(number);
     }
     
-    public TestBean(String longField, String stringField, Optional<String> description) {
-        this(Long.parseLong(longField), stringField, description);
+    public TestBean(String number, String name, Optional<String> description) {
+        this(Long.parseLong(number), name, description);
     }
     
-    public TestBean(String longField, long stringField, Optional<String> description) {
-        this(Long.parseLong(longField), stringField + "", description);
+    public TestBean(String number, long name, Optional<String> description) {
+        this(Long.parseLong(number), name + "", description);
     }
 
     @BuilderConstructor
-    private TestBean(long longField, String stringField, Optional<String> description) {
-        this.longField = longField;
-        this.stringField = stringField;
-        this.calculated = longField + 1;
+    private TestBean(long number, String name, Optional<String> description) {
+        this.number = number;
+        this.name = name;
+        this.calculated = number + 1;
         this.description = description;
     }
 
-    public long longField() {
-        return longField;
+    public long number() {
+        return number;
     }
 
-    public String stringField() {
-        return stringField;
+    public String name() {
+        return name;
     }
 
     public long calculated() {
