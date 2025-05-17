@@ -24,6 +24,7 @@ import javax.tools.Diagnostic.Kind;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
+import com.github.davidmoten.chained.processor.Generator.Construction;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
 @SupportedAnnotationTypes("com.github.davidmoten.chained.api.annotation.Builder")
@@ -73,13 +74,18 @@ public class BuilderProcessor extends AbstractProcessor {
             }
         }
         return true;
-
     }
 
     private void generateFromInterface(TypeElement typeElement, String packageName, Builder annotation,
             String builderClassName, PrintWriter out) {
-        // TODO Auto-generated method stub
-        
+        List<Parameter> parameters = typeElement //
+                .getEnclosedElements() //
+                .stream() //
+                .filter(x -> x.getKind() == ElementKind.METHOD) //
+                .map(x -> (ExecutableElement) x)
+                .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
+                .collect(Collectors.toList());
+
     }
 
     private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,
@@ -103,7 +109,8 @@ public class BuilderProcessor extends AbstractProcessor {
                 typeElement.getQualifiedName().toString(), //
                 builderClassName, //
                 parameters, //
-                constructorVisible, annotation.alwaysIncludeBuildMethod()));
+                constructorVisible ? Construction.DIRECT : Construction.REFLECTION, //
+                annotation.alwaysIncludeBuildMethod()));
         out.println();
     }
 

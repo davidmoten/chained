@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.github.davidmoten.chained.processor.Generator.Construction;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 import com.github.davidmoten.chained.processor.Generator.TypeModel;
 
@@ -18,7 +19,7 @@ public class GeneratorTest {
         List<Parameter> list = new ArrayList<>();
         list.add(new Parameter("String", "name"));
         list.add(new Parameter("java.util.Optional<Integer>", "age"));
-        String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, true, false);
+        String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, Construction.DIRECT, false);
         System.out.println(code);
     }
     

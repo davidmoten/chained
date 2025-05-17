@@ -24,10 +24,14 @@ public final class Generator {
     private Generator() {
         // prevent instantiation
     }
+    
+    public enum Construction {
+        DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION;
+    }
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
-            boolean constructorVisible, boolean alwaysIncludeBuildMethod) {
+            Construction construction, boolean alwaysIncludeBuildMethod) {
         Output o = new Output(builderClassName);
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
@@ -39,12 +43,12 @@ public final class Generator {
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
         if (mandatory.isEmpty()) {
-            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, constructorVisible);
+            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction);
             return o.toString();
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", o.add(className), o.add(p.type()), p.name());
-            writeBuildStatement(o, className, parameters, constructorVisible);
+            writeBuildStatement(o, className, parameters, construction);
             o.close();
             o.close();
             return o.toString();
@@ -67,7 +71,7 @@ public final class Generator {
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", o.add(className));
-            writeBuildStatement(o, className, parameters, constructorVisible);
+            writeBuildStatement(o, className, parameters, construction);
             o.close();
 
             for (int i = 0; i < mandatory.size() - 1; i++) {
@@ -219,7 +223,7 @@ public final class Generator {
     }
 
     private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
-            List<Parameter> parameters, boolean constructorVisible) {
+            List<Parameter> parameters, Construction construction) {
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(wrappingType(p.type())));
@@ -252,7 +256,7 @@ public final class Generator {
         }
         o.line();
         o.line("public %s build() {", o.add(className));
-        writeBuildStatement(o, className, parameters, constructorVisible);
+        writeBuildStatement(o, className, parameters, construction);
         o.close();
         o.close();
     }
@@ -367,11 +371,11 @@ public final class Generator {
     }
 
     private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
-            boolean constructorVisible) {
+            Construction construction) {
         String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
-        if (constructorVisible) {
+        if (construction == Construction.DIRECT) {
             o.line("return new %s(%s);", o.add(className), params);
-        } else {
+        } else if (construction == Construction.REFLECTION){
             String parameterClassNames = parameters.stream().map(x -> baseType(x.type()) + ".class")
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
