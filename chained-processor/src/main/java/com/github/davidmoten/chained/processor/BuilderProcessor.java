@@ -20,6 +20,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.JavaFileObject;
+import javax.tools.Diagnostic.Kind;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
@@ -44,32 +45,20 @@ public class BuilderProcessor extends AbstractProcessor {
                 String builderClassName = templatedBuilderClassName //
                         .replace("${pkg}", packageName) //
                         .replace("${simpleName}", simpleClassName);
-                String builderPackageName = Util.pkg(builderClassName);
 
                 try {
                     Filer filer = processingEnv.getFiler();
                     JavaFileObject file = filer.createSourceFile(builderClassName);
                     try (PrintWriter out = new PrintWriter(file.openWriter())) {
-                        ExecutableElement constructor = constructor(typeElement);
-                        List<Parameter> parameters = constructor //
-                                .getParameters() //
-                                .stream() //
-                                .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString()))
-                                .collect(Collectors.toList());
-
-                        Set<Modifier> modifiers = constructor.getModifiers();
-                        boolean constructorVisible = //
-                                modifiers.contains(Modifier.PUBLIC) //
-                                        || //
-                                        !modifiers.contains(Modifier.PRIVATE) //
-                                                && !modifiers.contains(Modifier.PROTECTED) //
-                                                && packageName.equals(builderPackageName);
-                        out.print(Generator.chainedBuilder( //
-                                typeElement.getQualifiedName().toString(), //
-                                builderClassName, //
-                                parameters, //
-                                constructorVisible, annotation.alwaysIncludeBuildMethod()));
-                        out.println();
+                        if (typeElement.getKind() == ElementKind.INTERFACE) {
+                            generateFromInterface(typeElement, packageName, annotation, builderClassName, out);
+                        } else if (typeElement.getKind() == ElementKind.CLASS
+                                || typeElement.getKind().name().equals("RECORD")) {
+                            generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName, out);
+                        } else {
+                            processingEnv.getMessager().printMessage(Kind.WARNING,
+                                    "class type " + typeElement.getKind() + " not supported for builder generation");
+                        }
                     }
                 } catch (IOException | RuntimeException e) {
                     ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -78,14 +67,44 @@ public class BuilderProcessor extends AbstractProcessor {
                     }
                     processingEnv //
                             .getMessager() //
-                            .printMessage(javax.tools.Diagnostic.Kind.ERROR,
-                                    new String(b.toByteArray(), StandardCharsets.UTF_8), element);
+                            .printMessage(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8), element);
                     return false;
                 }
             }
         }
         return true;
 
+    }
+
+    private void generateFromInterface(TypeElement typeElement, String packageName, Builder annotation,
+            String builderClassName, PrintWriter out) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,
+            String builderClassName, PrintWriter out) {
+        String builderPackageName = Util.pkg(builderClassName);
+        ExecutableElement constructor = constructor(typeElement);
+        List<Parameter> parameters = constructor //
+                .getParameters() //
+                .stream() //
+                .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString()))
+                .collect(Collectors.toList());
+
+        Set<Modifier> modifiers = constructor.getModifiers();
+        boolean constructorVisible = //
+                modifiers.contains(Modifier.PUBLIC) //
+                        || //
+                        !modifiers.contains(Modifier.PRIVATE) //
+                                && !modifiers.contains(Modifier.PROTECTED) //
+                                && packageName.equals(builderPackageName);
+        out.print(Generator.chainedBuilder( //
+                typeElement.getQualifiedName().toString(), //
+                builderClassName, //
+                parameters, //
+                constructorVisible, annotation.alwaysIncludeBuildMethod()));
+        out.println();
     }
 
     private static ExecutableElement constructor(TypeElement element) {
