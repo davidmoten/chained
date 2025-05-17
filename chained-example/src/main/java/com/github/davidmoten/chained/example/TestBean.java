@@ -5,7 +5,7 @@ import java.util.Optional;
 import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
 
-@Builder("${pkg}.TestBeanBuilder")
+@Builder("${pkg}.${simpleName}Builder")
 public final class TestBean {
 
     private final long longField;
