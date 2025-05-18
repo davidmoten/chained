@@ -85,7 +85,13 @@ public class BuilderProcessor extends AbstractProcessor {
                 .map(x -> (ExecutableElement) x)
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
                 .collect(Collectors.toList());
-
+        out.print(Generator.chainedBuilder( //
+                typeElement.getQualifiedName().toString(), //
+                builderClassName, //
+                parameters, //
+                Construction.INTERFACE_IMPLEMENTATION, //
+                annotation.alwaysIncludeBuildMethod()));
+        out.println();
     }
 
     private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,

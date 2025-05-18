@@ -24,7 +24,7 @@ public final class Generator {
     private Generator() {
         // prevent instantiation
     }
-    
+
     public enum Construction {
         DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION;
     }
@@ -38,7 +38,26 @@ public final class Generator {
         o.importsHere();
         o.line();
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
-        o.line("public final class %s {", builderSimpleClassName);
+        final String implementsClause;
+        if (construction == Construction.INTERFACE_IMPLEMENTATION) {
+            implementsClause = "implements " + o.add(className);
+        } else {
+            implementsClause = "";
+        }
+        o.line("public final class %s %s{", builderSimpleClassName, implementsClause);
+        if (construction == Construction.INTERFACE_IMPLEMENTATION) {
+            o.line("public %s(%s) {", builderSimpleClassName,
+                    parameters.stream().map(p -> o.add(p.type()) + " " + p.name()).collect(Collectors.joining(", ")));
+            parameters.forEach(p -> o.line("this.%s = %s;", p.name(), p.name()));
+            o.close();
+            for (Parameter p : parameters) {
+                o.line();
+                o.line("@%s", Override.class);
+                o.line("public %s %s() {", o.add(p.type()), p.name());
+                o.line("return %s;", p.name());
+                o.close();
+            }
+        }
         o.line();
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
@@ -48,7 +67,7 @@ public final class Generator {
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", o.add(className), o.add(p.type()), p.name());
-            writeBuildStatement(o, className, parameters, construction);
+            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
             o.close();
             o.close();
             return o.toString();
@@ -71,7 +90,7 @@ public final class Generator {
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", o.add(className));
-            writeBuildStatement(o, className, parameters, construction);
+            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
             o.close();
 
             for (int i = 0; i < mandatory.size() - 1; i++) {
@@ -256,7 +275,7 @@ public final class Generator {
         }
         o.line();
         o.line("public %s build() {", o.add(className));
-        writeBuildStatement(o, className, parameters, construction);
+        writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
         o.close();
         o.close();
     }
@@ -370,12 +389,12 @@ public final class Generator {
         assignField(o, p, "_b");
     }
 
-    private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
-            Construction construction) {
+    private static void writeBuildStatement(Output o, String className, String builderSimpleClassName,
+            List<Parameter> parameters, Construction construction) {
         String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
         if (construction == Construction.DIRECT) {
             o.line("return new %s(%s);", o.add(className), params);
-        } else if (construction == Construction.REFLECTION){
+        } else if (construction == Construction.REFLECTION) {
             String parameterClassNames = parameters.stream().map(x -> baseType(x.type()) + ".class")
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
@@ -387,12 +406,14 @@ public final class Generator {
             o.close();
             o.line("catch (%s", InvocationTargetException.class);
             o.right().right();
-            o.line("| NoSuchMethodException");
-            o.line("| InstantiationException");
-            o.line("| IllegalAccessException e) {");
+            o.line("| %s", NoSuchMethodException.class);
+            o.line("| %s", InstantiationException.class);
+            o.line("| %s e) {", IllegalAccessException.class);
             o.left().left();
-            o.line("throw new RuntimeException(e);");
+            o.line("throw new %s(e);", RuntimeException.class);
             o.close();
+        } else if (construction == Construction.INTERFACE_IMPLEMENTATION) {
+            o.line("return %s.this;", builderSimpleClassName);
         }
     }
 
