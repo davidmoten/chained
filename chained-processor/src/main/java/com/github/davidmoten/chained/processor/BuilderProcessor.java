@@ -82,7 +82,9 @@ public class BuilderProcessor extends AbstractProcessor {
                 .getEnclosedElements() //
                 .stream() //
                 .filter(x -> x.getKind() == ElementKind.METHOD) //
-                .map(x -> (ExecutableElement) x)
+                .map(x -> (ExecutableElement) x) //
+                .filter(x -> x.getParameters().isEmpty()) //
+                .filter(x -> !x.getModifiers().contains(Modifier.STATIC)) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
                 .collect(Collectors.toList());
         out.print(Generator.chainedBuilder( //

@@ -40,7 +40,7 @@ public final class Generator {
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
         final String implementsClause;
         if (construction == Construction.INTERFACE_IMPLEMENTATION) {
-            implementsClause = "implements " + o.add(className);
+            implementsClause = "implements " + o.add(className) + " ";
         } else {
             implementsClause = "";
         }
@@ -85,7 +85,7 @@ public final class Generator {
                 }
             }
             privateConstructor(o, builderSimpleClassName);
-            writeStaticCreators(o, builderSimpleClassName);
+            writeStaticCreators(o, builderSimpleClassName, construction);
             o.line();
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
@@ -177,15 +177,18 @@ public final class Generator {
         }
     }
 
-    private static void writeStaticCreators(Output o, String builderSimpleClassName) {
+    private static void writeStaticCreators(Output o, String builderSimpleClassName, Construction construction) {
         o.line();
-        o.line("public static %s builder() {", builderSimpleClassName);
+        String builderMethodName = construction == Construction.INTERFACE_IMPLEMENTATION ? "builder_" : "builder";
+        o.line("public static %s %s() {", builderSimpleClassName, builderMethodName);
         o.line("return new %s();", builderSimpleClassName);
         o.close();
-        o.line();
-        o.line("public static %s create() {", builderSimpleClassName);
-        o.line("return builder();");
-        o.close();
+        if (construction != Construction.INTERFACE_IMPLEMENTATION) {
+            o.line();
+            o.line("public static %s create() {", builderSimpleClassName);
+            o.line("return builder();");
+            o.close();
+        }
     }
 
     private static String wrappedType(String type) {
@@ -252,7 +255,7 @@ public final class Generator {
         }
         privateConstructor(o, builderSimpleClassName);
 
-        writeStaticCreators(o, builderSimpleClassName);
+        writeStaticCreators(o, builderSimpleClassName, construction);
 
         for (Parameter p : parameters) {
             if (p.isOptional()) {
