@@ -31,7 +31,7 @@ public final class Generator {
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
-            Construction construction, boolean alwaysIncludeBuildMethod) {
+            Construction construction, boolean alwaysIncludeBuildMethod, String implementationClassName) {
         Output o = new Output(builderClassName);
         o.line("package %s;", Util.pkg(builderClassName));
         o.line();
@@ -43,12 +43,13 @@ public final class Generator {
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
         List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
         if (mandatory.isEmpty()) {
-            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction);
+            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
             return o.toString();
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s) {", o.add(className), o.add(p.type()), p.name());
-            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
+            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction,
+                    implementationClassName);
             o.close();
             o.close();
             return o.toString();
@@ -71,7 +72,8 @@ public final class Generator {
             writeMandatorySetter(o, mandatory.get(0));
             o.line();
             o.line("private %s build() {", o.add(className));
-            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
+            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction,
+                    implementationClassName);
             o.close();
 
             for (int i = 0; i < mandatory.size() - 1; i++) {
@@ -110,7 +112,6 @@ public final class Generator {
                         o.close();
                     }
                     o.close();
-                    writeImplementationClass(o, className, parameters, construction);
                     o.close();
                     return o.toString();
                 } else {
@@ -154,40 +155,38 @@ public final class Generator {
             o.line("return _b.build();");
             o.close();
             o.close();
-            writeImplementationClass(o, className, parameters, construction);
             o.close();
             return o.toString();
         }
     }
 
-    private static final String IMPLEMENTATION = "Impl_";
-
-    private static void writeImplementationClass(Output o, String className, List<Parameter> parameters,
-            Construction construction) {
-        if (construction == Construction.INTERFACE_IMPLEMENTATION) {
-            o.line();
-            o.line("private final class %s implements %s {", IMPLEMENTATION, className);
-            o.line();
-            for (Parameter p : parameters) {
-                o.line("private %s %s;", o.add(p.type()), p.name());
-            }
-            o.line();
-            o.line("%s(%s) {", IMPLEMENTATION, parameters //
-                    .stream()//
-                    .map(p -> o.add(p.type()) + " " + p.name()) //
-                    .collect(Collectors.joining(", ")));
-            for (Parameter p : parameters) {
-                o.line("this.%s = %s;", p.name(), p.name());
-            }
-            o.close();
-            o.line();
-            for (Parameter p : parameters) {
-                o.line("public %s %s() {", o.add(p.type()), p.name());
-                o.line("return %s;", p.name());
-                o.close();
-            }
+    public static String generateImplemetationClass(String className, List<Parameter> parameters,
+            String implementationClassName) {
+        Output o = new Output(implementationClassName);
+        o.line("package %s;", Util.pkg(implementationClassName));
+        o.importsHere();
+        o.line("public class %s implements %s {", o.add(implementationClassName), className);
+        o.line();
+        for (Parameter p : parameters) {
+            o.line("private final %s %s;", o.add(p.type()), p.name());
+        }
+        o.line();
+        o.line("%s(%s) {", o.add(implementationClassName), parameters //
+                .stream()//
+                .map(p -> o.add(p.type()) + " " + p.name()) //
+                .collect(Collectors.joining(", ")));
+        for (Parameter p : parameters) {
+            o.line("this.%s = %s;", p.name(), p.name());
+        }
+        o.close();
+        o.line();
+        for (Parameter p : parameters) {
+            o.line("public %s %s() {", o.add(p.type()), p.name());
+            o.line("return %s;", p.name());
             o.close();
         }
+        o.close();
+        return o.toString();
     }
 
     private static void writeStaticCreators(Output o, String builderSimpleClassName, Construction construction) {
@@ -257,7 +256,7 @@ public final class Generator {
     }
 
     private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
-            List<Parameter> parameters, Construction construction) {
+            List<Parameter> parameters, Construction construction, String implementationClassName) {
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(wrappingType(p.type())));
@@ -290,9 +289,8 @@ public final class Generator {
         }
         o.line();
         o.line("public %s build() {", o.add(className));
-        writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
+        writeBuildStatement(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
         o.close();
-        writeImplementationClass(o, className, parameters, construction);
         o.close();
     }
 
@@ -406,7 +404,7 @@ public final class Generator {
     }
 
     private static void writeBuildStatement(Output o, String className, String builderSimpleClassName,
-            List<Parameter> parameters, Construction construction) {
+            List<Parameter> parameters, Construction construction, String implementationClassName) {
         String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
         if (construction == Construction.DIRECT) {
             o.line("return new %s(%s);", o.add(className), params);
@@ -429,7 +427,7 @@ public final class Generator {
             o.line("throw new %s(e);", RuntimeException.class);
             o.close();
         } else if (construction == Construction.INTERFACE_IMPLEMENTATION) {
-            o.line("return new %s(%s);", IMPLEMENTATION,
+            o.line("return new %s(%s);", o.add(implementationClassName),
                     parameters.stream().map(x -> x.name()).collect(Collectors.joining(", ")));
         }
     }

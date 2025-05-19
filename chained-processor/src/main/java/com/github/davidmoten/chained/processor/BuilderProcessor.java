@@ -46,21 +46,37 @@ public class BuilderProcessor extends AbstractProcessor {
                 String builderClassName = templatedBuilderClassName //
                         .replace("${pkg}", packageName) //
                         .replace("${simpleName}", simpleClassName);
-
+                String implementationClassName = Util.pkg(builderClassName) + "." + simpleClassName + "Impl";
                 try {
                     Filer filer = processingEnv.getFiler();
-                    JavaFileObject file = filer.createSourceFile(builderClassName);
-                    try (PrintWriter out = new PrintWriter(file.openWriter())) {
-                        if (typeElement.getKind() == ElementKind.INTERFACE) {
-                            generateFromInterface(typeElement, packageName, annotation, builderClassName, out);
-                        } else if (typeElement.getKind() == ElementKind.CLASS
-                                || typeElement.getKind().name().equals("RECORD")) {
-                            generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName, out);
-                        } else {
-                            processingEnv.getMessager().printMessage(Kind.WARNING,
-                                    "class type " + typeElement.getKind() + " not supported for builder generation");
+                    {
+                        JavaFileObject file = filer.createSourceFile(builderClassName);
+                        try (PrintWriter out = new PrintWriter(file.openWriter())) {
+                            if (typeElement.getKind() == ElementKind.INTERFACE) {
+                                generateFromInterface(typeElement, packageName, annotation, builderClassName,
+                                        implementationClassName, out);
+                            } else if (typeElement.getKind() == ElementKind.CLASS
+                                    || typeElement.getKind().name().equals("RECORD")) {
+                                generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName,
+                                        implementationClassName, out);
+                            } else {
+                                processingEnv.getMessager().printMessage(Kind.WARNING, "class type "
+                                        + typeElement.getKind() + " not supported for builder generation");
+                            }
                         }
                     }
+                    if (typeElement.getKind() == ElementKind.INTERFACE) {
+                        JavaFileObject file = filer.createSourceFile(implementationClassName);
+                        try (PrintWriter out = new PrintWriter(file.openWriter())) {
+                            if (typeElement.getKind() == ElementKind.INTERFACE) {
+                                String className = typeElement.getQualifiedName().toString();
+                                String code = Generator.generateImplemetationClass(className,
+                                        parametersFromInterface(typeElement), implementationClassName);
+                                out.println(code);
+                            }
+                        }
+                    }
+
                 } catch (IOException | RuntimeException e) {
                     ByteArrayOutputStream b = new ByteArrayOutputStream();
                     try (PrintWriter writer = new PrintWriter(b)) {
@@ -77,7 +93,18 @@ public class BuilderProcessor extends AbstractProcessor {
     }
 
     private void generateFromInterface(TypeElement typeElement, String packageName, Builder annotation,
-            String builderClassName, PrintWriter out) {
+            String builderClassName, String implementationClassName, PrintWriter out) {
+        List<Parameter> parameters = parametersFromInterface(typeElement);
+        out.print(Generator.chainedBuilder( //
+                typeElement.getQualifiedName().toString(), //
+                builderClassName, //
+                parameters, //
+                Construction.INTERFACE_IMPLEMENTATION, //
+                annotation.alwaysIncludeBuildMethod(), implementationClassName));
+        out.println();
+    }
+
+    private static List<Parameter> parametersFromInterface(TypeElement typeElement) {
         List<Parameter> parameters = typeElement //
                 .getEnclosedElements() //
                 .stream() //
@@ -87,17 +114,11 @@ public class BuilderProcessor extends AbstractProcessor {
                 .filter(x -> !x.getModifiers().contains(Modifier.STATIC)) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
                 .collect(Collectors.toList());
-        out.print(Generator.chainedBuilder( //
-                typeElement.getQualifiedName().toString(), //
-                builderClassName, //
-                parameters, //
-                Construction.INTERFACE_IMPLEMENTATION, //
-                annotation.alwaysIncludeBuildMethod()));
-        out.println();
+        return parameters;
     }
 
     private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,
-            String builderClassName, PrintWriter out) {
+            String builderClassName, String implementationClassName, PrintWriter out) {
         String builderPackageName = Util.pkg(builderClassName);
         ExecutableElement constructor = constructor(typeElement);
         List<Parameter> parameters = constructor //
@@ -118,7 +139,7 @@ public class BuilderProcessor extends AbstractProcessor {
                 builderClassName, //
                 parameters, //
                 constructorVisible ? Construction.DIRECT : Construction.REFLECTION, //
-                annotation.alwaysIncludeBuildMethod()));
+                annotation.alwaysIncludeBuildMethod(), implementationClassName));
         out.println();
     }
 

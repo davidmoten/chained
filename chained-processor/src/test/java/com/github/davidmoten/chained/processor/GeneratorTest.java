@@ -13,23 +13,24 @@ import com.github.davidmoten.chained.processor.Generator.Parameter;
 import com.github.davidmoten.chained.processor.Generator.TypeModel;
 
 public class GeneratorTest {
-    
+
     @Test
     public void test() {
         List<Parameter> list = new ArrayList<>();
         list.add(new Parameter("String", "name"));
         list.add(new Parameter("java.util.Optional<Integer>", "age"));
-        String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, Construction.DIRECT, false);
+        String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, Construction.DIRECT, false,
+                "blah.ThingImpl");
         System.out.println(code);
     }
-    
+
     @Test
     public void testTypeModelParsingNoGenerics() {
         TypeModel a = Generator.typeModel("java.util.Optional");
         assertEquals("java.util.Optional", a.baseType);
         assertTrue(a.typeArguments.isEmpty());
     }
-    
+
     @Test
     public void testTypeModelParsingOptional() {
         TypeModel a = Generator.typeModel("java.util.Optional<String>");
@@ -38,7 +39,7 @@ public class GeneratorTest {
         TypeModel b = a.typeArguments.get(0);
         assertEquals("String", b.baseType);
     }
-    
+
     @Test
     public void testTypeModelParsingComplex() {
         TypeModel a = Generator.typeModel("Optional<Map<String, Thing<Integer, Long>>>");
