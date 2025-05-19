@@ -35,6 +35,7 @@ public final class Generator {
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
             Construction construction, boolean alwaysIncludeBuildMethod, String implementationClassName) {
         Output o = new Output(builderClassName);
+        o.generatedComment();
         o.line("package %s;", Util.pkg(builderClassName));
         o.importsHere();
         o.line();
@@ -408,8 +409,10 @@ public final class Generator {
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
             o.line("try {");
-            o.line("%s<%s> _c = %s.class.getDeclaredConstructor(%s);", Constructor.class, o.add(className),
-                    o.add(className), parameterClassNames);
+            o.line("%s<%s> _c = %s.class", Constructor.class, o.add(className), o.add(className));
+            o.right().right();
+            o.line(".getDeclaredConstructor(%s);", parameterClassNames);
+            o.left().left();
             o.line("_c.setAccessible(true);");
             o.line("return _c.newInstance(%s);", params);
             o.close();
@@ -445,6 +448,10 @@ public final class Generator {
 
         public Output(String ownerClassName) {
             this.imports = new Imports(ownerClassName);
+        }
+
+        public void generatedComment() {
+            line("// GENERATED FILE - DO NOT EDIT");
         }
 
         private String indent = "";
@@ -577,6 +584,7 @@ public final class Generator {
     public static String generateImplemetationClass(String className, List<Parameter> parameters,
             String implementationClassName) {
         Output o = new Output(implementationClassName);
+        o.generatedComment();
         o.line("package %s;", Util.pkg(implementationClassName));
         o.importsHere();
         o.line();
