@@ -191,8 +191,7 @@ public final class Generator {
 
     private static void writeStaticCreators(Output o, String builderSimpleClassName, Construction construction) {
         o.line();
-        String builderMethodName = construction == Construction.INTERFACE_IMPLEMENTATION ? "builder_" : "builder";
-        o.line("public static %s %s() {", builderSimpleClassName, builderMethodName);
+        o.line("public static %s builder() {", builderSimpleClassName);
         o.line("return new %s();", builderSimpleClassName);
         o.close();
         if (construction != Construction.INTERFACE_IMPLEMENTATION) {
@@ -292,6 +291,7 @@ public final class Generator {
         o.line("public %s build() {", o.add(className));
         writeBuildStatement(o, className, builderSimpleClassName, parameters, construction);
         o.close();
+        writeImplementationClass(o, className, parameters, construction);
         o.close();
     }
 

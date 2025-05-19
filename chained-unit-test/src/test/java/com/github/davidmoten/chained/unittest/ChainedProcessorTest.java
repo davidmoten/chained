@@ -111,5 +111,10 @@ public class ChainedProcessorTest {
         HasList b = HasList.name("julia").list().add(1).addAll(more).buildList();
         assertEquals(a, b);
     }
+    
+    @Test
+    public void testIsInterfaceAllOptional() {
+        
+    }
 
 }

@@ -9,7 +9,7 @@ import com.github.davidmoten.chained.unittest.builder.IsInterfaceBuilder;
 public interface IsInterface {
     
     public static IsInterfaceBuilder builder() {
-        return IsInterfaceBuilder.builder_();
+        return IsInterfaceBuilder.builder();
     }
 
     String name();
