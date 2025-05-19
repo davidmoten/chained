@@ -401,7 +401,7 @@ public final class Generator {
         if (construction == Construction.DIRECT) {
             o.line("return new %s(%s);", o.add(className), params);
         } else if (construction == Construction.REFLECTION) {
-            String parameterClassNames = parameters.stream().map(x -> baseType(x.type()) + ".class")
+            String parameterClassNames = parameters.stream().map(x -> o.add(baseType(x.type())) + ".class")
                     .collect(Collectors.joining(", "));
             o.line("// use reflection to call non-visible constructor");
             o.line("try {");
@@ -438,6 +438,7 @@ public final class Generator {
         private static final String IMPORTS_HERE = "<<IMPORTS_HERE>>";
         private final Imports imports;
         private final StringBuilder b = new StringBuilder();
+        private boolean firstLine = true;
 
         public Output(String ownerClassName) {
             this.imports = new Imports(ownerClassName);
@@ -485,10 +486,11 @@ public final class Generator {
                 }
                 args2[i] = o;
             }
-            b.append(String.format("\n" + indent + fmt, args2));
+            b.append(String.format((firstLine ? "" : "\n") + indent + fmt, args2));
             if (fmt.endsWith("{")) {
                 right();
             }
+            firstLine = false;
         }
 
         public void close() {
@@ -591,8 +593,8 @@ public final class Generator {
             o.line("this.%s = %s;", p.name(), p.name());
         }
         o.close();
-        o.line();
         for (Parameter p : parameters) {
+            o.line();
             o.line("public %s %s() {", o.add(p.type()), p.name());
             o.line("return %s;", p.name());
             o.close();
