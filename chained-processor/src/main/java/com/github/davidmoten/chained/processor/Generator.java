@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import javax.annotation.Generated;
+
 import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
@@ -37,6 +39,7 @@ public final class Generator {
         o.importsHere();
         o.line();
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
+        o.line("@%s(\"%s\")", Generated.class, "com.github.davidmoten:chained-processor");
         o.line("public final class %s {", builderSimpleClassName);
         o.line();
         List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
