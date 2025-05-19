@@ -43,7 +43,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>${deploy.plugin.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
@@ -52,7 +51,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>${build.helper.version}</version>
 				<executions>
 					<execution>
 						<id>add-test-source</id>

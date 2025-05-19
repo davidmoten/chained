@@ -25,7 +25,6 @@
 
 	<build>
 		<plugins>
-
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
@@ -46,7 +45,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>${build.helper.version}</version>
 				<executions>
 					<execution>
 						<id>add-source</id>
@@ -79,7 +77,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>${source.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
