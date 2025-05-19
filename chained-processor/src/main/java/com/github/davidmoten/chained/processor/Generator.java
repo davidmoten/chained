@@ -34,7 +34,6 @@ public final class Generator {
             Construction construction, boolean alwaysIncludeBuildMethod, String implementationClassName) {
         Output o = new Output(builderClassName);
         o.line("package %s;", Util.pkg(builderClassName));
-        o.line();
         o.importsHere();
         o.line();
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
@@ -165,7 +164,8 @@ public final class Generator {
         Output o = new Output(implementationClassName);
         o.line("package %s;", Util.pkg(implementationClassName));
         o.importsHere();
-        o.line("public class %s implements %s {", o.add(implementationClassName), className);
+        o.line();
+        o.line("public class %s implements %s {", o.add(implementationClassName), o.add(className));
         o.line();
         for (Parameter p : parameters) {
             o.line("private final %s %s;", o.add(p.type()), p.name());
@@ -503,7 +503,14 @@ public final class Generator {
         @Override
         public String toString() {
             String s = b.toString();
-            return s.replace(IMPORTS_HERE + "\n", imports.toCode());
+            String code = imports.toCode();
+            final String code2;
+            if (code.trim().isEmpty()) {
+                code2 = "";
+            } else {
+                code2 = "\n" + imports.toCode();
+            }
+            return s.replace(IMPORTS_HERE + "\n", code2);
         }
     }
 
