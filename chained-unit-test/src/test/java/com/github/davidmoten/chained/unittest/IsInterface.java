@@ -13,7 +13,9 @@ public interface IsInterface {
     }
 
     String name();
+    
     int yearOfBirth();
+    
     Optional<String> description();
     
 }
