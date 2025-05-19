@@ -165,6 +165,7 @@ public final class Generator {
     private static void writeImplementationClass(Output o, String className, List<Parameter> parameters,
             Construction construction) {
         if (construction == Construction.INTERFACE_IMPLEMENTATION) {
+            o.line();
             o.line("private final class %s implements %s {", IMPLEMENTATION, className);
             o.line();
             for (Parameter p : parameters) {
