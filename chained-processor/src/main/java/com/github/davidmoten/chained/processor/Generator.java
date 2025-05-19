@@ -159,34 +159,27 @@ public final class Generator {
         }
     }
 
-    public static String generateImplemetationClass(String className, List<Parameter> parameters,
-            String implementationClassName) {
-        Output o = new Output(implementationClassName);
-        o.line("package %s;", Util.pkg(implementationClassName));
-        o.importsHere();
-        o.line();
-        o.line("public class %s implements %s {", o.add(implementationClassName), o.add(className));
-        o.line();
-        for (Parameter p : parameters) {
-            o.line("private final %s %s;", o.add(p.type()), p.name());
+    private static String asArguments(List<Parameter> parameters, Output o) {
+        if (parameters.size() > 2) {
+            String indent = o.indent() + repeat("    ", 3);
+            return parameters
+                    .stream() //
+                    .map(p -> "\n" + indent + o.add(p.type()) + " " + p.name()) //
+                    .collect(Collectors.joining(","));
+        } else {
+            return parameters //
+                    .stream()//
+                    .map(p -> o.add(p.type()) + " " + p.name()) //
+                    .collect(Collectors.joining(", "));
         }
-        o.line();
-        o.line("public %s(%s) {", o.add(implementationClassName), parameters //
-                .stream()//
-                .map(p -> o.add(p.type()) + " " + p.name()) //
-                .collect(Collectors.joining(", ")));
-        for (Parameter p : parameters) {
-            o.line("this.%s = %s;", p.name(), p.name());
+    }
+
+    private static String repeat(String s, int n) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            b.append(s);
         }
-        o.close();
-        o.line();
-        for (Parameter p : parameters) {
-            o.line("public %s %s() {", o.add(p.type()), p.name());
-            o.line("return %s;", p.name());
-            o.close();
-        }
-        o.close();
-        return o.toString();
+        return b.toString();
     }
 
     private static void writeStaticCreators(Output o, String builderSimpleClassName, Construction construction) {
@@ -452,6 +445,10 @@ public final class Generator {
         }
 
         private String indent = "";
+        
+        public String indent() {
+            return indent;
+        }
 
         public Output left() {
             indent = indent.substring(0, indent.length() - 4);
@@ -571,5 +568,32 @@ public final class Generator {
         public String toString() {
             return "Parameter [type=" + type + ", name=" + name + "]";
         }
+    }
+    
+    public static String generateImplemetationClass(String className, List<Parameter> parameters,
+            String implementationClassName) {
+        Output o = new Output(implementationClassName);
+        o.line("package %s;", Util.pkg(implementationClassName));
+        o.importsHere();
+        o.line();
+        o.line("public class %s implements %s {", o.add(implementationClassName), o.add(className));
+        o.line();
+        for (Parameter p : parameters) {
+            o.line("private final %s %s;", o.add(p.type()), p.name());
+        }
+        o.line();
+        o.line("public %s(%s) {", o.add(implementationClassName), asArguments(parameters, o));
+        for (Parameter p : parameters) {
+            o.line("this.%s = %s;", p.name(), p.name());
+        }
+        o.close();
+        o.line();
+        for (Parameter p : parameters) {
+            o.line("public %s %s() {", o.add(p.type()), p.name());
+            o.line("return %s;", p.name());
+            o.close();
+        }
+        o.close();
+        return o.toString();
     }
 }
