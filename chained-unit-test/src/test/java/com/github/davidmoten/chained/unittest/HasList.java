@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.unittest.builder.HasListBuilder;
-import com.github.davidmoten.chained.unittest.builder.HasListBuilder.BuilderWithName;;
+import com.github.davidmoten.chained.unittest.builder.HasListBuilder.BuilderWithName;
 
 @Builder
 public record HasList(String name, List<Integer> list) {
