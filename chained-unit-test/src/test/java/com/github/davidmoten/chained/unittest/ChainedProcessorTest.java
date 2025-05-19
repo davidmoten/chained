@@ -114,7 +114,10 @@ public class ChainedProcessorTest {
     
     @Test
     public void testIsInterfaceAllOptional() {
-        
+        IsInterfaceAllOptional a = IsInterfaceAllOptional.builder().name("fred").build();
+        assertEquals("fred", a.name().get());
+        assertFalse(a.yearOfBirth().isPresent());
+        assertFalse(a.description().isPresent());
     }
 
 }
