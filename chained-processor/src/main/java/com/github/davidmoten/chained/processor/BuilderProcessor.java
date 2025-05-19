@@ -46,7 +46,10 @@ public class BuilderProcessor extends AbstractProcessor {
                 String builderClassName = templatedBuilderClassName //
                         .replace("${pkg}", packageName) //
                         .replace("${simpleName}", simpleClassName);
-                String implementationClassName = Util.pkg(builderClassName) + "." + simpleClassName + "Impl";
+                String templatedImplementationClassName = annotation.implementationClassName();
+                String implementationClassName = templatedImplementationClassName //
+                        .replace("${pkg}", packageName) //
+                        .replace("${simpleName}", simpleClassName);
                 try {
                     Filer filer = processingEnv.getFiler();
                     {

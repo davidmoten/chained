@@ -171,7 +171,7 @@ public final class Generator {
             o.line("private final %s %s;", o.add(p.type()), p.name());
         }
         o.line();
-        o.line("%s(%s) {", o.add(implementationClassName), parameters //
+        o.line("public %s(%s) {", o.add(implementationClassName), parameters //
                 .stream()//
                 .map(p -> o.add(p.type()) + " " + p.name()) //
                 .collect(Collectors.joining(", ")));
