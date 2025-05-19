@@ -162,8 +162,7 @@ public final class Generator {
     private static String asArguments(List<Parameter> parameters, Output o) {
         if (parameters.size() > 2) {
             String indent = o.indent() + repeat("    ", 3);
-            return parameters
-                    .stream() //
+            return parameters.stream() //
                     .map(p -> "\n" + indent + o.add(p.type()) + " " + p.name()) //
                     .collect(Collectors.joining(","));
         } else {
@@ -445,7 +444,7 @@ public final class Generator {
         }
 
         private String indent = "";
-        
+
         public String indent() {
             return indent;
         }
@@ -569,7 +568,7 @@ public final class Generator {
             return "Parameter [type=" + type + ", name=" + name + "]";
         }
     }
-    
+
     public static String generateImplemetationClass(String className, List<Parameter> parameters,
             String implementationClassName) {
         Output o = new Output(implementationClassName);
@@ -583,6 +582,11 @@ public final class Generator {
         }
         o.line();
         o.line("public %s(%s) {", o.add(implementationClassName), asArguments(parameters, o));
+        for (Parameter p : parameters) {
+            if (!p.isPrimitive()) {
+                o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
+            }
+        }
         for (Parameter p : parameters) {
             o.line("this.%s = %s;", p.name(), p.name());
         }
