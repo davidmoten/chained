@@ -84,16 +84,6 @@
 							<goal>jar</goal>
 						</goals>
 						<phase>verify</phase>
-						<configuration>
-							<includes>
-								<include>**/*.java</include>
-							</includes>
-							<sources>
-								<source>${project.build.sourceDirectory}</source>
-								<source>
-									${project.build.directory}/generated-sources/annotations</source>
-							</sources>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
