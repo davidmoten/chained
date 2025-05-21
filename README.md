@@ -8,6 +8,8 @@ Java annotation processor to generate chained immutable builders including map a
 * supports JDK 8+, Maven
 
 ## Getting started
+
+### Maven
 Make these changes to your `pom.xml`:
 * add *chained-api* artifact to the dependencies
 * add the *chained-processor* annotation processor dependency to the *maven-compiler-plugin*
@@ -76,6 +78,41 @@ Make these changes to your `pom.xml`:
             </plugin>
     </plugins>
 </build>
+```
+### Gradle
+This is how to use *chained* annotation processor in a gradle project:
+
+`build.gradle`:
+```groovy
+plugins {
+    id 'java'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17  // adjust if needed
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+    from("$buildDir/generated/sources/annotationProcessor/java/main")
+    dependsOn tasks.named('compileJava') 
+}
+
+artifacts {
+    archives tasks.named('sourcesJar')
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.github.davidmoten:chained-api:0.0.1-SNAPSHOT'
+    annotationProcessor 'com.github.davidmoten:chained-processor:0.0.1-SNAPSHOT'
+}
 ```
 
 ## How to build
