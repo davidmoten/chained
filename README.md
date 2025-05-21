@@ -80,7 +80,7 @@ Make these changes to your `pom.xml`:
 </build>
 ```
 ### Gradle
-This is how to use *chained* annotation processor in a gradle project:
+This is how to use *chained* annotation processor in a gradle project (see [here](https://github.com/davidmoten/chained/tree/master/chained-gradle) for a demo minimal project):
 
 **build.gradle**:
 ```groovy
