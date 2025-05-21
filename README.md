@@ -171,5 +171,21 @@ We've knocked out the `.builder()` call (`name` is mandatory so always has to be
 
 It's very convenient for us that the annotation processor being run by the maven compiler plugin can do this. `javac` passes java structures parsed from source to the annotation processor and doesn't check that all references to classes actually exist till multi-round annotation processing has finished.
 
+Note that the `comments` field is optional so we can also create a `Person` as below:
+
+```java
+Person a = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .build();
+
+Optional<String> comments = Optional.of("enjoyed the event");
+Person a = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments(comments)
+    .build();
+```
+
 
 
