@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17  // adjust if needed
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from sourceSets.main.allSource
+    from("$buildDir/generated/sources/annotationProcessor/java/main")
+    dependsOn tasks.named('compileJava') 
+}
+
+artifacts {
+    archives tasks.named('sourcesJar')
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.github.davidmoten:chained-api:0.0.1-SNAPSHOT'
+    annotationProcessor 'com.github.davidmoten:chained-processor:0.0.1-SNAPSHOT'
+}

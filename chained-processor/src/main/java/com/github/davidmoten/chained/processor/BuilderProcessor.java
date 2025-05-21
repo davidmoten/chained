@@ -13,7 +13,6 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -30,9 +29,13 @@ import com.github.davidmoten.chained.processor.Generator.Construction;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
 @SupportedAnnotationTypes("com.github.davidmoten.chained.api.annotation.Builder")
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class BuilderProcessor extends AbstractProcessor {
 
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+    
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
