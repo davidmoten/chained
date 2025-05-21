@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -584,17 +585,18 @@ public final class Generator {
     public static String generateImplemetationClass(String className, List<Parameter> parameters,
             String implementationClassName, Optional<String> checkMethodName) {
         Output o = new Output(implementationClassName);
+        String implementationSimpleClassName = Util.simpleClassName(implementationClassName);
         o.generatedComment();
         o.line("package %s;", Util.pkg(implementationClassName));
         o.importsHere();
         o.line();
-        o.line("public class %s implements %s {", o.add(implementationClassName), o.add(className));
+        o.line("public class %s implements %s {", implementationSimpleClassName, o.add(className));
         o.line();
         for (Parameter p : parameters) {
             o.line("private final %s %s;", o.add(p.type()), p.name());
         }
         o.line();
-        o.line("public %s(%s) {", o.add(implementationClassName), asArguments(parameters, o));
+        o.line("public %s(%s) {", implementationSimpleClassName, asArguments(parameters, o));
         for (Parameter p : parameters) {
             if (!p.isPrimitive()) {
                 o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
@@ -614,14 +616,61 @@ public final class Generator {
             o.line("return %s;", p.name());
             o.close();
         }
+        writeToString(parameters, o, implementationSimpleClassName);
+        writeEquals(parameters, o, implementationSimpleClassName);
+        writeHashCode(parameters, o);
+        return o.toString();
+    }
+
+    private static void writeToString(List<Parameter> parameters, Output o, String implementationSimpleClassName) {
         o.line();
         o.line("@%s", Override.class);
         o.line("public String toString() {");
-        o.line("%s _b = new %s();", StringBuilder.class, StringBuilder.class);
-        o.line("b.append(\"%s\"", Util.simpleClassName(implementationClassName));
-        o.line("return _b.toString();");
+        o.line("%s b = new %s();", StringBuilder.class, StringBuilder.class);
+        o.line("b.append(\"%s[\");", implementationSimpleClassName);
+        boolean first = true;
+        for (Parameter p : parameters) {
+            String extra = first ? "" : ", ";
+            o.line("b.append(\"%s%s=\");", extra, p.name());
+            o.line("b.append(%s.valueOf(this.%s));", String.class, p.name());
+            first = false;
+        }
+        o.line("b.append(\"]\");");
+        o.line("return b.toString();");
+        o.close();
+    }
+
+    private static void writeEquals(List<Parameter> parameters, Output o, String implementationSimpleClassName) {
+        o.line();
+        o.line("@%s", Override.class);
+        o.line("public boolean equals(%s o) {", Object.class);
+        o.line("if (this == o) return true;");
+        o.line("if (o == null) return false;");
+        o.line("if (getClass() != o.getClass()) return false;");
+        o.line("%s other = (%s) o;", implementationSimpleClassName, implementationSimpleClassName);
+        if (parameters.isEmpty()) {
+            o.line("return true;");
+        } else {
+            o.line("return");
+            o.right();
+            for (int i = 0; i < parameters.size(); i++) {
+                Parameter p = parameters.get(i);
+                String prefix = i == 0 ? "" : "&& ";
+                String suffix = i == parameters.size() - 1 ? ";" : "";
+                o.line("%s%s.equals(this.%s, other.%s)%s", prefix, Objects.class, p.name, p.name, suffix);
+            }
+            o.left();
+        }
+        o.close();
+    }
+
+    private static void writeHashCode(List<Parameter> parameters, Output o) {
+        o.line();
+        o.line("@%s", Override.class);
+        o.line("public int hashCode() {");
+        String args = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
+        o.line("return %s.hash(%s);", Objects.class, args);
         o.close();
         o.close();
-        return o.toString();
     }
 }
