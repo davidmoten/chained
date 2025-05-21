@@ -29,6 +29,7 @@ Make these changes to your `pom.xml`:
     <plugins>
         <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.14.0</version>
             <configuration>
                 <generatedSourcesDirectory>
                     ${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
@@ -46,6 +47,7 @@ Make these changes to your `pom.xml`:
         <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.6.0</version> 
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -82,7 +84,7 @@ Make these changes to your `pom.xml`:
 ### Gradle
 This is how to use *chained* annotation processor in a gradle project (see [here](https://github.com/davidmoten/chained/tree/master/chained-gradle) for a demo minimal project):
 
-**build.gradle**:
+**build.gradle** (using gradle 8.12.1):
 ```groovy
 plugins {
     id 'java'
