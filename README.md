@@ -121,4 +121,55 @@ dependencies {
 
 `mvn clean install`
 
+## Examples
+java `record` types are a big boost in concise coding. Let's create a builder for the `Person` class below using *chained*:
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+
+@Builder
+public final record Person(String name, int yearOfBirth, Optional<String> comments) {}
+```
+Using defaults this will generate the class `mine.builder.PersonBuilder`.
+
+We can use it like this:
+
+```java
+Person p = PersonBuilder
+    .builder()
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments("enjoyed the event")
+    .build();
+```
+From a discoverability perspective this is not great because a user has to know of the existence of `PersonBuilder`. Let's improve this by adding a static builder method to `Person` class:
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+import mine.builder.PersonBuilder.BuilderWithName;
+
+@Builder
+public final record Person(String name, int yearOfBirth, Optional<String> comments) {
+    public static BuilderWithName name(String name) {
+        return PersonBuilder.builder().name(name);
+    }
+}
+```
+Now we create a `Person` like this:
+```java
+Person p = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments("enjoyed the event")
+    .build();
+```
+We've knocked out the `.builder()` call (`name` is mandatory so always has to be specified, forced at compile time), and we have discoverability back (because the creation of `Person` is via a factory method on the `Person` class. 
+
+It's very convenient for us that the annotation processor being run by the maven compiler plugin can do this. `javac` passes java structures parsed from source to the annotation processor and doesn't check that all references to classes actually exist till multi-round annotation processing has finished.
+
+
 
