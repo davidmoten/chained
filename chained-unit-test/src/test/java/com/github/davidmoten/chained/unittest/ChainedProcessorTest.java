@@ -111,7 +111,7 @@ public class ChainedProcessorTest {
         HasList b = HasList.name("julia").list().add(1).addAll(more).buildList();
         assertEquals(a, b);
     }
-    
+
     @Test
     public void testIsInterfaceAllOptional() {
         IsInterfaceAllOptional a = IsInterfaceAllOptional.builder().name("fred").build();
@@ -119,10 +119,18 @@ public class ChainedProcessorTest {
         assertFalse(a.yearOfBirth().isPresent());
         assertFalse(a.description().isPresent());
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testIsInterfaceCheck() {
-        IsInterface a = IsInterface.builder().name("anne").yearOfBirth(0).build();
+        IsInterface.builder().name("anne").yearOfBirth(0).build();
+    }
+
+    @Test
+    public void testTransformFields() {
+        TransformFields a = TransformFields.a(-1).b(-2);
+        assertEquals(0, a.a());
+        assertEquals(2, a.b());
+
     }
 
 }
