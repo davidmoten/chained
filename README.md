@@ -13,7 +13,7 @@ Make these changes to your `pom.xml`:
 * add the *chained-processor* annotation processor dependency to the *maven-compiler-plugin*
 * configure *build-helper-maven-plugin* to ensure generated source is picked up in IDEs and the sources jar
 
-```xml`
+```xml
 <dependencies>
     ...
     <dependency>
