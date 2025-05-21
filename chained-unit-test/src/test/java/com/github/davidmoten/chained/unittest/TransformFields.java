@@ -8,6 +8,7 @@ import com.github.davidmoten.chained.unittest.builder.TransformFieldsBuilder.Bui
 public record TransformFields(int a, int b) {
     
     public TransformFields {
+        // override constructor parameters
         a = Math.max(0, a);
         b = Math.max(2, b);
     }
