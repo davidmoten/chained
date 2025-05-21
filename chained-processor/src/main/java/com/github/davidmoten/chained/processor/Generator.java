@@ -614,6 +614,13 @@ public final class Generator {
             o.line("return %s;", p.name());
             o.close();
         }
+        o.line();
+        o.line("@%s", Override.class);
+        o.line("public String toString() {");
+        o.line("%s _b = new %s();", StringBuilder.class, StringBuilder.class);
+        o.line("b.append(\"%s\"", Util.simpleClassName(implementationClassName));
+        o.line("return _b.toString();");
+        o.close();
         o.close();
         return o.toString();
     }

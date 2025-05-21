@@ -130,7 +130,6 @@ public class ChainedProcessorTest {
         TransformFields a = TransformFields.a(-1).b(-2);
         assertEquals(0, a.a());
         assertEquals(2, a.b());
-
     }
 
 }
