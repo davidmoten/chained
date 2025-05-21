@@ -110,8 +110,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.davidmoten:chained-api:0.0.1-SNAPSHOT'
-    annotationProcessor 'com.github.davidmoten:chained-processor:0.0.1-SNAPSHOT'
+    implementation 'com.github.davidmoten:chained-api:VERSION_HERE'
+    annotationProcessor 'com.github.davidmoten:chained-processor:VERSION_HERE'
 }
 ```
 
