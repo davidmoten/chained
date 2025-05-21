@@ -119,5 +119,10 @@ public class ChainedProcessorTest {
         assertFalse(a.yearOfBirth().isPresent());
         assertFalse(a.description().isPresent());
     }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testIsInterfaceCheck() {
+        IsInterface a = IsInterface.builder().name("anne").yearOfBirth(0).build();
+    }
 
 }

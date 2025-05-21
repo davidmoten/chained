@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,11 +20,12 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.JavaFileObject;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
+import com.github.davidmoten.chained.api.annotation.Check;
 import com.github.davidmoten.chained.processor.Generator.Construction;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
@@ -74,7 +76,8 @@ public class BuilderProcessor extends AbstractProcessor {
                             if (typeElement.getKind() == ElementKind.INTERFACE) {
                                 String className = typeElement.getQualifiedName().toString();
                                 String code = Generator.generateImplemetationClass(className,
-                                        parametersFromInterface(typeElement), implementationClassName);
+                                        parametersFromInterface(typeElement), implementationClassName,
+                                        checkMethodName(typeElement));
                                 out.println(code);
                             }
                         }
@@ -95,6 +98,25 @@ public class BuilderProcessor extends AbstractProcessor {
         return true;
     }
 
+    private static Optional<String> checkMethodName(TypeElement typeElement) {
+        List<ExecutableElement> list = typeElement //
+                .getEnclosedElements() //
+                .stream() //
+                .filter(x -> x.getKind() == ElementKind.METHOD) //
+                .filter(x -> !x.getModifiers().contains(Modifier.STATIC)) //
+                .map(x -> (ExecutableElement) x) //
+                .filter(x -> x.getParameters().isEmpty()) //
+                .filter(x -> x.getAnnotation(Check.class) != null).collect(Collectors.toList());
+        if (list.size() > 1) {
+            throw new IllegalStateException(
+                    "interface " + typeElement.getSimpleName() + " can only have @Check method");
+        } else if (list.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(list.get(0).getSimpleName().toString());
+        }
+    }
+
     private void generateFromInterface(TypeElement typeElement, String packageName, Builder annotation,
             String builderClassName, String implementationClassName, PrintWriter out) {
         List<Parameter> parameters = parametersFromInterface(typeElement);
@@ -112,11 +134,13 @@ public class BuilderProcessor extends AbstractProcessor {
                 .getEnclosedElements() //
                 .stream() //
                 .filter(x -> x.getKind() == ElementKind.METHOD) //
+                .filter(x -> !x.getModifiers().contains(Modifier.STATIC)
+                        && !x.getModifiers().contains(Modifier.DEFAULT)) //
                 .map(x -> (ExecutableElement) x) //
                 .filter(x -> x.getParameters().isEmpty()) //
-                .filter(x -> !x.getModifiers().contains(Modifier.STATIC)) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
                 .collect(Collectors.toList());
+
         return parameters;
     }
 

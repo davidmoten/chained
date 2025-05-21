@@ -582,7 +582,7 @@ public final class Generator {
     }
 
     public static String generateImplemetationClass(String className, List<Parameter> parameters,
-            String implementationClassName) {
+            String implementationClassName, Optional<String> checkMethodName) {
         Output o = new Output(implementationClassName);
         o.generatedComment();
         o.line("package %s;", Util.pkg(implementationClassName));
@@ -603,9 +603,13 @@ public final class Generator {
         for (Parameter p : parameters) {
             o.line("this.%s = %s;", p.name(), p.name());
         }
+        if (checkMethodName.isPresent()) {
+            o.line("%s();", checkMethodName.get());
+        }
         o.close();
         for (Parameter p : parameters) {
             o.line();
+            o.line("@%s", Override.class);
             o.line("public %s %s() {", o.add(p.type()), p.name());
             o.line("return %s;", p.name());
             o.close();
