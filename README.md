@@ -5,7 +5,7 @@ Java annotation processor to generate chained immutable builders including map a
 * targets **null-safe** usage (`java.util.Optional` used for optional fields and optional return values)
 * especially concise usage with java `record` types
 * generates builders for `class`, `record` and `interface` types
-* supports JDK 8+, Maven
+* supports JDK 8+, Maven, Gradle
 
 ## Getting started
 
