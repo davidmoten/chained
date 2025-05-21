@@ -122,6 +122,8 @@ dependencies {
 `mvn clean install`
 
 ## Examples
+
+### Record types
 java `record` types are a big boost in concise coding. Let's create a builder for the `Person` class below using *chained*:
 
 ```java
@@ -186,6 +188,28 @@ Person a = Person
     .comments(comments)
     .build();
 ```
+
+### Providing the full class name of the generated classes
+
+Set the value of the `@Builder` annotation to customize the full generated class name. The value can be templated with these items:
+* `${pkg}` - the package of the class with the `@Builder` annotation
+* `${simpleName}` - the simple name of the class with the `@Builder` annotation
+The default value is `${pkg}.builder.${simpleName}Builder`.
+
+For example if you want the generated builder class to be in the same package:
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+
+@Builder("${pkg}.${simpleName}Builder")
+public final record Person(String name, int yearOfBirth, Optional<String> comments) {}
+```
+
+### Generating from class types
+
+### Generating from interface types
+
 
 
 
