@@ -171,7 +171,7 @@ Person p = Person
 ```
 We've knocked out the `.builder()` call (`name` is mandatory so always has to be specified, forced at compile time), and we have discoverability back (because the creation of `Person` is via a factory method on the `Person` class. 
 
-It's very convenient for us that the annotation processor being run by the maven compiler plugin can do this. `javac` passes java structures parsed from source to the annotation processor and doesn't check that all references to classes actually exist till multi-round annotation processing has finished.
+It's very convenient for us that the annotation processor being run by the maven compiler plugin can do this. `javac` hands java structures parsed from source to the annotation processor and doesn't check that all references to classes actually exist till multi-round annotation processing has finished.
 
 Note that the `comments` field is optional and these are our creation options in the builder due to the existence of method overrides:
 
