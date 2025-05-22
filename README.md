@@ -195,6 +195,13 @@ Person a = Person
     .yearOfBirth(2001)
     .comments("cool person")
     .build();
+
+// pass wrapped comments
+Person a = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments(Optional.of("cool person"))
+    .build();
 ```
 
 ### Providing the full class name of the generated classes
