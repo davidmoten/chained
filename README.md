@@ -281,15 +281,51 @@ public interface Person {
 
 ### Generating from class types
 
-### FAQ
+### Modelling patterns
+These are some aspects of modelling that you may want to represent:
+* field constraints (like OpenAPI `min`, `max`, `minLength`, `maxLength`, `pattern`)
+* field defaults (when a value is not specified)
+* field transformations
 
-#### How to implement field constraints
+### How to implement field constraints
 Use the constructor for `record` and `class` types, and the `@Check` annotation for `interface` types.
 
+An example with a `record` type:
+
+```java
+public Person(String name, int yearOfBirth) {
+    public Person {
+        Preconditions.checkArgument(yearOfBirth >= 1900, "yearOfBirth must be >= 1900");
+    }
+}
+```
+See [Generating from interface types](.) for an example of using `@Check`.
+
 #### How to implement field defaults and transformations
-Modify field inputs in the constructor for `record` and `class` types, not available for `interface` types.
+Modify field inputs in the constructor for `record` and `class` types, not available for `interface` types (but there are workarounds).
 
+A field default example with a `record` type:
 
+```java
+public Order(String id, Optional<Integer> number) {
+    public Order {
+        if (number.isEmpty()) {
+            number = Optional.of(1);
+        }
+    }
+}
+```
 
+This is also achievable with the `interface` type but not as cleanly:
 
-
+```java
+public interface Order {
+    String id();
+    
+    Optional<Integer> numberInput();
+    
+    default int number() {
+        return numberInput().orElse(1);
+    }
+}
+```
