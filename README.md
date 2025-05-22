@@ -84,7 +84,7 @@ Make these changes to your `pom.xml`:
 ### Gradle
 This is how to use *chained* annotation processor in a gradle project (see [here](https://github.com/davidmoten/chained/tree/master/chained-gradle) for a demo minimal project):
 
-**build.gradle** (using gradle 8.12.1):
+**build.gradle** (tested with gradle 8.12.1):
 ```groovy
 plugins {
     id 'java'
