@@ -426,7 +426,7 @@ public final class Generator {
             o.line("throw new %s(e);", RuntimeException.class);
             o.close();
         } else if (construction == Construction.INTERFACE_IMPLEMENTATION) {
-            o.line("return new %s(%s);", o.add(implementationClassName),
+            o.line("return %s.create(%s);", o.add(implementationClassName),
                     parameters.stream().map(x -> x.name()).collect(Collectors.joining(", ")));
         }
     }
@@ -596,7 +596,7 @@ public final class Generator {
             o.line("private final %s %s;", o.add(p.type()), p.name());
         }
         o.line();
-        o.line("public %s(%s) {", implementationSimpleClassName, asArguments(parameters, o));
+        o.line("private %s(%s) {", implementationSimpleClassName, asArguments(parameters, o));
         for (Parameter p : parameters) {
             if (!p.isPrimitive()) {
                 o.line("%s.checkNotNull(%s, \"%s\");", Preconditions.class, p.name(), p.name());
@@ -607,6 +607,18 @@ public final class Generator {
         }
         if (checkMethodName.isPresent()) {
             o.line("%s();", checkMethodName.get());
+        }
+        o.close();
+        o.line();
+        o.line("public static %s create(%s) {", implementationSimpleClassName, asArguments(parameters, o));
+        if (checkMethodName.isPresent()) {
+            o.line("%s _o = new %s(%s);", implementationSimpleClassName, implementationSimpleClassName,
+                    parameters.stream().map(x -> x.name()).collect(Collectors.joining(", ")));
+            o.line("_o.%s();", checkMethodName.get());
+            o.line("return _o;");
+        } else {
+            o.line("return new %s(%s);", implementationSimpleClassName,
+                    parameters.stream().map(x -> x.name()).collect(Collectors.joining(", ")));
         }
         o.close();
         for (Parameter p : parameters) {

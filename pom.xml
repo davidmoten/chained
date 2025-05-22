@@ -1,29 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>com.github.davidmoten</groupId>
-    <artifactId>sonatype-parent</artifactId>
-    <version>0.1</version>
-  </parent>
-	  <artifactId>chained</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>chained</name>
-  <url>http://github.com/davidmoten/chained</url>
-  <properties>
-    <!-- Common build settings -->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <encoding>UTF-8</encoding>
-    <!-- Java compiler settings -->
-    <java.version>1.8</java.version>
-    <java.compile.source.version>1.8</java.compile.source.version>
-    <java.compile.target.version>1.8</java.compile.target.version>
-    
-    <!-- versions of test dependencies -->
-    <junit.version>4.13.2</junit.version>
-  </properties>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.github.davidmoten</groupId>
+        <artifactId>sonatype-parent</artifactId>
+        <version>0.1</version>
+    </parent>
+    <artifactId>chained</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>chained</name>
+    <url>http://github.com/davidmoten/chained</url>
+    <properties>
+        <!-- Common build settings -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <encoding>UTF-8</encoding>
+        <!-- Java compiler settings -->
+        <java.version>1.8</java.version>
+        <java.compile.source.version>1.8</java.compile.source.version>
+        <java.compile.target.version>1.8</java.compile.target.version>
+
+        <!-- versions of test dependencies -->
+        <junit.version>4.13.2</junit.version>
+    </properties>
 
     <licenses>
         <license>
@@ -64,41 +67,41 @@
         <url>scm:git:https://github.com:davidmoten/chained.git</url>
         <tag>HEAD</tag>
     </scm>
-  <modules>
-    <module>chained-api</module>
-    <module>chained-processor</module>
-    <module>chained-example</module>
-    <module>chained-unit-test</module>
-  </modules>
-  
-  <build>
-  <pluginManagement>
-   <plugins>
-   <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.1</version>
+    <modules>
+        <module>chained-api</module>
+        <module>chained-processor</module>
+        <module>chained-example</module>
+        <module>chained-unit-test</module>
+    </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.1</version>
                 </plugin>
                 <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.0</version>
                 </plugin>
                 <plugin>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.6.0</version>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
-                				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>3.1.4</version>
-				</plugin>
-				
-   </plugins>
-  </pluginManagement>
-  </build>
-  
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.4</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+
 </project>

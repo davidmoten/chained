@@ -206,9 +206,74 @@ import com.github.davidmoten.chained.api.annotation.Builder;
 public final record Person(String name, int yearOfBirth, Optional<String> comments) {}
 ```
 
+### Generating from interface types
+This generation method is especially useful for JDK < 17 (when `record` type was introduced).
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+import mine.builder.PersonBuilder.BuilderWithName;
+
+@Builder
+public interface Person {
+
+    String name();
+    int yearOfBirth();
+    Optional<String> description();
+    
+    public static BuilderWithName name(String name) {
+        return PersonBuilder.builder().name(name);
+    }
+}
+```
+This generation method generates `PersonBuilder` class and also a `PersonImpl` class next to it. The returned instance of `Person` from the builder is actually an instance of `PersonImpl`.
+
+If you want to validate the fields add a `default` method annotated with `@Check`:
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.Preconditions;
+import com.github.davidmoten.chained.api.annotation.Builder;
+import com.github.davidmoten.chained.api.annotation.Check;
+import mine.builder.PersonBuilder.BuilderWithName;
+
+@Builder
+public interface Person {
+
+    String name();
+    int yearOfBirth();
+    Optional<String> description();
+    
+    @Check
+    default void check() {
+        Preconditions.checkArgument(name().trim().length() > 0, "name cannot be blank");
+        Preconditions.checkArgument(yearOfBirth() > 1900, "yearOfBirth must be after 1900");
+        Preconditions.checkArgument(
+            description()
+                .map(x -> x.length)
+                .orElse(0) < 4096,
+            "description must be less than 4096 characters");
+    }
+    
+    public static BuilderWithName name(String name) {
+        return PersonBuilder.builder().name(name);
+    }
+}
+
+```
+
 ### Generating from class types
 
-### Generating from interface types
+### FAQ
+
+#### How to implement field constraints
+Use the constructor for `record` and `class` types, and the `@Check` annotation for `interface` types.
+
+#### How to implement field defaults and transformations
+Modify field inputs in the constructor for `record` and `class` types, not available for `interface` types.
+
 
 
 
