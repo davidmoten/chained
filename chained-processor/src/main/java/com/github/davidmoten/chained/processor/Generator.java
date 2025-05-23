@@ -6,12 +6,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -168,17 +174,21 @@ public final class Generator {
 
     private static Map<String, String> createCollectionImplementationTypes() {
         Map<String, String> m = new HashMap<>();
-        m.put("java.util.Set", "java.util.HashSet");
-        m.put("java.util.List", "java.util.ArrayList");
-        m.put("java.util.ArrayList", "java.util.ArrayList");
-        m.put("java.util.Map", "java.util.LinkedHashMap");
-        m.put("java.util.HashMap", "java.util.LinkedHashMap");
-        m.put("java.util.LinkedHashMap", "java.util.LinkedHashMap");
-        m.put("java.util.SortedMap", "java.util.TreeMap");
-        m.put("java.util.TreeMap", "java.util.TreeMap");
-        m.put("java.util.SortedSet", "java.util.TreeSet");
-        m.put("java.util.TreeSet", "java.util.TreeSet");
+        add(m, List.class, ArrayList.class);
+        add(m, ArrayList.class, ArrayList.class);
+        add(m, Map.class, LinkedHashMap.class);
+        add(m, LinkedHashMap.class, LinkedHashMap.class);
+        add(m, SortedMap.class, TreeMap.class);
+        add(m, NavigableMap.class, TreeMap.class);
+        add(m, TreeMap.class, TreeMap.class);
+        add(m, Set.class, HashSet.class);
+        add(m, SortedSet.class, TreeSet.class);
+        add(m, TreeSet.class, TreeSet.class);
         return m;
+    }
+
+    private static void add(Map<String, String> map, Class<?> a, Class<?> b) {
+        map.put(a.getCanonicalName(), b.getCanonicalName());
     }
 
     private static String asArguments(List<Parameter> parameters, Output o) {
