@@ -281,6 +281,14 @@ public interface Person {
 
 ### Generating from class types
 
+TODO
+
+### Map builders
+
+### List builders
+
+### Set builders
+
 ### Modelling patterns
 These are some aspects of modelling that you may want to represent:
 * field constraints (like OpenAPI `min`, `max`, `minLength`, `maxLength`, `pattern`)

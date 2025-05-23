@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -130,6 +131,13 @@ public class ChainedProcessorTest {
         TransformFields a = TransformFields.a(-1).b(-2);
         assertEquals(0, a.a());
         assertEquals(2, a.b());
+    }
+
+    @Test
+    public void testHasSet() {
+        HasSet a = HasSet.name("woo").numbers().add(1).add(2).add(3).buildList();
+        assertEquals("woo", a.name());
+        assertEquals(Set.of(1, 2, 3), a.numbers());
     }
 
 }

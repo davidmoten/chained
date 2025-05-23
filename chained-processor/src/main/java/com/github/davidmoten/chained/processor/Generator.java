@@ -22,6 +22,7 @@ import com.github.davidmoten.chained.api.Helpers;
 import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
+import com.github.davidmoten.chained.api.SetBuilder;
 
 public final class Generator {
 
@@ -67,6 +68,8 @@ public final class Generator {
                     o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), LinkedHashMap.class);
                 } else if (p.type().startsWith("java.util.List<")) {
                     o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), ArrayList.class);
+                } else if (p.type().startsWith("java.util.Set<")) {
+                    o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), HashSet.class);
                 } else {
                     o.line("private %s %s;", o.add(p.type()), p.name());
                 }
@@ -296,6 +299,7 @@ public final class Generator {
             String fieldPrefix, String returnExpression) {
         writeBuilderForMap(o, p, builderSimpleClassName, fieldPrefix, returnExpression);
         writeBuilderForList(o, p, builderSimpleClassName, fieldPrefix, returnExpression);
+        writeBuilderForSet(o, p, builderSimpleClassName, fieldPrefix, returnExpression);
     }
 
     private static void writeBuilderForMap(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix,
@@ -320,6 +324,18 @@ public final class Generator {
             String genericType = tm.typeArguments.get(0).render();
             o.line("public %s<%s, %s> %s() {", ListBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
             o.line("return new %s<>(() -> %s, %s%s);", ListBuilder.class, returnExpression, fieldPrefix, p.name());
+            o.close();
+        }
+    }
+    
+    private static void writeBuilderForSet(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix,
+            String returnExpression) {
+        TypeModel tm = typeModel(p.type());
+        if (tm.baseType.equals("java.util.Set") && tm.typeArguments.size() == 1) {
+            o.line();
+            String genericType = tm.typeArguments.get(0).render();
+            o.line("public %s<%s, %s> %s() {", SetBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
+            o.line("return new %s<>(() -> %s, %s%s);", SetBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
     }
