@@ -285,7 +285,68 @@ TODO
 
 ### Map builders
 
+Fields that are declared of type `java.util.Map<K, V>` will have corresponding map builders:
+
+```java
+@Builder
+public record HasProperties(String name, Map<String, String> properties) {
+    public static HasProperties name(String name) {
+        return HasPropertiesBuilder.builder().name();
+    }
+}
+```
+To create:
+
+```java
+Map<String, String> properties = Map.of("scars", "true", "yearOfBirth", "2000");
+HasProperties a = HasProperties
+    .name("jack")
+    .properties(properties);
+```
+
+or more fluidly:
+
+```java
+HasProperties a = HasProperties
+    .name("jack") 
+    .properties()
+    .put("scars", "true")
+    .put("yearOfBirth", "2000")
+    .buildMap();
+```
+
+
 ### List builders
+
+Fields that are declared of type `java.util.List<T>` will have corresponding map builders:
+
+```java
+@Builder
+public record HasNumbers(String name, List<T> numbers) {
+    public static HasProperties name(String name) {
+        return HasPropertiesBuilder.builder().name();
+    }
+}
+```
+To create:
+
+```java
+List<Integer> numbers = List.of(1, 2, 3);
+HasProperties a = HasProperties
+    .name("jack")
+    .properties(properties);
+```
+
+or more fluidly:
+
+```java
+HasProperties a = HasProperties
+    .name("jack") 
+    .properties()
+    .put("scars", "true")
+    .put("yearOfBirth", "2000")
+    .buildMap();
+```
 
 ### Set builders
 
