@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,7 +40,7 @@ public final class Generator {
         DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION;
     }
 
-    private static Map<String, String> collectionImplementationTypes = createCollectionImplementationTypes();
+    private static final Map<String, String> COLLECTION_IMPLEMENTATION_TYPES = createCollectionImplementationTypes();
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
@@ -73,7 +74,7 @@ public final class Generator {
                             Optional.class);
                 } else {
                     TypeModel tm = typeModel(p.type());
-                    String typ = collectionImplementationTypes.get(tm.baseType);
+                    String typ = COLLECTION_IMPLEMENTATION_TYPES.get(tm.baseType);
                     if (typ == null) {
                         o.line("private %s %s;", o.add(p.type()), p.name());
                     } else
@@ -175,6 +176,7 @@ public final class Generator {
     private static Map<String, String> createCollectionImplementationTypes() {
         Map<String, String> m = new HashMap<>();
         add(m, List.class, ArrayList.class);
+        add(m, LinkedList.class, LinkedList.class);
         add(m, ArrayList.class, ArrayList.class);
         add(m, Map.class, LinkedHashMap.class);
         add(m, LinkedHashMap.class, LinkedHashMap.class);
