@@ -285,8 +285,15 @@ TODO
 
 ### Map builders
 
-Fields that are declared of type `java.util.Map<K, V>` will have corresponding map builders:
+Fields that are declared with the types below will have corresponding map builders:
+* `java.util.Map`
+* `java.util.HashMap`
+* `java.util.SortedMap`
+* `java.util.NavigableMap`
+* `java.util.TreeMap`
+* `java.util.LinkedHashMap`
 
+For example, given this class:
 ```java
 @Builder
 public record HasProperties(String name, Map<String, String> properties) {
@@ -295,7 +302,7 @@ public record HasProperties(String name, Map<String, String> properties) {
     }
 }
 ```
-To create:
+we can assign the map in one go:
 
 ```java
 Map<String, String> properties = Map.of("scars", "true", "yearOfBirth", "2000");
@@ -315,10 +322,14 @@ HasProperties a = HasProperties
     .buildMap();
 ```
 
-
 ### List builders
 
-Fields that are declared of type `java.util.List<T>` will have corresponding map builders:
+Fields that are declared with the types below will have corresponding list builders:
+* `java.util.List`
+* `java.util.ArrayList`
+* `java.util.LinkedList`
+
+For example, given this class:
 
 ```java
 @Builder
@@ -328,7 +339,7 @@ public record HasNumbers(String name, List<T> numbers) {
     }
 }
 ```
-To create:
+we can assign the list in one go:
 
 ```java
 List<Integer> numbers = List.of(1, 2, 3);
@@ -350,8 +361,12 @@ HasNumbers a = HasNumbers
 
 ### Set builders
 
-Fields that are declared of type `java.util.Set<T>` will have corresponding map builders:
+Fields that are declared with the types below will have corresponding set builders:
+* `java.util.Set`
+* `java.util.SortedSet`
+* `java.util.TreeSet`
 
+For example, given this class:
 ```java
 @Builder
 public record HasNumbers(String name, Set<T> numbers) {
@@ -360,7 +375,7 @@ public record HasNumbers(String name, Set<T> numbers) {
     }
 }
 ```
-To create:
+we can assign the set in one go:
 
 ```java
 Set<Integer> numbers = Set.of(1, 2, 3);
