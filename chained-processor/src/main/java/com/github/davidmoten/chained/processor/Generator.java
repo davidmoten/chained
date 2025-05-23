@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Generated;
 
+import com.github.davidmoten.chained.api.Helpers;
 import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
@@ -402,9 +403,11 @@ public final class Generator {
 
     private static void writeBuildStatement(Output o, String className, String builderSimpleClassName,
             List<Parameter> parameters, Construction construction, String implementationClassName) {
-        String params = parameters.stream().map(x -> x.name()).collect(Collectors.joining(", "));
+        String args = parameters.stream()
+                .map(x -> String.format("\n%s%s.unmodifiable(%s)", repeat("    ", 4), o.add(Helpers.class), x.name())) //
+                .collect(Collectors.joining(","));
         if (construction == Construction.DIRECT) {
-            o.line("return new %s(%s);", o.add(className), params);
+            o.line("return new %s(%s);", o.add(className), args);
         } else if (construction == Construction.REFLECTION) {
             String parameterClassNames = parameters.stream().map(x -> o.add(baseType(x.type())) + ".class")
                     .collect(Collectors.joining(", "));
@@ -415,7 +418,7 @@ public final class Generator {
             o.line(".getDeclaredConstructor(%s);", parameterClassNames);
             o.left().left();
             o.line("_c.setAccessible(true);");
-            o.line("return _c.newInstance(%s);", params);
+            o.line("return _c.newInstance(%s);", args);
             o.close();
             o.line("catch (%s", InvocationTargetException.class);
             o.right().right();
@@ -426,8 +429,7 @@ public final class Generator {
             o.line("throw new %s(e);", RuntimeException.class);
             o.close();
         } else if (construction == Construction.INTERFACE_IMPLEMENTATION) {
-            o.line("return %s.create(%s);", o.add(implementationClassName),
-                    parameters.stream().map(x -> x.name()).collect(Collectors.joining(", ")));
+            o.line("return %s.create(%s);", o.add(implementationClassName), args);
         }
     }
 
@@ -477,6 +479,10 @@ public final class Generator {
 
         public void line() {
             b.append("\n");
+        }
+
+        public String add(Class<?> cls) {
+            return imports.add(cls);
         }
 
         public String add(String type) {
