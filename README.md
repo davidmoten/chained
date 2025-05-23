@@ -332,23 +332,53 @@ To create:
 
 ```java
 List<Integer> numbers = List.of(1, 2, 3);
-HasProperties a = HasProperties
+HasNumbers a = HasNumbers
     .name("jack")
-    .properties(properties);
+    .numbers(numbers);
 ```
 
 or more fluidly:
 
 ```java
-HasProperties a = HasProperties
+HasNumbers a = HasNumbers
     .name("jack") 
-    .properties()
-    .put("scars", "true")
-    .put("yearOfBirth", "2000")
-    .buildMap();
+    .numbers()
+    .add(1, 2)
+    .add(3)
+    .buildList();
 ```
 
 ### Set builders
+
+Fields that are declared of type `java.util.Set<T>` will have corresponding map builders:
+
+```java
+@Builder
+public record HasNumbers(String name, Set<T> numbers) {
+    public static HasProperties name(String name) {
+        return HasPropertiesBuilder.builder().name();
+    }
+}
+```
+To create:
+
+```java
+Set<Integer> numbers = Set.of(1, 2, 3);
+HasNumbers a = HasNumbers
+    .name("jack")
+    .numbers(numbers);
+```
+
+or more fluidly:
+
+```java
+HasNumbers a = HasNumbers
+    .name("jack") 
+    .numbers()
+    .add(1, 2)
+    .add(3)
+    .buildList();
+```
 
 ### Modelling patterns
 These are some aspects of modelling that you may want to represent:
