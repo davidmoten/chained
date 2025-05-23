@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +32,8 @@ public final class Generator {
     public enum Construction {
         DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION;
     }
+
+    private static Map<String, String> collectionImplementationTypes = createCollectionImplementationTypes();
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
@@ -64,108 +65,120 @@ public final class Generator {
                 if (p.isOptional()) {
                     o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(wrappingType(p.name())),
                             Optional.class);
-                } else if (p.type().startsWith("java.util.Map<")) {
-                    o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), LinkedHashMap.class);
-                } else if (p.type().startsWith("java.util.List<")) {
-                    o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), ArrayList.class);
-                } else if (p.type().startsWith("java.util.Set<")) {
-                    o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), HashSet.class);
                 } else {
-                    o.line("private %s %s;", o.add(p.type()), p.name());
+                    TypeModel tm = typeModel(p.type());
+                    String typ = collectionImplementationTypes.get(tm.baseType);
+                    if (typ == null) {
+                        o.line("private %s %s;", o.add(p.type()), p.name());
+                    } else
+                        o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), o.add(typ));
                 }
             }
-            privateConstructor(o, builderSimpleClassName);
-            writeStaticCreators(o, builderSimpleClassName, construction);
-            o.line();
-            writeMandatorySetter(o, mandatory.get(0));
-            o.line();
-            o.line("private %s build() {", o.add(className));
-            writeBuildStatement(o, className, builderSimpleClassName, parameters, construction,
-                    implementationClassName);
-            o.close();
+        }
+        privateConstructor(o, builderSimpleClassName);
+        writeStaticCreators(o, builderSimpleClassName, construction);
+        o.line();
+        writeMandatorySetter(o, mandatory.get(0));
+        o.line();
+        o.line("private %s build() {", o.add(className));
+        writeBuildStatement(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
+        o.close();
 
-            for (int i = 0; i < mandatory.size() - 1; i++) {
-                Parameter p = mandatory.get(i);
-                String builder = builderClassName(p.name());
-                o.line();
-                o.line("public final static class %s {", builder);
-                o.line();
-                o.line("private final %s _b;", builderSimpleClassName);
-                o.line();
-                o.line("private %s(%s _b) {", builder, builderSimpleClassName);
-                o.line("this._b = _b;");
-                o.close();
-
-                Parameter q = mandatory.get(i + 1);
-                if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
-                    if (!alwaysIncludeBuildMethod) {
-                        writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
-                        o.line();
-                        o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
-                        writeNullCheck(o, q);
-                        assignBuilderField(o, q);
-                        o.line("return _b.build();");
-                        o.close();
-                    } else {
-                        writeBuilderForCollection(o, q, builder, "_b.", "this");
-                        o.line();
-                        o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
-                        writeNullCheck(o, q);
-                        assignBuilderField(o, q);
-                        o.line("return this;");
-                        o.close();
-                        o.line();
-                        o.line("public %s build() {", o.add(className));
-                        o.line("return _b.build();");
-                        o.close();
-                    }
-                    o.close();
-                    o.close();
-                    return o.toString();
-                } else {
-                    String nextBuilder = builderClassName(q.name());
-                    o.line();
-                    o.line("public %s %s(%s %s) {", nextBuilder, q.name(), o.add(q.type()), q.name());
-                    writeNullCheck(o, q);
-                    assignBuilderField(o, q);
-                    o.line("return new %s(_b);", nextBuilder);
-                    o.close();
-                    o.close();
-                }
-            }
-            // optionals cannot be empty if get to here
-            String lastBuilder = builderClassName(mandatory.get(mandatory.size() - 1).name());
+        for (int i = 0; i < mandatory.size() - 1; i++) {
+            Parameter p = mandatory.get(i);
+            String builder = builderClassName(p.name());
             o.line();
-            o.line("public final static class %s {", lastBuilder);
+            o.line("public final static class %s {", builder);
             o.line();
             o.line("private final %s _b;", builderSimpleClassName);
             o.line();
-            o.line("private %s(%s _b) {", lastBuilder, builderSimpleClassName);
+            o.line("private %s(%s _b) {", builder, builderSimpleClassName);
             o.line("this._b = _b;");
             o.close();
-            for (Parameter p : optionals) {
-                o.line();
-                o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(toPrimitive(wrappedType(p.type()))),
-                        p.name());
-                writeNullCheck(o, p);
-                o.line("this._b.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
-                o.line("return this;");
+
+            Parameter q = mandatory.get(i + 1);
+            if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
+                if (!alwaysIncludeBuildMethod) {
+                    writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
+                    o.line();
+                    o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
+                    writeNullCheck(o, q);
+                    assignBuilderField(o, q);
+                    o.line("return _b.build();");
+                    o.close();
+                } else {
+                    writeBuilderForCollection(o, q, builder, "_b.", "this");
+                    o.line();
+                    o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
+                    writeNullCheck(o, q);
+                    assignBuilderField(o, q);
+                    o.line("return this;");
+                    o.close();
+                    o.line();
+                    o.line("public %s build() {", o.add(className));
+                    o.line("return _b.build();");
+                    o.close();
+                }
                 o.close();
+                o.close();
+                return o.toString();
+            } else {
+                String nextBuilder = builderClassName(q.name());
                 o.line();
-                o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(p.type()), p.name());
-                writeNullCheck(o, p);
-                assignBuilderField(o, p);
-                o.line("return this;");
+                o.line("public %s %s(%s %s) {", nextBuilder, q.name(), o.add(q.type()), q.name());
+                writeNullCheck(o, q);
+                assignBuilderField(o, q);
+                o.line("return new %s(_b);", nextBuilder);
+                o.close();
                 o.close();
             }
-            o.line();
-            o.line("public %s build() {", o.add(className));
-            o.line("return _b.build();");
-            o.close();
-            o.close();
-            o.close();
-            return o.toString();
         }
+        // optionals cannot be empty if get to here
+        String lastBuilder = builderClassName(mandatory.get(mandatory.size() - 1).name());
+        o.line();
+        o.line("public final static class %s {", lastBuilder);
+        o.line();
+        o.line("private final %s _b;", builderSimpleClassName);
+        o.line();
+        o.line("private %s(%s _b) {", lastBuilder, builderSimpleClassName);
+        o.line("this._b = _b;");
+        o.close();
+        for (Parameter p : optionals) {
+            o.line();
+            o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(toPrimitive(wrappedType(p.type()))), p.name());
+            writeNullCheck(o, p);
+            o.line("this._b.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
+            o.line("return this;");
+            o.close();
+            o.line();
+            o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(p.type()), p.name());
+            writeNullCheck(o, p);
+            assignBuilderField(o, p);
+            o.line("return this;");
+            o.close();
+        }
+        o.line();
+        o.line("public %s build() {", o.add(className));
+        o.line("return _b.build();");
+        o.close();
+        o.close();
+        o.close();
+        return o.toString();
+    }
+
+    private static Map<String, String> createCollectionImplementationTypes() {
+        Map<String, String> m = new HashMap<>();
+        m.put("java.util.Set", "java.util.HashSet");
+        m.put("java.util.List", "java.util.ArrayList");
+        m.put("java.util.ArrayList", "java.util.ArrayList");
+        m.put("java.util.Map", "java.util.LinkedHashMap");
+        m.put("java.util.HashMap", "java.util.LinkedHashMap");
+        m.put("java.util.LinkedHashMap", "java.util.LinkedHashMap");
+        m.put("java.util.SortedMap", "java.util.TreeMap");
+        m.put("java.util.TreeMap", "java.util.TreeMap");
+        m.put("java.util.SortedSet", "java.util.TreeSet");
+        m.put("java.util.TreeSet", "java.util.TreeSet");
+        return m;
     }
 
     private static String asArguments(List<Parameter> parameters, Output o) {
@@ -327,7 +340,7 @@ public final class Generator {
             o.close();
         }
     }
-    
+
     private static void writeBuilderForSet(Output o, Parameter p, String builderSimpleClassName, String fieldPrefix,
             String returnExpression) {
         TypeModel tm = typeModel(p.type());
@@ -383,6 +396,10 @@ public final class Generator {
         TypeModel(String baseType, List<TypeModel> typeArguments) {
             this.baseType = baseType;
             this.typeArguments = typeArguments;
+        }
+
+        public boolean isMap() {
+            return baseType.contains("Map");
         }
 
         public String render() {
