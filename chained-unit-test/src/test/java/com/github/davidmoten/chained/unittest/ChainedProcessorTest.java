@@ -135,7 +135,7 @@ public class ChainedProcessorTest {
 
     @Test
     public void testHasSet() {
-        HasSet a = HasSet.name("woo").numbers().add(1).add(2).add(3).buildList();
+        HasSet a = HasSet.name("woo").numbers().add(1, 2, 3).buildList();
         assertEquals("woo", a.name());
         assertEquals(Set.of(1, 2, 3), a.numbers());
     }
