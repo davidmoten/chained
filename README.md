@@ -39,7 +39,7 @@ Make these changes to your `pom.xml`:
                     <path>
                         <groupId>com.github.davidmoten</groupId>
                         <artifactId>chained-processor</artifactId>
-                        <version>${project.parent.version}</version>
+                        <version>VERSION_HERE</version>
                     </path>
                 </annotationProcessorPaths>
             </configuration>
