@@ -6,6 +6,7 @@ Java annotation processor to generate chained immutable builders including map a
 * especially concise usage with java `record` types
 * generates builders for `class`, `record` and `interface` types
 * supports JDK 8+, Maven, Gradle
+* generates source (as well as compiled classes) so is IDE friendly as long as the IDE is *build-helper-maven-plugin* aware.
 
 ## Getting started
 
