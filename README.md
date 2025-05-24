@@ -413,7 +413,7 @@ public Person(String name, int yearOfBirth) {
     }
 }
 ```
-See [Generating from interface types](.) for an example of using `@Check`.
+See [Generating from interface types](#generating-from-interface-types) for an example of using `@Check`.
 
 #### How to implement field defaults and transformations
 Modify field inputs in the constructor for `record` and `class` types, not available for `interface` types (but there are workarounds).
