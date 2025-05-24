@@ -631,7 +631,7 @@ public final class Generator {
         }
     }
 
-    public static String generateImplemetationClass(String className, List<Parameter> parameters,
+    static String generateImplemetationClass(String className, List<Parameter> parameters,
             String implementationClassName, Optional<String> checkMethodName) {
         Output o = new Output(implementationClassName);
         String implementationSimpleClassName = Util.simpleClassName(implementationClassName);
