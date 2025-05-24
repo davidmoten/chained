@@ -37,7 +37,7 @@ public final class Generator {
     }
 
     public enum Construction {
-        DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION;
+        DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION
     }
 
     private static final Map<String, String> COLLECTION_IMPLEMENTATION_TYPES = createCollectionImplementationTypes();
@@ -111,8 +111,6 @@ public final class Generator {
                     o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
                     writeNullCheck(o, q);
                     assignBuilderField(o, q);
-                    o.line("return _b.build();");
-                    o.close();
                 } else {
                     writeBuilderForCollection(o, q, builder, "_b.", "this");
                     o.line();
@@ -123,9 +121,9 @@ public final class Generator {
                     o.close();
                     o.line();
                     o.line("public %s build() {", o.add(className));
-                    o.line("return _b.build();");
-                    o.close();
                 }
+                o.line("return _b.build();");
+                o.close();
                 o.close();
                 o.close();
                 return o.toString();
@@ -656,9 +654,7 @@ public final class Generator {
         for (Parameter p : parameters) {
             o.line("this.%s = %s;", p.name(), p.name());
         }
-        if (checkMethodName.isPresent()) {
-            o.line("%s();", checkMethodName.get());
-        }
+        checkMethodName.ifPresent(s -> o.line("%s();", s));
         o.close();
         o.line();
         o.line("public static %s create(%s) {", implementationSimpleClassName, asArguments(parameters, o));
