@@ -119,7 +119,7 @@ or
 ## Examples
 
 ### Record types
-java `record` types are a big boost in concise coding. Let's create a builder for the `Person` class below using *chained*:
+java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*:
 
 ```java
 package mine;
