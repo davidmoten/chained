@@ -112,6 +112,10 @@ dependencies {
 
 `mvn clean install`
 
+or 
+
+`gradle clean publishToMavenLocal`
+
 ## Examples
 
 ### Record types
