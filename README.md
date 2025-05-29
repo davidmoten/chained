@@ -66,7 +66,7 @@ Make these changes to your `pom.xml`:
                 <!-- if you use the @Builder annotation in test classes as well then include this execution -->
                 <execution>
                     <id>add-test-source</id>
-                    <phase>generate-sources</phase>
+                    <phase>generate-test-sources</phase>
                     <goals>
                         <goal>add-test-source</goal>
                     </goals>
