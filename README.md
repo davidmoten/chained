@@ -91,11 +91,6 @@ plugins {
     id 'java'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17  // adjust if needed
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 tasks.register('sourcesJar', Jar) {
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
@@ -105,11 +100,6 @@ tasks.register('sourcesJar', Jar) {
 
 artifacts {
     archives tasks.named('sourcesJar')
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
 }
 
 dependencies {
