@@ -6,7 +6,7 @@ import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.unittest.builder.InsideBuilder;
 import com.github.davidmoten.chained.unittest.builder.InsideBuilder.BuilderWithName;
 
-public class MemberClassTest {
+public class NestedClassTest {
 
     @Builder
     public static record Inside(String name, int yearOfBirth) {
@@ -36,7 +36,7 @@ public class MemberClassTest {
 
     @Test(expected = ClassNotFoundException.class)
     public void testInsideInnerBuilderNotGenerated() throws ClassNotFoundException {
-        Class.forName(MemberClassTest.class.getName() + ".builder.InsideInnerBuilder");
+        Class.forName(NestedClassTest.class.getName() + ".builder.InsideInnerBuilder");
     }
 
 }
