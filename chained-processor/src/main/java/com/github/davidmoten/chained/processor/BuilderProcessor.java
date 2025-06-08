@@ -18,6 +18,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
@@ -35,17 +36,26 @@ public class BuilderProcessor extends AbstractProcessor {
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
     }
-    
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
             if (element instanceof TypeElement) {
                 TypeElement typeElement = (TypeElement) element;
+                System.out.println("processing " + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " " + typeElement.getModifiers());
+                if (typeElement.getNestingKind() == NestingKind.MEMBER
+                        && !typeElement.getModifiers().contains(Modifier.STATIC)) {
+                    processingEnv //
+                            .getMessager() //
+                            .printMessage(Kind.WARNING, "nested classes must be static to use @Builder", element);
+                    continue;
+                }
                 String packageName = processingEnv //
                         .getElementUtils() //
                         .getPackageOf(typeElement) //
                         .getQualifiedName().toString();
                 String simpleClassName = typeElement.getSimpleName().toString();
+                
                 Builder annotation = typeElement.getAnnotation(Builder.class);
                 String templatedBuilderClassName = annotation.value();
                 String builderClassName = templatedBuilderClassName //
@@ -109,7 +119,8 @@ public class BuilderProcessor extends AbstractProcessor {
                 .filter(x -> !x.getModifiers().contains(Modifier.STATIC)) //
                 .map(x -> (ExecutableElement) x) //
                 .filter(x -> x.getParameters().isEmpty()) //
-                .filter(x -> x.getAnnotation(Check.class) != null).collect(Collectors.toList());
+                .filter(x -> x.getAnnotation(Check.class) != null) //
+                .collect(Collectors.toList());
         if (list.size() > 1) {
             throw new IllegalStateException(
                     "interface " + typeElement.getSimpleName() + " can only have @Check method");
