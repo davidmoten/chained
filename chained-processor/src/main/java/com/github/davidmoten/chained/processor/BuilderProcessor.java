@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
@@ -42,7 +43,11 @@ public class BuilderProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
             if (element instanceof TypeElement) {
                 TypeElement typeElement = (TypeElement) element;
-                System.out.println("processing " + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " " + typeElement.getModifiers());
+                processingEnv //
+                        .getMessager() //
+                        .printMessage(Kind.NOTE, "processing Builder annotation: " //
+                                + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " "
+                                + typeElement.getModifiers());
                 if (typeElement.getNestingKind() == NestingKind.MEMBER
                         && !typeElement.getModifiers().contains(Modifier.STATIC)) {
                     processingEnv //
@@ -55,7 +60,7 @@ public class BuilderProcessor extends AbstractProcessor {
                         .getPackageOf(typeElement) //
                         .getQualifiedName().toString();
                 String simpleClassName = typeElement.getSimpleName().toString();
-                
+
                 Builder annotation = typeElement.getAnnotation(Builder.class);
                 String templatedBuilderClassName = annotation.value();
                 String builderClassName = templatedBuilderClassName //

@@ -23,7 +23,7 @@
                         <verbose>true</verbose>
                         <source>17</source>
                         <target>17</target>
-                        <verbose>true</verbose>
+                        <verbose>false</verbose>
                         <generatedTestSourcesDirectory>
                             ${project.build.directory}/generated-test-sources/test-annotations</generatedTestSourcesDirectory>
                         <annotationProcessorPaths>

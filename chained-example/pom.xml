@@ -28,7 +28,7 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <verbose>true</verbose>
+                    <verbose>false</verbose>
                     <generatedSourcesDirectory>
                         ${project.build.directory}/generated-sources/annotations
                     </generatedSourcesDirectory>
