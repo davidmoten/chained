@@ -69,9 +69,9 @@
     </scm>
     <modules>
         <module>chained-api</module>
-        <module>chained-processor</module>
         <module>chained-example</module>
         <module>chained-unit-test</module>
+        <module>chained-processor</module>
     </modules>
 
     <build>

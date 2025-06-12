@@ -79,6 +79,14 @@
             <version>${project.parent.version}</version>
         </dependency>
         
+        <!-- required ony in chained project to enforce build order -->
+        <dependency>
+            <groupId>com.github.davidmoten</groupId>
+            <artifactId>chained-processor</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        
             <!-- Test Dependencies -->
         <dependency>
             <groupId>junit</groupId>
