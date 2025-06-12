@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
@@ -43,16 +42,12 @@ public class BuilderProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
             if (element instanceof TypeElement) {
                 TypeElement typeElement = (TypeElement) element;
-                processingEnv //
-                        .getMessager() //
-                        .printMessage(Kind.NOTE, "processing Builder annotation: " //
-                                + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " "
-                                + typeElement.getModifiers());
+                log(Kind.NOTE, "processing Builder annotation: " //
+                        + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " "
+                        + typeElement.getModifiers());
                 if (typeElement.getNestingKind() == NestingKind.MEMBER
                         && !typeElement.getModifiers().contains(Modifier.STATIC)) {
-                    processingEnv //
-                            .getMessager() //
-                            .printMessage(Kind.WARNING, "nested classes must be static to use @Builder", element);
+                    log(Kind.WARNING, "nested classes must be static to use @Builder", element);
                     continue;
                 }
                 String packageName = processingEnv //
@@ -83,8 +78,8 @@ public class BuilderProcessor extends AbstractProcessor {
                                 generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName,
                                         implementationClassName, out);
                             } else {
-                                processingEnv.getMessager().printMessage(Kind.WARNING, "class type "
-                                        + typeElement.getKind() + " not supported for builder generation");
+                                log(Kind.WARNING, "class type " + typeElement.getKind()
+                                        + " not supported for builder generation");
                             }
                         }
                     }
@@ -106,14 +101,20 @@ public class BuilderProcessor extends AbstractProcessor {
                     try (PrintWriter writer = new PrintWriter(b)) {
                         e.printStackTrace(writer);
                     }
-                    processingEnv //
-                            .getMessager() //
-                            .printMessage(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8), element);
+                    log(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8), element);
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    private void log(Kind kind, String message, Element element) {
+        processingEnv.getMessager().printMessage(kind, message, element);
+    }
+
+    private void log(Kind kind, String message) {
+        processingEnv.getMessager().printMessage(kind, message);
     }
 
     private static Optional<String> checkMethodName(TypeElement typeElement) {
@@ -149,7 +150,7 @@ public class BuilderProcessor extends AbstractProcessor {
     }
 
     private static List<Parameter> parametersFromInterface(TypeElement typeElement) {
-        List<Parameter> parameters = typeElement //
+        return typeElement //
                 .getEnclosedElements() //
                 .stream() //
                 .filter(x -> x.getKind() == ElementKind.METHOD) //
@@ -159,8 +160,6 @@ public class BuilderProcessor extends AbstractProcessor {
                 .filter(x -> x.getParameters().isEmpty()) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
                 .collect(Collectors.toList());
-
-        return parameters;
     }
 
     private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,
