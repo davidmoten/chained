@@ -140,12 +140,24 @@ public class ChainedProcessorTest {
         assertEquals("woo", a.name());
         assertEquals(Set.of(1, 2, 3), a.numbers());
     }
-    
+
     @Test
     public void testOptionalAsNullable() {
-        OptionalAsNullable a = OptionalAsNullable.name("fred").build();
-        assertEquals("fred", a.name());
-        assertNull(a.age());   
+        {
+            OptionalAsNullable a = OptionalAsNullable.name("fred").build();
+            assertEquals("fred", a.name());
+            assertNull(a.age());
+        }
+        {
+            OptionalAsNullable a = OptionalAsNullable.name("fred").age(10).build();
+            assertEquals("fred", a.name());
+            assertEquals(10, (int) a.age());
+        }
+        {
+            OptionalAsNullable a = OptionalAsNullable.name("fred").age(null).build();
+            assertEquals("fred", a.name());
+            assertNull(a.age());
+        }
     }
 
 }
