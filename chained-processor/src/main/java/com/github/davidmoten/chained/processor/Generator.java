@@ -55,13 +55,19 @@ public final class Generator {
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
         o.line("@%s(\"%s\")", Generated.class, "com.github.davidmoten:chained-processor");
         o.line("public final class %s {", builderSimpleClassName);
-        o.line();
-        List<Parameter> mandatory = parameters.stream().filter(p -> !p.isOptional()).collect(Collectors.toList());
-        List<Parameter> optionals = parameters.stream().filter(p -> p.isOptional()).collect(Collectors.toList());
+        List<Parameter> mandatory = parameters //
+                .stream() //
+                .filter(p -> !p.isOptional() && !p.isNullable()) //
+                .collect(Collectors.toList());
+        List<Parameter> optionalOrNullable = parameters //
+                .stream() //
+                .filter(p -> p.isOptional() || p.isNullable()) //
+                .collect(Collectors.toList());
         if (mandatory.isEmpty()) {
             writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
             return o.toString();
-        } else if (optionals.isEmpty() && mandatory.size() == 1) {
+        } else if (optionalOrNullable.isEmpty() && mandatory.size() == 1) {
+            o.line();
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s %s) {", o.add(className), ann(o, p), o.add(p.type()), p.name());
             writeBuildStatement(o, className, builderSimpleClassName, parameters, construction,
@@ -71,14 +77,13 @@ public final class Generator {
             return o.toString();
         } else {
             for (Parameter p : parameters) {
+                o.line();
+                o.line(ann(o, p));
                 if (p.isOptional()) {
-                    o.line(ann(o, p));
-                    o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(wrappingType(p.name())),
-                            Optional.class);
+                    o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(outerType(p.name())), Optional.class);
                 } else {
                     TypeModel tm = typeModel(p.type());
                     String typ = COLLECTION_IMPLEMENTATION_TYPES.get(tm.baseType);
-                    o.line(ann(o, p));
                     if (typ == null) {
                         o.line("private %s %s;", o.add(p.type()), p.name());
                     } else
@@ -108,7 +113,7 @@ public final class Generator {
             o.close();
 
             Parameter q = mandatory.get(i + 1);
-            if (i + 1 == mandatory.size() - 1 && optionals.isEmpty()) {
+            if (i + 1 == mandatory.size() - 1 && optionalOrNullable.isEmpty()) {
                 if (!alwaysIncludeBuildMethod) {
                     writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
                     o.line();
@@ -153,14 +158,16 @@ public final class Generator {
         o.line("private %s(%s _b) {", lastBuilder, builderSimpleClassName);
         o.line("this._b = _b;");
         o.close();
-        for (Parameter p : optionals) {
-            o.line();
-            // TODO add ann
-            o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(toPrimitive(wrappedType(p.type()))), p.name());
-            writeNullCheck(o, p);
-            o.line("this._b.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
-            o.line("return this;");
-            o.close();
+        for (Parameter p : optionalOrNullable) {
+            if (p.isOptional()) {
+                o.line();
+                o.line("public %s %s(@%s %s %s) {", lastBuilder, p.name(), Nonnull.class,
+                        o.add(toPrimitive(innerType(p.type()))), p.name());
+                writeNullCheck(o, p);
+                o.line("this._b.%s = %s.of(%s);", p.name(), o.add(outerType(p.type())), p.name());
+                o.line("return this;");
+                o.close();
+            }
             o.line();
             o.line("public %s %s(%s %s %s) {", lastBuilder, p.name(), ann(o, p), o.add(p.type()), p.name());
             if (!p.isNullable()) {
@@ -234,7 +241,7 @@ public final class Generator {
         }
     }
 
-    private static String wrappedType(String type) {
+    private static String innerType(String type) {
         int i = type.indexOf("<");
         if (i == -1) {
             return type;
@@ -248,7 +255,7 @@ public final class Generator {
         }
     }
 
-    private static String wrappingType(String type) {
+    private static String outerType(String type) {
         int i = type.indexOf("<");
         if (i == -1) {
             return type;
@@ -292,9 +299,12 @@ public final class Generator {
     private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
             List<Parameter> parameters, Construction construction, String implementationClassName) {
         for (Parameter p : parameters) {
+            o.line();
             if (p.isOptional()) {
-                o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(wrappingType(p.type())));
+                o.line("@%s", Nonnull.class);
+                o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(outerType(p.type())));
             } else {
+                o.line("@%s", ann(o, p));
                 o.line("private %s %s;", o.add(p.type()), p.name());
             }
         }
@@ -304,12 +314,12 @@ public final class Generator {
 
         for (Parameter p : parameters) {
             if (p.isOptional()) {
-                String wrappedType = wrappedType(p.type());
+                String wrappedType = innerType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
                 o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(wrappedType), p.name());
                 writeNullCheck(o, p);
-                o.line("this.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
+                o.line("this.%s = %s.of(%s);", p.name(), o.add(outerType(p.type())), p.name());
                 o.line("return this;");
                 o.close();
             }

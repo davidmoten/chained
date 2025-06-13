@@ -2,6 +2,7 @@ package com.github.davidmoten.chained.unittest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,6 +139,13 @@ public class ChainedProcessorTest {
         HasSet a = HasSet.name("woo").numbers().add(1, 2, 3).buildList();
         assertEquals("woo", a.name());
         assertEquals(Set.of(1, 2, 3), a.numbers());
+    }
+    
+    @Test
+    public void testOptionalAsNullable() {
+        OptionalAsNullable a = OptionalAsNullable.name("fred").build();
+        assertEquals("fred", a.name());
+        assertNull(a.age());   
     }
 
 }
