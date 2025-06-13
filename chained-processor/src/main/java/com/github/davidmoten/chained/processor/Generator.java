@@ -63,7 +63,7 @@ public final class Generator {
             return o.toString();
         } else if (optionals.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
-            o.line("public static %s of(%s %s) {", o.add(className), o.add(p.type()), p.name());
+            o.line("public static %s of(%s %s %s) {", o.add(className), ann(o, p), o.add(p.type()), p.name());
             writeBuildStatement(o, className, builderSimpleClassName, parameters, construction,
                     implementationClassName);
             o.close();
@@ -72,11 +72,13 @@ public final class Generator {
         } else {
             for (Parameter p : parameters) {
                 if (p.isOptional()) {
+                    o.line(ann(o, p));
                     o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(wrappingType(p.name())),
                             Optional.class);
                 } else {
                     TypeModel tm = typeModel(p.type());
                     String typ = COLLECTION_IMPLEMENTATION_TYPES.get(tm.baseType);
+                    o.line(ann(o, p));
                     if (typ == null) {
                         o.line("private %s %s;", o.add(p.type()), p.name());
                     } else
