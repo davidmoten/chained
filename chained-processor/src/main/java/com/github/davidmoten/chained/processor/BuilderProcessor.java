@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
@@ -158,7 +159,8 @@ public class BuilderProcessor extends AbstractProcessor {
                         && !x.getModifiers().contains(Modifier.DEFAULT)) //
                 .map(x -> (ExecutableElement) x) //
                 .filter(x -> x.getParameters().isEmpty()) //
-                .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString()))
+                .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString(),
+                        x.getAnnotation(Nullable.class) != null)) //
                 .collect(Collectors.toList());
     }
 
@@ -169,7 +171,8 @@ public class BuilderProcessor extends AbstractProcessor {
         List<Parameter> parameters = constructor //
                 .getParameters() //
                 .stream() //
-                .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString()))
+                .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString(),
+                        p.getAnnotation(Nullable.class) != null)) //
                 .collect(Collectors.toList());
 
         Set<Modifier> modifiers = constructor.getModifiers();

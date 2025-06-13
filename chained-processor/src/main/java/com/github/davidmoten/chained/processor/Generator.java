@@ -603,10 +603,12 @@ public final class Generator {
 
         private final String type;
         private final String name;
+        private final boolean nullable;
 
-        Parameter(String type, String name) {
+        Parameter(String type, String name, boolean nullable) {
             this.type = type;
             this.name = name;
+            this.nullable = nullable;
         }
 
         String type() {
@@ -623,6 +625,10 @@ public final class Generator {
 
         boolean isPrimitive() {
             return PRIMITIVES.contains(type);
+        }
+        
+        boolean isNullable() {
+            return nullable;
         }
 
         @Override
