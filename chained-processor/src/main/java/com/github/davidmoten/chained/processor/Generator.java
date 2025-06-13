@@ -307,8 +307,7 @@ public final class Generator {
             }
             writeBuilderForCollection(o, p, builderSimpleClassName, "this", "this");
             o.line();
-            String ann = "@" + (p.isNullable() ? o.add(Nullable.class) : o.add(Nonnull.class)) + " ";
-            o.line("public %s %s(%s%s %s) {", builderSimpleClassName, p.name(), ann, o.add(p.type()), p.name());
+            o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(p.type()), p.name());
             if (!p.isNullable()) {
                 writeNullCheck(o, p);
             }
@@ -321,6 +320,10 @@ public final class Generator {
         writeBuildStatement(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
         o.close();
         o.close();
+    }
+    
+    public static String ann(Output o, Parameter p) {
+        return "@" + (p.isNullable() ? o.add(Nullable.class) : o.add(Nonnull.class));
     }
 
     private static void writeBuilderForCollection(Output o, Parameter p, String builderSimpleClassName,
