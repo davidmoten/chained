@@ -112,13 +112,14 @@ public final class Generator {
                 if (!alwaysIncludeBuildMethod) {
                     writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
                     o.line();
-                    o.line("public %s %s(%s %s) {", o.add(className), q.name(), o.add(q.type()), q.name());
+                    o.line("public %s %s(%s %s %s) {", o.add(className), q.name(), ann(o, p), o.add(q.type()),
+                            q.name());
                     writeNullCheck(o, q);
                     assignBuilderField(o, q);
                 } else {
                     writeBuilderForCollection(o, q, builder, "_b.", "this");
                     o.line();
-                    o.line("public %s %s(%s %s) {", builder, q.name(), o.add(q.type()), q.name());
+                    o.line("public %s %s(%s %s %s) {", builder, q.name(), ann(o, p), o.add(q.type()), q.name());
                     writeNullCheck(o, q);
                     assignBuilderField(o, q);
                     o.line("return this;");
@@ -134,7 +135,7 @@ public final class Generator {
             } else {
                 String nextBuilder = builderClassName(q.name());
                 o.line();
-                o.line("public %s %s(%s %s) {", nextBuilder, q.name(), o.add(q.type()), q.name());
+                o.line("public %s %s(%s %s %s) {", nextBuilder, q.name(), ann(o, p), o.add(q.type()), q.name());
                 writeNullCheck(o, q);
                 assignBuilderField(o, q);
                 o.line("return new %s(_b);", nextBuilder);
@@ -154,14 +155,17 @@ public final class Generator {
         o.close();
         for (Parameter p : optionals) {
             o.line();
+            // TODO add ann
             o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(toPrimitive(wrappedType(p.type()))), p.name());
             writeNullCheck(o, p);
             o.line("this._b.%s = %s.of(%s);", p.name(), o.add(wrappingType(p.type())), p.name());
             o.line("return this;");
             o.close();
             o.line();
-            o.line("public %s %s(%s %s) {", lastBuilder, p.name(), o.add(p.type()), p.name());
-            writeNullCheck(o, p);
+            o.line("public %s %s(%s %s %s) {", lastBuilder, p.name(), ann(o, p), o.add(p.type()), p.name());
+            if (!p.isNullable()) {
+                writeNullCheck(o, p);
+            }
             assignBuilderField(o, p);
             o.line("return this;");
             o.close();
@@ -262,8 +266,10 @@ public final class Generator {
 
     private static void writeMandatorySetter(Output o, Parameter p) {
         String nextBuilder = builderClassName(p.name());
-        o.line("public %s %s(%s %s) {", nextBuilder, p.name(), o.add(p.type()), p.name());
-        writeNullCheck(o, p);
+        o.line("public %s %s(%s %s %s) {", nextBuilder, p.name(), ann(o, p), o.add(p.type()), p.name());
+        if (!p.isNullable()) {
+            writeNullCheck(o, p);
+        }
         o.line("this.%s = %s;", p.name(), p.name());
         o.line("return new %s(this);", nextBuilder);
         o.close();
@@ -323,7 +329,7 @@ public final class Generator {
         o.close();
         o.close();
     }
-    
+
     public static String ann(Output o, Parameter p) {
         return "@" + (p.isNullable() ? o.add(Nullable.class) : o.add(Nonnull.class));
     }
