@@ -55,6 +55,7 @@ public final class Generator {
         String builderSimpleClassName = Util.simpleClassName(builderClassName);
         o.line("@%s(\"%s\")", Generated.class, "com.github.davidmoten:chained-processor");
         o.line("public final class %s {", builderSimpleClassName);
+        o.line();
         List<Parameter> mandatory = parameters //
                 .stream() //
                 .filter(p -> !p.isOptional() && !p.isNullable()) //
@@ -67,7 +68,6 @@ public final class Generator {
             writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
             return o.toString();
         } else if (optionalOrNullable.isEmpty() && mandatory.size() == 1) {
-            o.line();
             Parameter p = mandatory.get(0);
             o.line("public static %s of(%s %s %s) {", o.add(className), ann(o, p), o.add(p.type()), p.name());
             writeBuildStatement(o, className, builderSimpleClassName, parameters, construction,
@@ -77,8 +77,6 @@ public final class Generator {
             return o.toString();
         } else {
             for (Parameter p : parameters) {
-                o.line();
-                o.line(ann(o, p));
                 if (p.isOptional()) {
                     o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(outerType(p.name())), Optional.class);
                 } else {
@@ -299,12 +297,9 @@ public final class Generator {
     private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
             List<Parameter> parameters, Construction construction, String implementationClassName) {
         for (Parameter p : parameters) {
-            o.line();
             if (p.isOptional()) {
-                o.line("@%s", Nonnull.class);
                 o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(outerType(p.type())));
             } else {
-                o.line("@%s", ann(o, p));
                 o.line("private %s %s;", o.add(p.type()), p.name());
             }
         }
