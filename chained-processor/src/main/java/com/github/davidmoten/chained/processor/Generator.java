@@ -23,6 +23,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import javax.annotation.Generated;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.davidmoten.chained.api.Helpers;
 import com.github.davidmoten.chained.api.ListBuilder;
@@ -305,8 +307,11 @@ public final class Generator {
             }
             writeBuilderForCollection(o, p, builderSimpleClassName, "this", "this");
             o.line();
-            o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(p.type()), p.name());
-            writeNullCheck(o, p);
+            String ann = "@" + (p.isNullable() ? o.add(Nullable.class) : o.add(Nonnull.class)) + " ";
+            o.line("public %s %s(%s%s %s) {", builderSimpleClassName, p.name(), ann, o.add(p.type()), p.name());
+            if (!p.isNullable()) {
+                writeNullCheck(o, p);
+            }
             assignField(o, p);
             o.line("return this;");
             o.close();
@@ -626,7 +631,7 @@ public final class Generator {
         boolean isPrimitive() {
             return PRIMITIVES.contains(type);
         }
-        
+
         boolean isNullable() {
             return nullable;
         }
