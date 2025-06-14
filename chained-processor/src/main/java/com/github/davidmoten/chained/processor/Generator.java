@@ -77,15 +77,16 @@ public final class Generator {
             return o.toString();
         } else {
             for (Parameter p : parameters) {
+                o.line(ann(o, p));
                 if (p.isOptional()) {
                     o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(outerType(p.name())), Optional.class);
                 } else {
-                    TypeModel tm = typeModel(p.type());
-                    String typ = COLLECTION_IMPLEMENTATION_TYPES.get(tm.baseType);
-                    if (typ == null) {
+                    Optional<String> typ = collectionImplementationType(p);
+                    if (!typ.isPresent() || p.isNullable()) {
                         o.line("private %s %s;", o.add(p.type()), p.name());
-                    } else
-                        o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), o.add(typ));
+                    } else {
+                        o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), o.add(typ.get()));
+                    }
                 }
             }
         }
@@ -182,6 +183,11 @@ public final class Generator {
         o.close();
         o.close();
         return o.toString();
+    }
+
+    private static Optional<String> collectionImplementationType(Parameter p) {
+        TypeModel tm = typeModel(p.type());
+        return Optional.ofNullable(COLLECTION_IMPLEMENTATION_TYPES.get(tm.baseType));
     }
 
     private static Map<String, String> createCollectionImplementationTypes() {
@@ -450,6 +456,7 @@ public final class Generator {
     }
 
     private static void assignField(Output o, Parameter p, String variable) {
+        // TODO handle lists, sets, all map types
         if (p.type().startsWith("java.util.Map<")) {
             o.line("%s.%s.putAll(%s);", variable, p.name(), p.name());
         } else {
