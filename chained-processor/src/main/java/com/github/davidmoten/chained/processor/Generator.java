@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,12 @@ public final class Generator {
         DIRECT, REFLECTION, INTERFACE_IMPLEMENTATION
     }
 
+    private enum CollectionType {
+        LIST, SET, MAP
+    }
+
     private static final Map<String, String> COLLECTION_IMPLEMENTATION_TYPES = createCollectionImplementationTypes();
+    private static final Map<String, CollectionType> COLLECTION_TYPES = createCollectionTypes();
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
@@ -77,16 +83,10 @@ public final class Generator {
             return o.toString();
         } else {
             for (Parameter p : parameters) {
-                o.line(ann(o, p));
                 if (p.isOptional()) {
                     o.line("private %s %s = %s.empty();", o.add(p.type()), o.add(outerType(p.name())), Optional.class);
                 } else {
-                    Optional<String> typ = collectionImplementationType(p);
-                    if (!typ.isPresent() || p.isNullable()) {
-                        o.line("private %s %s;", o.add(p.type()), p.name());
-                    } else {
-                        o.line("private %s %s = new %s<>();", o.add(p.type()), p.name(), o.add(typ.get()));
-                    }
+                    o.line("private %s %s;", o.add(p.type()), p.name());
                 }
             }
         }
@@ -183,6 +183,22 @@ public final class Generator {
         o.close();
         o.close();
         return o.toString();
+    }
+
+    private static Map<String, CollectionType> createCollectionTypes() {
+        Map<String, CollectionType> m = new HashMap<>();
+        m.put(List.class.getCanonicalName(), CollectionType.LIST);
+        m.put(LinkedList.class.getCanonicalName(), CollectionType.LIST);
+        m.put(ArrayList.class.getCanonicalName(), CollectionType.LIST);
+        m.put(Map.class.getCanonicalName(), CollectionType.MAP);
+        m.put(LinkedHashMap.class.getCanonicalName(), CollectionType.MAP);
+        m.put(SortedMap.class.getCanonicalName(), CollectionType.MAP);
+        m.put(NavigableMap.class.getCanonicalName(), CollectionType.MAP);
+        m.put(TreeMap.class.getCanonicalName(), CollectionType.MAP);
+        m.put(Set.class.getCanonicalName(), CollectionType.SET);
+        m.put(SortedSet.class.getCanonicalName(), CollectionType.SET);
+        m.put(TreeSet.class.getCanonicalName(), CollectionType.SET);
+        return m;
     }
 
     private static Optional<String> collectionImplementationType(Parameter p) {
@@ -361,6 +377,9 @@ public final class Generator {
             String valueType = tm.typeArguments.get(1).render();
             o.line("public %s<%s, %s, %s> %s() {", MapBuilder.class, o.add(keyType), o.add(valueType),
                     builderSimpleClassName, p.name());
+            o.line("%s%s = %s%s == null ? new %s<>() : %s%s;", fieldPrefix, p.name(), fieldPrefix, p.name(),
+                    collectionImplementationType(p).orElse(LinkedHashMap.class.getCanonicalName()), fieldPrefix,
+                    p.name());
             o.line("return new %s<>(() -> %s, %s%s);", MapBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
@@ -373,6 +392,8 @@ public final class Generator {
             o.line();
             String genericType = tm.typeArguments.get(0).render();
             o.line("public %s<%s, %s> %s() {", ListBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
+            o.line("%s%s = %s%s == null ? new %s<>() : %s%s;", fieldPrefix, p.name(), fieldPrefix, p.name(),
+                    collectionImplementationType(p).orElse(ArrayList.class.getCanonicalName()), fieldPrefix, p.name());
             o.line("return new %s<>(() -> %s, %s%s);", ListBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
@@ -385,6 +406,9 @@ public final class Generator {
             o.line();
             String genericType = tm.typeArguments.get(0).render();
             o.line("public %s<%s, %s> %s() {", SetBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
+            o.line("%s%s = %s%s == null ? new %s<>() : %s%s;", fieldPrefix, p.name(), fieldPrefix, p.name(),
+                    collectionImplementationType(p).orElse(LinkedHashSet.class.getCanonicalName()), fieldPrefix,
+                    p.name());
             o.line("return new %s<>(() -> %s, %s%s);", SetBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
@@ -456,9 +480,35 @@ public final class Generator {
     }
 
     private static void assignField(Output o, Parameter p, String variable) {
-        // TODO handle lists, sets, all map types
-        if (p.type().startsWith("java.util.Map<")) {
+        String outerType = outerType(p.type());
+        CollectionType collectionType = COLLECTION_TYPES.get(outerType);
+        if (collectionType == CollectionType.MAP) {
+            o.line("if (%s.%s == null) {", variable, p.name());
+            o.line("%s.%s = new %s<>();", variable, p.name(),
+                    collectionImplementationType(p).orElse(LinkedHashMap.class.getCanonicalName()));
+            o.close();
+            o.line("else {");
+            o.line("%s.%s.clear();", variable, p.name());
+            o.close();
             o.line("%s.%s.putAll(%s);", variable, p.name(), p.name());
+        } else if (collectionType == CollectionType.LIST) {
+            o.line("if (%s.%s == null) {", variable, p.name());
+            o.line("%s.%s = new %s<>();", variable, p.name(),
+                    collectionImplementationType(p).orElse(ArrayList.class.getCanonicalName()));
+            o.close();
+            o.line("else {");
+            o.line("%s.%s.clear();", variable, p.name());
+            o.close();
+            o.line("%s.%s.addAll(%s);", variable, p.name(), p.name());
+        } else if (collectionType == CollectionType.SET) {
+            o.line("if (%s.%s == null) {", variable, p.name());
+            o.line("%s.%s = new %s<>();", variable, p.name(),
+                    collectionImplementationType(p).orElse(LinkedHashSet.class.getCanonicalName()));
+            o.close();
+            o.line("else {");
+            o.line("%s.%s.clear();", variable, p.name());
+            o.close();
+            o.line("%s.%s.addAll(%s);", variable, p.name(), p.name());
         } else {
             o.line("%s.%s = %s;", variable, p.name(), p.name());
         }
