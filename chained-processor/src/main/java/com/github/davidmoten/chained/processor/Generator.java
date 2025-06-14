@@ -219,6 +219,7 @@ public final class Generator {
         add(m, Set.class, HashSet.class);
         add(m, SortedSet.class, TreeSet.class);
         add(m, TreeSet.class, TreeSet.class);
+        add(m, LinkedHashSet.class, LinkedHashSet.class);
         return m;
     }
 
@@ -407,7 +408,7 @@ public final class Generator {
             String genericType = tm.typeArguments.get(0).render();
             o.line("public %s<%s, %s> %s() {", SetBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
             o.line("%s%s = %s%s == null ? new %s<>() : %s%s;", fieldPrefix, p.name(), fieldPrefix, p.name(),
-                    collectionImplementationType(p).orElse(LinkedHashSet.class.getCanonicalName()), fieldPrefix,
+                    collectionImplementationType(p).orElse(HashSet.class.getCanonicalName()), fieldPrefix,
                     p.name());
             o.line("return new %s<>(() -> %s, %s%s);", SetBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
@@ -487,7 +488,7 @@ public final class Generator {
         } else if (collectionType == CollectionType.LIST) {
             setCollectionField(o, p, variable, ArrayList.class);
         } else if (collectionType == CollectionType.SET) {
-            setCollectionField(o, p, variable, LinkedHashSet.class);
+            setCollectionField(o, p, variable, HashSet.class);
         } else {
             o.line("%s.%s = %s;", variable, p.name(), p.name());
         }
