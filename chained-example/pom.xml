@@ -51,6 +51,10 @@
                             <version>${project.parent.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                    <!-- override default generated class package and name -->
+                    <compilerArgs>
+                        <arg>-AgeneratedClassName=$${pkg}.builder.$${simpleName}Builder</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
