@@ -484,23 +484,17 @@ public final class Generator {
         CollectionType collectionType = COLLECTION_TYPES.get(outerType);
         if (collectionType == CollectionType.MAP) {
             setCollectionField(o, p, variable, LinkedHashMap.class);
-            o.line("%s.%s.clear();", variable, p.name());
-            o.line("%s.%s.putAll(%s);", variable, p.name(), p.name());
         } else if (collectionType == CollectionType.LIST) {
             setCollectionField(o, p, variable, ArrayList.class);
-            o.line("%s.%s.clear();", variable, p.name());
-            o.line("%s.%s.addAll(%s);", variable, p.name(), p.name());
         } else if (collectionType == CollectionType.SET) {
             setCollectionField(o, p, variable, LinkedHashSet.class);
-            o.line("%s.%s.clear();", variable, p.name());
-            o.line("%s.%s.addAll(%s);", variable, p.name(), p.name());
         } else {
             o.line("%s.%s = %s;", variable, p.name(), p.name());
         }
     }
 
     private static void setCollectionField(Output o, Parameter p, String variable, Class<?> collectionImplementation) {
-        o.line("%s.%s = %s.createCollectionIfNotPresent(", //
+        o.line("%s.%s = %s.addToCollection(", //
                 variable, //
                 p.name(), //
                 Helpers.class);

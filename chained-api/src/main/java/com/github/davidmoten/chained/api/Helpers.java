@@ -29,23 +29,42 @@ public final class Helpers {
         return o;
     }
 
-    public static <T> T createCollectionIfNotPresent(T currentValue, T newValue, Supplier<? extends T> factory, boolean isNullable) {
+    @SuppressWarnings("unchecked")
+    public static <T> T addToCollection(T currentValue, T newValue, Supplier<? extends T> factory, boolean isNullable) {
+        T result;
         if (isNullable) {
-           if (newValue == null) {
-               return newValue;
-           } else if (currentValue == null) {
-               return factory.get();
-           } else {
-               return currentValue;
-           }
+            if (newValue == null) {
+                result = null;
+            } else if (currentValue == null) {
+                result = factory.get();
+            } else {
+                result = currentValue;
+            }
         } else {
             Preconditions.checkNotNull(newValue, "newValue");
             if (currentValue == null) {
-                return factory.get();
+                result = factory.get();
             } else {
-                return currentValue;
+                result = currentValue;
             }
         }
+        if (result != null) {
+            // note that newValue cannot be null here
+            if (result instanceof Map) {
+                Map<Object, Object> r = ((Map<Object, Object>) result);
+                r.clear();
+                r.putAll((Map<?, ?>) newValue);
+            } else if (result instanceof List) {
+                List<Object> r = ((List<Object>) result);
+                r.clear();
+                r.addAll((List<?>) newValue);
+            } else if (result instanceof Set) {
+                Set<Object> r = ((Set<Object>) result);
+                r.clear();
+                r.addAll((Set<?>) newValue);
+            }
+        }
+        return result;
     }
 
 }
