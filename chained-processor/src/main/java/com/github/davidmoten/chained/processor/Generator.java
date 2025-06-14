@@ -749,6 +749,7 @@ public final class Generator {
         for (Parameter p : parameters) {
             o.line();
             o.line("@%s", Override.class);
+            o.line(ann(o, p));
             o.line("public %s %s() {", o.add(p.type()), p.name());
             o.line("return %s;", p.name());
             o.close();
