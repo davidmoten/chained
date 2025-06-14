@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public final class Helpers {
 
@@ -26,6 +27,25 @@ public final class Helpers {
 
     public static <T> T unmodifiable(T o) {
         return o;
+    }
+
+    public static <T> T createCollectionIfNotPresent(T currentValue, T newValue, Supplier<? extends T> factory, boolean isNullable) {
+        if (isNullable) {
+           if (newValue == null) {
+               return newValue;
+           } else if (currentValue == null) {
+               return factory.get();
+           } else {
+               return currentValue;
+           }
+        } else {
+            Preconditions.checkNotNull(newValue, "newValue");
+            if (currentValue == null) {
+                return factory.get();
+            } else {
+                return currentValue;
+            }
+        }
     }
 
 }

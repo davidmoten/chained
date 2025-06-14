@@ -483,35 +483,35 @@ public final class Generator {
         String outerType = outerType(p.type());
         CollectionType collectionType = COLLECTION_TYPES.get(outerType);
         if (collectionType == CollectionType.MAP) {
-            o.line("if (%s.%s == null) {", variable, p.name());
-            o.line("%s.%s = new %s<>();", variable, p.name(),
-                    collectionImplementationType(p).orElse(LinkedHashMap.class.getCanonicalName()));
-            o.close();
-            o.line("else {");
+            setCollectionField(o, p, variable, LinkedHashMap.class);
             o.line("%s.%s.clear();", variable, p.name());
-            o.close();
             o.line("%s.%s.putAll(%s);", variable, p.name(), p.name());
         } else if (collectionType == CollectionType.LIST) {
-            o.line("if (%s.%s == null) {", variable, p.name());
-            o.line("%s.%s = new %s<>();", variable, p.name(),
-                    collectionImplementationType(p).orElse(ArrayList.class.getCanonicalName()));
-            o.close();
-            o.line("else {");
+            setCollectionField(o, p, variable, ArrayList.class);
             o.line("%s.%s.clear();", variable, p.name());
-            o.close();
             o.line("%s.%s.addAll(%s);", variable, p.name(), p.name());
         } else if (collectionType == CollectionType.SET) {
-            o.line("if (%s.%s == null) {", variable, p.name());
-            o.line("%s.%s = new %s<>();", variable, p.name(),
-                    collectionImplementationType(p).orElse(LinkedHashSet.class.getCanonicalName()));
-            o.close();
-            o.line("else {");
+            setCollectionField(o, p, variable, LinkedHashSet.class);
             o.line("%s.%s.clear();", variable, p.name());
-            o.close();
             o.line("%s.%s.addAll(%s);", variable, p.name(), p.name());
         } else {
             o.line("%s.%s = %s;", variable, p.name(), p.name());
         }
+    }
+
+    private static void setCollectionField(Output o, Parameter p, String variable, Class<?> collectionImplementation) {
+        o.line("%s.%s = %s.createCollectionIfNotPresent(", //
+                variable, //
+                p.name(), //
+                Helpers.class);
+        o.right().right().right();
+        o.line("%s.%s, %s, () -> new %s<>(), %s);", //
+                variable, //
+                p.name(), //
+                p.name(), o.add(collectionImplementationType(p) //
+                        .orElse(collectionImplementation.getCanonicalName())), //
+                p.isNullable());
+        o.left().left().left();
     }
 
     private static void assignField(Output o, Parameter p) {
