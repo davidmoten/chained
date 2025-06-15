@@ -42,79 +42,89 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
-            if (element instanceof TypeElement) {
-                TypeElement typeElement = (TypeElement) element;
-                log(Kind.NOTE, "processing Builder annotation: " //
-                        + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " "
-                        + typeElement.getModifiers());
-                if (typeElement.getNestingKind() == NestingKind.MEMBER
-                        && !typeElement.getModifiers().contains(Modifier.STATIC)) {
-                    log(Kind.WARNING, "nested classes must be static to use @Builder", element);
-                    continue;
-                }
-                String packageName = processingEnv //
-                        .getElementUtils() //
-                        .getPackageOf(typeElement) //
-                        .getQualifiedName().toString();
-                String simpleClassName = typeElement.getSimpleName().toString();
+        try {
+            for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
+                if (element instanceof TypeElement) {
+                    TypeElement typeElement = (TypeElement) element;
+                    log(Kind.NOTE, "processing Builder annotation: " //
+                            + typeElement + " " + typeElement.getKind() + " " + typeElement.getNestingKind() + " "
+                            + typeElement.getModifiers());
+                    if (typeElement.getNestingKind() == NestingKind.MEMBER
+                            && !typeElement.getModifiers().contains(Modifier.STATIC)) {
+                        log(Kind.WARNING, "nested classes must be static to use @Builder", element);
+                        continue;
+                    }
+                    String packageName = processingEnv //
+                            .getElementUtils() //
+                            .getPackageOf(typeElement) //
+                            .getQualifiedName().toString();
+                    String simpleClassName = typeElement.getSimpleName().toString();
 
-                String defaultBuilderClassName = processingEnv //
-                        .getOptions().getOrDefault("generatedClassName", DEFAULT_BUILDER_CLASS_NAME_TEMPLATE);
-                Builder annotation = typeElement.getAnnotation(Builder.class);
-                String templatedBuilderClassName = annotation.value() == null ? defaultBuilderClassName
-                        : annotation.value();
-                
-                String builderClassName = templatedBuilderClassName //
-                        .replace("${pkg}", packageName) //
-                        .replace("${simpleName}", simpleClassName);
-                log(Kind.NOTE, "resolved builder class name: " + builderClassName);
-                String templatedImplementationClassName = annotation.implementationClassName();
-                String implementationClassName = templatedImplementationClassName //
-                        .replace("${pkg}", packageName) //
-                        .replace("${simpleName}", simpleClassName);
-                try {
-                    Filer filer = processingEnv.getFiler();
-                    {
-                        JavaFileObject file = filer.createSourceFile(builderClassName);
-                        try (PrintWriter out = new PrintWriter(file.openWriter())) {
-                            if (typeElement.getKind() == ElementKind.INTERFACE) {
-                                generateFromInterface(typeElement, packageName, annotation, builderClassName,
-                                        implementationClassName, out);
-                            } else if (typeElement.getKind() == ElementKind.CLASS
-                                    || typeElement.getKind().name().equals("RECORD")) {
-                                generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName,
-                                        implementationClassName, out);
-                            } else {
-                                log(Kind.WARNING, "class type " + typeElement.getKind()
-                                        + " not supported for builder generation");
+                    String defaultBuilderClassName = processingEnv //
+                            .getOptions() //
+                            .getOrDefault("generatedClassName", DEFAULT_BUILDER_CLASS_NAME_TEMPLATE);
+                    Builder annotation = typeElement.getAnnotation(Builder.class);
+                    String templatedBuilderClassName = annotation.value() == null ? defaultBuilderClassName
+                            : annotation.value();
+
+                    String builderClassName = templatedBuilderClassName //
+                            .replace("${pkg}", packageName) //
+                            .replace("${simpleName}", simpleClassName);
+                    log(Kind.NOTE, "resolved builder class name: " + builderClassName);
+                    String templatedImplementationClassName = annotation.implementationClassName();
+                    String implementationClassName = templatedImplementationClassName //
+                            .replace("${pkg}", packageName) //
+                            .replace("${simpleName}", simpleClassName);
+                    try {
+                        Filer filer = processingEnv.getFiler();
+                        {
+                            JavaFileObject file = filer.createSourceFile(builderClassName);
+                            try (PrintWriter out = new PrintWriter(file.openWriter())) {
+                                if (typeElement.getKind() == ElementKind.INTERFACE) {
+                                    generateFromInterface(typeElement, packageName, annotation, builderClassName,
+                                            implementationClassName, out);
+                                } else if (typeElement.getKind() == ElementKind.CLASS
+                                        || typeElement.getKind().name().equals("RECORD")) {
+                                    generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName,
+                                            implementationClassName, out);
+                                } else {
+                                    log(Kind.WARNING, "class type " + typeElement.getKind()
+                                            + " not supported for builder generation");
+                                }
                             }
                         }
-                    }
-                    if (typeElement.getKind() == ElementKind.INTERFACE) {
-                        JavaFileObject file = filer.createSourceFile(implementationClassName);
-                        try (PrintWriter out = new PrintWriter(file.openWriter())) {
-                            if (typeElement.getKind() == ElementKind.INTERFACE) {
-                                String className = typeElement.getQualifiedName().toString();
-                                String code = Generator.generateImplemetationClass(className,
-                                        parametersFromInterface(typeElement), implementationClassName,
-                                        checkMethodName(typeElement));
-                                out.println(code);
+                        if (typeElement.getKind() == ElementKind.INTERFACE) {
+                            JavaFileObject file = filer.createSourceFile(implementationClassName);
+                            try (PrintWriter out = new PrintWriter(file.openWriter())) {
+                                if (typeElement.getKind() == ElementKind.INTERFACE) {
+                                    String className = typeElement.getQualifiedName().toString();
+                                    String code = Generator.generateImplemetationClass(className,
+                                            parametersFromInterface(typeElement), implementationClassName,
+                                            checkMethodName(typeElement));
+                                    out.println(code);
+                                }
                             }
                         }
-                    }
 
-                } catch (IOException | RuntimeException e) {
-                    ByteArrayOutputStream b = new ByteArrayOutputStream();
-                    try (PrintWriter writer = new PrintWriter(b)) {
-                        e.printStackTrace(writer);
+                    } catch (IOException | RuntimeException e) {
+                        ByteArrayOutputStream b = new ByteArrayOutputStream();
+                        try (PrintWriter writer = new PrintWriter(b)) {
+                            e.printStackTrace(writer);
+                        }
+                        log(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8), element);
+                        return false;
                     }
-                    log(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8), element);
-                    return false;
                 }
             }
+            return true;
+        } catch (RuntimeException e) {
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            try (PrintWriter writer = new PrintWriter(b)) {
+                e.printStackTrace(writer);
+            }
+            log(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8));
+            return false;
         }
-        return true;
     }
 
     private void log(Kind kind, String message, Element element) {
