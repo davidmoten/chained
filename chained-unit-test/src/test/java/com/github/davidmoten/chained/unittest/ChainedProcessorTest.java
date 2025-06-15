@@ -160,4 +160,28 @@ public class ChainedProcessorTest {
         }
     }
 
+    @Test
+    public void testTwoNullable() {
+        {
+            TwoNullable a = TwoNullable.builder().name("fred").age(10).build();
+            assertEquals("fred", a.name());
+            assertEquals(10, (int) a.age());
+        }
+        {
+            TwoNullable a = TwoNullable.builder().name("fred").age(null).build();
+            assertEquals("fred", a.name());
+            assertNull(a.age());
+        }
+        {
+            TwoNullable a = TwoNullable.builder().name(null).age(null).build();
+            assertNull(a.name());
+            assertNull(a.age());
+        }
+        {
+            TwoNullable a = TwoNullable.builder().build();
+            assertNull(a.name());
+            assertNull(a.age());
+        }
+    }
+
 }
