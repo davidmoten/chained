@@ -184,4 +184,23 @@ public class ChainedProcessorTest {
         }
     }
 
+    @Test
+    public void testNullableMap() {
+        {
+            NullableMap a = NullableMap.name("fred").map(Map.of("a", 1, "b", 2)).build();
+            assertEquals("fred", a.name());
+            assertEquals(Map.of("a", 1, "b", 2), a.map());
+        }
+        {
+            NullableMap a = NullableMap.name("fred").map(null).build();
+            assertEquals("fred", a.name());
+            assertNull(a.map());
+        }
+
+        {
+            NullableMap a = NullableMap.name("fred").build();
+            assertEquals("fred", a.name());
+            assertNull(a.map());
+        }
+    }
 }

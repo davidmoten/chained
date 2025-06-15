@@ -10,18 +10,30 @@ import java.util.function.Supplier;
 public final class Helpers {
 
     public static <K, V> Map<K, V> unmodifiable(Map<K, V> o) {
+        if (o == null) {
+            return null;
+        }
         return Collections.unmodifiableMap(o);
     }
 
     public static <T> List<T> unmodifiable(List<T> o) {
+        if (o == null) {
+            return null;
+        }
         return Collections.unmodifiableList(o);
     }
 
     public static <T> Set<T> unmodifiable(Set<T> o) {
+        if (o == null) {
+            return null;
+        }
         return Collections.unmodifiableSet(o);
     }
 
     public static <T> Collection<T> unmodifiable(Collection<T> o) {
+        if (o == null) {
+            return null;
+        }
         return Collections.unmodifiableCollection(o);
     }
 
