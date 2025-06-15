@@ -15,7 +15,7 @@ Java annotation processor to generate chained immutable builders including map a
 ### Maven
 Make these changes to your `pom.xml`:
 * add *chained-api* artifact to the dependencies
-* add the *chained-processor* annotation processor dependency to the *maven-compiler-plugin*
+* configure *maven-compiler-plugin* to use the *chained-processor* annotation processor
 * configure *build-helper-maven-plugin* to ensure generated source is picked up in IDEs and the sources jar
 
 ```xml
