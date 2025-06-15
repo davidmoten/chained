@@ -15,7 +15,7 @@ public @interface Builder {
      * 
      * @return full class name template for generated builder class
      */
-    String value();
+    String value() default "";
 
     boolean alwaysIncludeBuildMethod() default false;
 

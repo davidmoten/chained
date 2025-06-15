@@ -64,7 +64,8 @@ public final class BuilderProcessor extends AbstractProcessor {
                             .getOptions() //
                             .getOrDefault("generatedClassName", DEFAULT_BUILDER_CLASS_NAME_TEMPLATE);
                     Builder annotation = typeElement.getAnnotation(Builder.class);
-                    String templatedBuilderClassName = annotation.value() == null ? defaultBuilderClassName
+                    String templatedBuilderClassName = annotation.value() == null || annotation.value().equals("")
+                            ? defaultBuilderClassName
                             : annotation.value();
 
                     String builderClassName = templatedBuilderClassName //
