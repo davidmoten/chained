@@ -2,7 +2,8 @@
 Java annotation processor to generate chained immutable builders including map and list builders.
 * chained builders provide compile-time *type-safety* to ensure mandatory fields are always set
 * builders include map and list builders (supporting multiple implementations)
-* targets **null-safe** usage (`java.util.Optional` used for optional fields and optional return values)
+* supports **null-safe** usage (`java.util.Optional` used for optional fields and optional return values)
+* supports **null** usage (use `javax.annotation.Nullable`)
 * especially concise usage with java `record` types
 * generates builders for `class`, `record` and `interface` types
 * supports JDK 8+, Maven, Gradle
@@ -120,7 +121,9 @@ or
 ## Examples
 
 ### Record types
-java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*:
+
+#### Null-safe usage
+java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*, making use of `Optional` for optional fields:
 
 ```java
 package mine;
@@ -197,6 +200,81 @@ Person a = Person
     .name("Helen")
     .yearOfBirth(2001)
     .comments(Optional.of("cool person"))
+    .build();
+```
+
+#### Nullable usage
+java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*, making use of `null`` for optional fields:
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+import javax.annotation.Nullable;
+
+@Builder
+public final record Person(String name, int yearOfBirth, @Nullable String comments) {}
+```
+Using defaults this will generate the class `mine.builder.PersonBuilder`.
+
+We can use it like this:
+
+```java
+Person p = PersonBuilder
+    .builder()
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments("enjoyed the event")
+    .build();
+```
+From a discoverability perspective this is not great because a user has to know of the existence of `PersonBuilder`. Let's improve this by adding a static builder method to `Person` class:
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+import mine.builder.PersonBuilder.BuilderWithName;
+
+@Builder
+public final record Person(String name, int yearOfBirth, Optional<String> comments) {
+    public static BuilderWithName name(String name) {
+        return PersonBuilder.builder().name(name);
+    }
+}
+```
+Now we create a `Person` like this:
+```java
+Person p = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments("enjoyed the event")
+    .build();
+```
+We've knocked out the `.builder()` call (`name` is mandatory so always has to be specified, forced at compile time), and we have discoverability back (because the creation of `Person` is via a factory method on the `Person` class. 
+
+It's very convenient for us that the annotation processor being run by the maven compiler plugin can do this. `javac` hands java structures parsed from source to the annotation processor and doesn't check that all references to classes actually exist till multi-round annotation processing (generation) has finished.
+
+Note that the `comments` field is optional and these are our creation options in the builder:
+
+```java
+// leave comments out
+Person a = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .build();
+
+// pass empty comments
+Person a = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments(null)
+    .build();
+
+// pass comments
+Person a = Person
+    .name("Helen")
+    .yearOfBirth(2001)
+    .comments("cool person")
     .build();
 ```
 
