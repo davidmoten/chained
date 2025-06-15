@@ -1,7 +1,7 @@
 # chained
 Java annotation processor to generate chained immutable builders including map and list builders.
 * chained builders provide compile-time *type-safety* to ensure mandatory fields are always set
-* builders include map and list builders (supporting multiple implementations)
+* builders include map, list, and set builders (supporting multiple implementations)
 * supports **null-safe** usage (`java.util.Optional` used for optional fields and optional return values)
 * supports **null** usage (use `javax.annotation.Nullable`)
 * especially concise usage with java `record` types
