@@ -31,7 +31,9 @@ import com.github.davidmoten.chained.processor.Generator.Construction;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
 
 @SupportedAnnotationTypes("com.github.davidmoten.chained.api.annotation.Builder")
-public class BuilderProcessor extends AbstractProcessor {
+public final class BuilderProcessor extends AbstractProcessor {
+
+    private static final String DEFAULT_BUILDER_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Builder";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -57,11 +59,16 @@ public class BuilderProcessor extends AbstractProcessor {
                         .getQualifiedName().toString();
                 String simpleClassName = typeElement.getSimpleName().toString();
 
+                String defaultBuilderClassName = processingEnv //
+                        .getOptions().getOrDefault("generatedClassName", DEFAULT_BUILDER_CLASS_NAME_TEMPLATE);
                 Builder annotation = typeElement.getAnnotation(Builder.class);
-                String templatedBuilderClassName = annotation.value();
+                String templatedBuilderClassName = annotation.value() == null ? defaultBuilderClassName
+                        : annotation.value();
+                
                 String builderClassName = templatedBuilderClassName //
                         .replace("${pkg}", packageName) //
                         .replace("${simpleName}", simpleClassName);
+                log(Kind.NOTE, "resolved builder class name: " + builderClassName);
                 String templatedImplementationClassName = annotation.implementationClassName();
                 String implementationClassName = templatedImplementationClassName //
                         .replace("${pkg}", packageName) //

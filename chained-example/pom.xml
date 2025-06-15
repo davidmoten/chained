@@ -53,7 +53,7 @@
                     </annotationProcessorPaths>
                     <!-- override default generated class package and name -->
                     <compilerArgs>
-                        <arg>-AgeneratedClassName=$${pkg}.builder.$${simpleName}Builder</arg>
+                        <arg>-AgeneratedClassName=$${pkg}.builders.$${simpleName}Builder</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
