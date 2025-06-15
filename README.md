@@ -507,7 +507,7 @@ public Order(String id, Optional<Integer> number) {
 }
 ```
 
-This is also achievable with the `interface` type but not as cleanly because we have exposed two `number` accessors in the public API:
+This is also achievable with the `interface` type but not as cleanly because we choose to expose two `number` accessors in the public API:
 
 ```java
 public interface Order {
