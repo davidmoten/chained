@@ -437,6 +437,8 @@ HasNumbers a = HasNumbers
 
 Fields that are declared with the types below will have corresponding set builders:
 * `java.util.Set`
+* `java.util.HashSet`
+* `java.util.LinkedHashSet`
 * `java.util.SortedSet`
 * `java.util.TreeSet`
 
