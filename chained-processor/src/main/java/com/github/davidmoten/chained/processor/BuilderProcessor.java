@@ -71,7 +71,6 @@ public final class BuilderProcessor extends AbstractProcessor {
                     String builderClassName = templatedBuilderClassName //
                             .replace("${pkg}", packageName) //
                             .replace("${simpleName}", simpleClassName);
-                    log(Kind.NOTE, "resolved builder class name: " + builderClassName);
                     String templatedImplementationClassName = annotation.implementationClassName();
                     String implementationClassName = templatedImplementationClassName //
                             .replace("${pkg}", packageName) //
