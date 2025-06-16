@@ -207,7 +207,7 @@ public class ChainedProcessorTest {
     @Test
     public void testCopy1() {
         Mixed a = Mixed.name("fred").city("London").age(10).description("someone").build();
-        Mixed b = Mixed.copy(a).withCity("Paris").build();
+        Mixed b = Mixed.copy(a).city("Paris").build();
         assertEquals("fred", b.name());
         assertEquals("Paris", b.city());
         assertEquals("someone", b.description().get());
@@ -217,7 +217,7 @@ public class ChainedProcessorTest {
     @Test
     public void testTwoOptional() {
         TwoOptional a = TwoOptional.builder().name("fred").age(10).build();
-        TwoOptional b = a.copy().withName("julia").build();
+        TwoOptional b = a.copy().name("julia").build();
         assertEquals("julia", b.name().get());
         assertEquals(10, (int) b.age().get());
     }

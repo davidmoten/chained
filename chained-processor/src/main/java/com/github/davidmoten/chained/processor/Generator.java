@@ -211,7 +211,7 @@ public final class Generator {
             for (Parameter p : parameters) {
                 {
                     o.line();
-                    o.line("public CopyBuilder with%s(%s %s %s) {", upperFirst(p.name()), ann(o, p), o.add(p.type()),
+                    o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()),
                             p.name());
                     String args = parameters.stream() //
                             .map(x -> x.name().equals(p.name()) ? p.name() : "value." + x.name() + "()") //
@@ -227,7 +227,7 @@ public final class Generator {
 
                 if (p.isOptional() && !p.isNullable()) {
                     o.line();
-                    o.line("public CopyBuilder with%s(%s %s %s) {", upperFirst(p.name()), ann(o, p),
+                    o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p),
                             o.add(innerType(p.type())), p.name());
                     String args = parameters.stream() //
                             .map(x -> x.name().equals(p.name()) ? (o.add(Optional.class) + ".of(" + p.name() + ")")
