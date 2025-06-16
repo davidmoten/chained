@@ -3,13 +3,13 @@ Java annotation processor to generate chained immutable builders including map a
 * chained builders provide compile-time *type-safety* to ensure mandatory fields are always set
 * builders include map, list, and set builders (supporting multiple implementations)
 * supports **null-safe** usage (`java.util.Optional` used for optional fields and optional return values)
-* supports **null** usage (use `javax.annotation.Nullable`)
+* supports **null** usage (use `javax.annotation.Nullable` to pass `null` to optional values)
 * especially concise usage with java `record` types
 * generates builders for `class`, `record` and `interface` types
 * supports JDK 8+, Maven, Gradle
 * generates source (as well as compiled classes) so is IDE friendly as long as the IDE is *build-helper-maven-plugin* aware.
 * no internal class references (no funky stuff, follows public api of javac annotation processor)
-* no dedicated support for Jackson or other annotations (just use JDK 14+ `record`!)
+* no dedicated support for Jackson or other annotations (just use JDK 14+ `record` and annotate normally!)
 
 ## Getting started
 
@@ -520,3 +520,31 @@ public interface Order {
     }
 }
 ```
+## Motivation
+1. Fluent, Readable API
+* Chained focuses specifically on generating fluent builder patterns with concise, readable chaining methods.
+* While Immutables and AutoValue provide builders, Chained is explicitly designed around the idea of fluent method chaining, making it extremely intuitive and easy to read.
+* Lombok does generate builders, but the chaining style and flexibility provided by Chained specifically targets readability and intuitive construction.
+2. Lightweight and Minimalistic
+* Chained is intentionally lightweight, generating minimal, predictable code. It avoids complex feature sets and thus remains simple and straightforward.
+* Immutables and AutoValue offer rich feature sets that may include additional complexity (like JSON serialization, derived attributes, modifiable types).
+* Lombok has a wide scope, generating diverse boilerplate code (getters, setters, equals/hashCode, etc.) beyond just builders, which adds complexity in debugging and IDE integration.
+3. Explicit and Transparent Generated Code
+* Chained produces clear, maintainable, and predictable generated code. Its explicit builder patterns help developers quickly grasp object construction logic.
+* Unlike Lombok, which can obscure generated code in IDEs and cause transparency and debugging challenges, Chained ensures that the generated builders are straightforward and easy to inspect.
+* Immutables and AutoValue also generate explicit code, but Chained positions itself as simpler and more focused on builders alone.
+4. Optimized for Modern Java (Records and Immutable Types)
+* Chained is well-suited to modern Java features like records and immutable data types, providing easy integration and support without complex configuration or dependency management.
+* Immutables and AutoValue also support modern Java, but they require more elaborate setup and configuration.
+* Lombok’s support for records and newer Java features is evolving but can lag behind or require additional steps to integrate effectively.
+5. Low Barrier to Adoption
+* Chained provides a minimal and straightforward annotation processing model, making it easy to integrate into existing projects without extensive setup or dependency management.
+* Immutables and AutoValue require more elaborate setup and learning curve.
+* Lombok, while popular, may introduce IDE and build configuration complexity, as it integrates deeply into the compilation process and IDE tooling.
+### Summary of When to Prefer Chained
+* You value simplicity, readability, and explicitness in builder code generation.
+* You want minimalism and ease of integration without extensive setup or advanced feature overhead.
+* You're using modern Java features like records and immutable types, and you prefer a solution directly tailored to this context.
+* You want to avoid the complexity, opacity, or maintenance overhead associated with broader and more complex code-generation tools like Lombok, Immutables, and AutoValue.
+In short, Chained provides a lightweight, modern, fluent, and explicitly readable solution specifically optimized for generating chained builders, offering a simpler alternative to the richer, but more complex ecosystems of Immutables, Lombok, and AutoValue.
+
