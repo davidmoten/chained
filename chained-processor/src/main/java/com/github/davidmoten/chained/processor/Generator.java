@@ -209,18 +209,38 @@ public final class Generator {
                 o.close();
             }
             for (Parameter p : parameters) {
-                o.line();
-                o.line("public CopyBuilder with%s(%s %s) {", upperFirst(p.name()), o.add(p.type()), p.name());
-                String args = parameters.stream() //
-                        .map(x -> x.name().equals(p.name()) ? p.name() : "value." + x.name() + "()") //
-                        .collect(Collectors.joining(", "));
-                if (construction == Construction.REFLECTION) {
-                    o.line("this.value = create(%s);", args);
-                } else {
-                    o.line("this.value = new %s(%s);", o.add(className), args);
+                {
+                    o.line();
+                    o.line("public CopyBuilder with%s(%s %s %s) {", upperFirst(p.name()), ann(o, p), o.add(p.type()),
+                            p.name());
+                    String args = parameters.stream() //
+                            .map(x -> x.name().equals(p.name()) ? p.name() : "value." + x.name() + "()") //
+                            .collect(Collectors.joining(", "));
+                    if (construction == Construction.REFLECTION) {
+                        o.line("this.value = create(%s);", args);
+                    } else {
+                        o.line("this.value = new %s(%s);", o.add(className), args);
+                    }
+                    o.line("return this;");
+                    o.close();
                 }
-                o.line("return this;");
-                o.close();
+
+                if (p.isOptional() && !p.isNullable()) {
+                    o.line();
+                    o.line("public CopyBuilder with%s(%s %s %s) {", upperFirst(p.name()), ann(o, p),
+                            o.add(innerType(p.type())), p.name());
+                    String args = parameters.stream() //
+                            .map(x -> x.name().equals(p.name()) ? (o.add(Optional.class) + ".of(" + p.name() + ")")
+                                    : "value." + x.name() + "()") //
+                            .collect(Collectors.joining(", "));
+                    if (construction == Construction.REFLECTION) {
+                        o.line("this.value = create(%s);", args);
+                    } else {
+                        o.line("this.value = new %s(%s);", o.add(className), args);
+                    }
+                    o.line("return this;");
+                    o.close();
+                }
             }
             o.line();
             o.line("public %s build() {", o.add(className));
@@ -630,7 +650,11 @@ public final class Generator {
         }
 
         public Output left() {
+            try {
             indent = indent.substring(0, indent.length() - 4);
+            } catch (IndexOutOfBoundsException e) {
+                throw new IllegalStateException("cannot left indent when indent is empty, output contents so far:\n" + toString(), e);
+            }
             return this;
         }
 
