@@ -281,7 +281,7 @@ Person a = Person
 ```
 
 ### Copy 
-Let's look at the `Person` record example again, and we'll add a static `copy` method:
+Let's look at the `Person` record example again, and we'll add a `copy` method:
 
 ```java
 package mine;
@@ -296,7 +296,7 @@ public final record Person(String name, int yearOfBirth, Optional<String> commen
         return PersonBuilder.builder().name(name);
     }
     
-    public static CopyBuilder copy() {
+    public CopyBuilder copy() {
         return PersonBuilder.copy(this);
     }
 }
