@@ -1,4 +1,5 @@
 # chained
+
 Java annotation processor to generate chained immutable builders including map and list builders.
 * chained builders provide compile-time *type-safety* to ensure mandatory fields are always set
 * builders include map, list, and set builders (supporting multiple implementations)
@@ -521,6 +522,8 @@ public interface Order {
 }
 ```
 ## Motivation
+Here's a comparison of Chained with Immutables, AutoValue and Lombok tools.
+
 1. Fluent, Readable API
 * Chained focuses specifically on generating fluent builder patterns with concise, readable chaining methods.
 * While Immutables and AutoValue provide builders, Chained is explicitly designed around the idea of fluent method chaining, making it extremely intuitive and easy to read.
