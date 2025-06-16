@@ -522,7 +522,7 @@ public interface Order {
 }
 ```
 ## Motivation
-Here's a comparison of Chained with Immutables, AutoValue and Lombok tools.
+Here's a comparison of Chained with [Immutables](https://immutables.github.io), [AutoValue](https://github.com/google/auto/tree/master/value) and [Lombok](https://projectlombok.org/) tools.
 
 **Fluent, Readable API**
 * Chained focuses specifically on generating fluent builder patterns with concise, readable chaining methods.
