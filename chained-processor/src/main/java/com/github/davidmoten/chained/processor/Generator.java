@@ -181,6 +181,36 @@ public final class Generator {
         o.line("return _b.build();");
         o.close();
         o.close();
+        if (construction != Construction.INTERFACE_IMPLEMENTATION) {
+            o.line();
+            o.line("public static final class CopyBuilder {");
+            o.line();
+            o.line("private final %s value;", o.add(className));
+            o.line();
+            o.line("private CopyBuilder(%s value) {", o.add(className));
+            o.line("this.value = value;");
+            o.close();
+            if (construction == Construction.REFLECTION) {
+                o.line();
+                o.line("private static %s create(Object... args) {", o.add(className));
+                writeBuildStatement(o, className, parameters, construction, implementationClassName, "args");
+                o.close();
+            }
+            for (Parameter p : parameters) {
+                o.line();
+                o.line("public %s with%s(%s %s) {", o.add(className), upperFirst(p.name()), o.add(p.type()), p.name());
+                String args = parameters.stream() //
+                        .map(x -> x.name().equals(p.name()) ? p.name() : "value." + x.name() + "()") //
+                        .collect(Collectors.joining(", "));
+                if (construction == Construction.REFLECTION) {
+                    o.line("return create(%s);", args);
+                } else {
+                    o.line("return new %s(%s);", o.add(className), args);
+                }
+                o.close();
+            }
+            o.close();
+        }
         o.close();
         return o.toString();
     }
@@ -408,8 +438,7 @@ public final class Generator {
             String genericType = tm.typeArguments.get(0).render();
             o.line("public %s<%s, %s> %s() {", SetBuilder.class, o.add(genericType), builderSimpleClassName, p.name());
             o.line("%s%s = %s%s == null ? new %s<>() : %s%s;", fieldPrefix, p.name(), fieldPrefix, p.name(),
-                    collectionImplementationType(p).orElse(HashSet.class.getCanonicalName()), fieldPrefix,
-                    p.name());
+                    collectionImplementationType(p).orElse(HashSet.class.getCanonicalName()), fieldPrefix, p.name());
             o.line("return new %s<>(() -> %s, %s%s);", SetBuilder.class, returnExpression, fieldPrefix, p.name());
             o.close();
         }
@@ -522,6 +551,11 @@ public final class Generator {
         String args = parameters.stream()
                 .map(x -> String.format("\n%s%s.unmodifiable(%s)", repeat("    ", 4), o.add(Helpers.class), x.name())) //
                 .collect(Collectors.joining(","));
+        writeBuildStatement(o, className, parameters, construction, implementationClassName, args);
+    }
+
+    private static void writeBuildStatement(Output o, String className, List<Parameter> parameters,
+            Construction construction, String implementationClassName, String args) {
         if (construction == Construction.DIRECT) {
             o.line("return new %s(%s);", o.add(className), args);
         } else if (construction == Construction.REFLECTION) {
