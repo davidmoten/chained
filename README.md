@@ -553,6 +553,6 @@ Here's a comparison of Chained with Immutables, AutoValue and Lombok tools.
 * You value simplicity, readability, and explicitness in builder code generation.
 * You want minimalism and ease of integration without extensive setup or advanced feature overhead.
 * You're using modern Java features like records and immutable types, and you prefer a solution directly tailored to this context.
-* You want to avoid the complexity, opacity, or maintenance overhead associated with broader and more complex code-generation tools like Lombok, Immutables, and AutoValue.
+* You want to avoid the complexity, opacity, IDE integration problems, or maintenance overhead associated with broader and more complex code-generation tools like Lombok, Immutables, and AutoValue.
 In short, Chained provides a lightweight, modern, fluent, and explicitly readable solution specifically optimized for generating chained builders, offering a simpler alternative to the richer, but more complex ecosystems of Immutables, Lombok, and AutoValue.
 
