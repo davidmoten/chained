@@ -309,14 +309,13 @@ Person a = Person.name("fred").age(23).build();
 Person b = a.copy().withName("anne").build();
 ```
 
-Of course you can do this without adding the static `copy` method too:
+Of course you can do this without adding the `copy` method too:
 
 ```java
 Person a = Person.name("fred").age(23).build();
 
 Person b = PersonBuilder.copy(a).withName("anne").build();
 ```
-c
 
 ### Providing the full class name of the generated classes
 
