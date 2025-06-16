@@ -183,9 +183,13 @@ public final class Generator {
         o.close();
         if (construction != Construction.INTERFACE_IMPLEMENTATION) {
             o.line();
+            o.line("public static CopyBuilder from(%s value) {", o.add(className));
+            o.line("return new CopyBuilder(value);", lastBuilder);
+            o.close();
+            o.line();
             o.line("public static final class CopyBuilder {");
             o.line();
-            o.line("private final %s value;", o.add(className));
+            o.line("private %s value;", o.add(className));
             o.line();
             o.line("private CopyBuilder(%s value) {", o.add(className));
             o.line("this.value = value;");
@@ -198,17 +202,22 @@ public final class Generator {
             }
             for (Parameter p : parameters) {
                 o.line();
-                o.line("public %s with%s(%s %s) {", o.add(className), upperFirst(p.name()), o.add(p.type()), p.name());
+                o.line("public CopyBuilder with%s(%s %s) {", upperFirst(p.name()), o.add(p.type()), p.name());
                 String args = parameters.stream() //
                         .map(x -> x.name().equals(p.name()) ? p.name() : "value." + x.name() + "()") //
                         .collect(Collectors.joining(", "));
                 if (construction == Construction.REFLECTION) {
-                    o.line("return create(%s);", args);
+                    o.line("this.value = create(%s);", args);
                 } else {
-                    o.line("return new %s(%s);", o.add(className), args);
+                    o.line("this.value = new %s(%s);", o.add(className), args);
                 }
+                o.line("return this;");
                 o.close();
             }
+            o.line();
+            o.line("public %s build() {", o.add(className));
+            o.line("return value;");
+            o.close();
             o.close();
         }
         o.close();
