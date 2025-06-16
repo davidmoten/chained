@@ -134,6 +134,7 @@ public final class Generator {
                 o.line("return _b.build();");
                 o.close();
                 o.close();
+                writeCopyBuilder(className, parameters, construction, implementationClassName, o);
                 o.close();
                 return o.toString();
             } else {
@@ -181,10 +182,17 @@ public final class Generator {
         o.line("return _b.build();");
         o.close();
         o.close();
+        writeCopyBuilder(className, parameters, construction, implementationClassName, o);
+        o.close();
+        return o.toString();
+    }
+
+    private static void writeCopyBuilder(String className, List<Parameter> parameters, Construction construction,
+            String implementationClassName, Output o) {
         if (construction != Construction.INTERFACE_IMPLEMENTATION) {
             o.line();
             o.line("public static CopyBuilder copy(%s value) {", o.add(className));
-            o.line("return new CopyBuilder(value);", lastBuilder);
+            o.line("return new CopyBuilder(value);");
             o.close();
             o.line();
             o.line("public static final class CopyBuilder {");
@@ -220,8 +228,6 @@ public final class Generator {
             o.close();
             o.close();
         }
-        o.close();
-        return o.toString();
     }
 
     private static Map<String, CollectionType> createCollectionTypes() {
@@ -394,6 +400,7 @@ public final class Generator {
         o.line("public %s build() {", o.add(className));
         writeBuildStatement(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
         o.close();
+        writeCopyBuilder(className, parameters, construction, implementationClassName, o);
         o.close();
     }
 

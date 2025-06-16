@@ -280,6 +280,44 @@ Person a = Person
     .build();
 ```
 
+### Copy 
+Let's look at the `Person` record example again, and we'll add a static `copy` method:
+
+```java
+package mine;
+
+import com.github.davidmoten.chained.api.annotation.Builder;
+import mine.builder.PersonBuilder.BuilderWithName;
+import mine.builder.PersonBuilder.CopyBuilder;
+
+@Builder
+public final record Person(String name, int yearOfBirth, Optional<String> comments) {
+    public static BuilderWithName name(String name) {
+        return PersonBuilder.builder().name(name);
+    }
+    
+    public static CopyBuilder copy() {
+        return PersonBuilder.copy(this);
+    }
+}
+```
+Now we can do this:
+
+```java
+Person a = Person.name("fred").age(23).build();
+
+Person b = a.copy().name("anne").build();
+```
+
+Of course you can do this without adding the static `copy` method too:
+
+```java
+Person a = Person.name("fred").age(23).build();
+
+Person b = PersonBuilder.copy(a).name("anne").build();
+```
+c
+
 ### Providing the full class name of the generated classes
 
 Set the value of the `@Builder` annotation to customize the full generated class name. The value can be templated with these items:
