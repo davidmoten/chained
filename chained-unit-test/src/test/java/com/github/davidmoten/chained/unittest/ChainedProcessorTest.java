@@ -213,10 +213,12 @@ public class ChainedProcessorTest {
         assertEquals("someone", b.description().get());
         assertEquals(10, (long) b.age().get());
     }
-    
+
     @Test
     public void testTwoOptional() {
         TwoOptional a = TwoOptional.builder().name("fred").age(10).build();
-        TwoOptional b = a.copy().withName("julia").withAge(20).build();
+        TwoOptional b = a.copy().withName("julia").build();
+        assertEquals("julia", b.name().get());
+        assertEquals(10, (int) b.age().get());
     }
 }
