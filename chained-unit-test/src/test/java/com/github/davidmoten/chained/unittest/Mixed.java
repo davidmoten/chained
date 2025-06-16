@@ -13,7 +13,7 @@ public record Mixed(String name, Optional<Integer> age, String city, Optional<St
         return MixedBuilder.builder().name(name);
     }
     
-    public static CopyBuilder from(Mixed mixed) {
-        return MixedBuilder.from(mixed);
+    public static CopyBuilder copy(Mixed mixed) {
+        return MixedBuilder.copy(mixed);
     }
 }

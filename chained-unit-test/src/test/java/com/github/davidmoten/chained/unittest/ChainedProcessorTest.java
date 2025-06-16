@@ -205,9 +205,9 @@ public class ChainedProcessorTest {
     }
 
     @Test
-    public void testFrom() {
+    public void testCopy() {
         Mixed a = Mixed.name("fred").city("London").age(10).description("someone").build();
-        Mixed b = Mixed.from(a).withCity("Paris").build();
+        Mixed b = Mixed.copy(a).withCity("Paris").build();
         assertEquals("fred", b.name());
         assertEquals("Paris", b.city());
         assertEquals("someone", b.description().get());

@@ -183,7 +183,7 @@ public final class Generator {
         o.close();
         if (construction != Construction.INTERFACE_IMPLEMENTATION) {
             o.line();
-            o.line("public static CopyBuilder from(%s value) {", o.add(className));
+            o.line("public static CopyBuilder copy(%s value) {", o.add(className));
             o.line("return new CopyBuilder(value);", lastBuilder);
             o.close();
             o.line();
