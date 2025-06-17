@@ -95,6 +95,7 @@ plugins {
     id 'java'
 }
 
+// ensure that generated sources end up in the sources jar
 tasks.register('sourcesJar', Jar) {
     archiveClassifier.set('sources')
     from sourceSets.main.allSource
