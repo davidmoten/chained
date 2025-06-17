@@ -34,6 +34,7 @@ import com.github.davidmoten.chained.processor.Generator.Parameter;
 public final class BuilderProcessor extends AbstractProcessor {
 
     private static final String DEFAULT_BUILDER_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Builder";
+    private static final String DEFAULT_IMPLEMENTATION_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Impl";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -64,14 +65,19 @@ public final class BuilderProcessor extends AbstractProcessor {
                             .getOptions() //
                             .getOrDefault("generatedClassName", DEFAULT_BUILDER_CLASS_NAME_TEMPLATE);
                     Builder annotation = typeElement.getAnnotation(Builder.class);
-                    String templatedBuilderClassName = annotation.value() == null || annotation.value().equals("")
-                            ? defaultBuilderClassName
+                    String templatedBuilderClassName = isEmpty(annotation.value()) ? defaultBuilderClassName
                             : annotation.value();
 
                     String builderClassName = templatedBuilderClassName //
                             .replace("${pkg}", packageName) //
                             .replace("${simpleName}", simpleClassName);
-                    String templatedImplementationClassName = annotation.implementationClassName();
+                    String defaultImplementationClassName = processingEnv //
+                            .getOptions() //
+                            .getOrDefault("generatedImplementationClassName",
+                                    DEFAULT_IMPLEMENTATION_CLASS_NAME_TEMPLATE);
+                    String templatedImplementationClassName = isEmpty(annotation.implementationClassName())
+                            ? defaultImplementationClassName
+                            : annotation.implementationClassName();
                     String implementationClassName = templatedImplementationClassName //
                             .replace("${pkg}", packageName) //
                             .replace("${simpleName}", simpleClassName);
@@ -125,6 +131,10 @@ public final class BuilderProcessor extends AbstractProcessor {
             log(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8));
             return false;
         }
+    }
+
+    private static boolean isEmpty(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     private void log(Kind kind, String message, Element element) {

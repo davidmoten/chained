@@ -11,16 +11,16 @@ public @interface Builder {
 
     /**
      * Template for construction of generated builder class full name. Default is
-     * "${pkg}.builder.${simpleName}Builder".
+     * <code>${pkg}.builder.${simpleName}Builder</code>.
      * 
      * @return full class name template for generated builder class
      */
     String value() default "";
 
     /**
-     * Returns false if and only if the generated builder of a class with only mandatory
-     * properties should immediately return the built object (skipping the need to
-     * call {@code build()}) when the last mandatory property is specified.
+     * Returns false if and only if the generated builder of a class with only
+     * mandatory properties should immediately return the built object (skipping the
+     * need to call {@code build()}) when the last mandatory property is specified.
      * 
      * @return false if should skip the final {@code build()} method when all
      *         properties are mandatory
@@ -31,11 +31,12 @@ public @interface Builder {
      * When the annotated class is an interface, returns template for construction
      * of generated implementation class full name that is returned by a builder.
      * Available parameters (related to the class that the annotation is placed on)
-     * are <code>${pkg}</code>, <code>${simpleName}</code>.
+     * are <code>${pkg}</code>, <code>${simpleName}</code>. Default is
+     * <code>${pkg}.builder.${simpleName}Impl</code>
      * 
      * @return template to use for the generated builder class full name
      */
-    String implementationClassName() default "${pkg}.builder.${simpleName}Impl";
+    String implementationClassName() default "";
 
     /**
      * If true then the generated builder will have a static `copy` method that
