@@ -20,7 +20,7 @@ public class GeneratorTest {
         list.add(new Parameter("String", "name", false));
         list.add(new Parameter("java.util.Optional<Integer>", "age", false));
         String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, Construction.DIRECT, false,
-                "blah.ThingImpl");
+                "blah.ThingImpl", true);
         System.out.println(code);
     }
 

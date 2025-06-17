@@ -163,7 +163,9 @@ public final class BuilderProcessor extends AbstractProcessor {
                 builderClassName, //
                 parameters, //
                 Construction.INTERFACE_IMPLEMENTATION, //
-                annotation.alwaysIncludeBuildMethod(), implementationClassName));
+                annotation.alwaysIncludeBuildMethod(), //
+                implementationClassName, //
+                annotation.copy()));
         out.println();
     }
 
@@ -204,7 +206,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 builderClassName, //
                 parameters, //
                 constructorVisible ? Construction.DIRECT : Construction.REFLECTION, //
-                annotation.alwaysIncludeBuildMethod(), implementationClassName));
+                annotation.alwaysIncludeBuildMethod(), implementationClassName, annotation.copy()));
         out.println();
     }
 

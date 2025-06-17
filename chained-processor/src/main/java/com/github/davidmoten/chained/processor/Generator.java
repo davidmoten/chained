@@ -52,7 +52,8 @@ public final class Generator {
 
     // VisibleForTesting
     static String chainedBuilder(String className, String builderClassName, List<Parameter> parameters,
-            Construction construction, boolean alwaysIncludeBuildMethod, String implementationClassName) {
+            Construction construction, boolean alwaysIncludeBuildMethod, String implementationClassName,
+            boolean includeCopyMethod) {
         Output o = new Output(builderClassName);
         o.generatedComment();
         o.line("package %s;", Util.pkg(builderClassName));
@@ -71,7 +72,8 @@ public final class Generator {
                 .filter(p -> p.isOptional() || p.isNullable()) //
                 .collect(Collectors.toList());
         if (mandatory.isEmpty()) {
-            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
+            writeSimpleBuilder(o, className, builderSimpleClassName, parameters, construction, implementationClassName,
+                    includeCopyMethod);
             return o.toString();
         } else if (optionalOrNullable.isEmpty() && mandatory.size() == 1) {
             Parameter p = mandatory.get(0);
@@ -134,7 +136,7 @@ public final class Generator {
                 o.line("return _b.build();");
                 o.close();
                 o.close();
-                writeCopyBuilder(className, parameters, construction, implementationClassName, o);
+                writeCopyBuilder(className, parameters, construction, implementationClassName, includeCopyMethod, o);
                 o.close();
                 return o.toString();
             } else {
@@ -182,65 +184,65 @@ public final class Generator {
         o.line("return _b.build();");
         o.close();
         o.close();
-        writeCopyBuilder(className, parameters, construction, implementationClassName, o);
+        writeCopyBuilder(className, parameters, construction, implementationClassName, includeCopyMethod, o);
         o.close();
         return o.toString();
     }
 
     private static void writeCopyBuilder(String className, List<Parameter> parameters, Construction construction,
-            String implementationClassName, Output o) {
-        if (construction != Construction.INTERFACE_IMPLEMENTATION) {
+            String implementationClassName, boolean includeCopyMethod, Output o) {
+        if (!includeCopyMethod || construction == Construction.INTERFACE_IMPLEMENTATION) {
+            return;
+        }
+        o.line();
+        o.line("public static CopyBuilder copy(%s value) {", o.add(className));
+        o.line("return new CopyBuilder(value);");
+        o.close();
+        o.line();
+        o.line("public static final class CopyBuilder {");
+        o.line();
+        for (Parameter p : parameters) {
+            o.line("private %s %s;", o.add(p.type()), p.name());
+        }
+        o.line();
+        o.line("private CopyBuilder(%s value) {", o.add(className));
+        for (Parameter p : parameters) {
+            o.line("this.%s = value.%s();", p.name(), p.name());
+        }
+        o.close();
+        for (Parameter p : parameters) {
             o.line();
-            o.line("public static CopyBuilder copy(%s value) {", o.add(className));
-            o.line("return new CopyBuilder(value);");
+            o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
+            o.line("this.%s = %s;", p.name(), p.name());
+            o.line("return this;");
             o.close();
-            o.line();
-            o.line("public static final class CopyBuilder {");
-            o.line();
-            for (Parameter p : parameters) {
-                o.line("private %s %s;", o.add(p.type()), p.name());
-            }
-            o.line();
-            o.line("private CopyBuilder(%s value) {", o.add(className));
-            for (Parameter p : parameters) {
-                o.line("this.%s = value.%s();", p.name(), p.name());
-            }
-            o.close();
-            for (Parameter p : parameters) {
+
+            if (p.isOptional() && !p.isNullable()) {
                 o.line();
-                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
-                o.line("this.%s = %s;", p.name(), p.name());
+                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(innerType(p.type())), p.name());
+                o.line("this.%s = %s.of(%s);", p.name(), Optional.class, p.name());
                 o.line("return this;");
                 o.close();
-
-                if (p.isOptional() && !p.isNullable()) {
-                    o.line();
-                    o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(innerType(p.type())),
-                            p.name());
-                    o.line("this.%s = %s.of(%s);", p.name(), Optional.class, p.name());
-                    o.line("return this;");
-                    o.close();
-                }
             }
+        }
+        o.line();
+        o.line("public %s build() {", o.add(className));
+        String args = parameters.stream() //
+                .map(p -> "this." + p.name()) //
+                .collect(Collectors.joining(", "));
+        if (construction == Construction.REFLECTION) {
+            o.line("return create(%s);", args);
+        } else {
+            o.line("return new %s(%s);", o.add(className), args);
+        }
+        o.close();
+        if (construction == Construction.REFLECTION) {
             o.line();
-            o.line("public %s build() {", o.add(className));
-            String args = parameters.stream() //
-                    .map(p -> "this." + p.name()) //
-                    .collect(Collectors.joining(", "));
-            if (construction == Construction.REFLECTION) {
-                o.line("return create(%s);", args);
-            } else {
-                o.line("return new %s(%s);", o.add(className), args);
-            }
-            o.close();
-            if (construction == Construction.REFLECTION) {
-                o.line();
-                o.line("private static %s create(Object... args) {", o.add(className));
-                writeBuildStatement(o, className, parameters, construction, implementationClassName, "args");
-                o.close();
-            }
+            o.line("private static %s create(Object... args) {", o.add(className));
+            writeBuildStatement(o, className, parameters, construction, implementationClassName, "args");
             o.close();
         }
+        o.close();
     }
 
     private static Map<String, CollectionType> createCollectionTypes() {
@@ -376,7 +378,8 @@ public final class Generator {
     }
 
     private static void writeSimpleBuilder(Output o, String className, String builderSimpleClassName,
-            List<Parameter> parameters, Construction construction, String implementationClassName) {
+            List<Parameter> parameters, Construction construction, String implementationClassName,
+            boolean includeCopyMethod) {
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 o.line("private %s %s = %s.empty();", o.add(p.type()), p.name(), o.add(outerType(p.type())));
@@ -413,7 +416,7 @@ public final class Generator {
         o.line("public %s build() {", o.add(className));
         writeBuildStatement(o, className, builderSimpleClassName, parameters, construction, implementationClassName);
         o.close();
-        writeCopyBuilder(className, parameters, construction, implementationClassName, o);
+        writeCopyBuilder(className, parameters, construction, implementationClassName, includeCopyMethod, o);
         o.close();
     }
 
