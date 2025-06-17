@@ -11,7 +11,8 @@ public @interface Builder {
 
     /**
      * Template for construction of generated builder class full name. Default is
-     * <code>${pkg}.builder.${simpleName}Builder</code>.
+     * the compiler argument {@code -AgeneratedClassName} or
+     * <code>${pkg}.builder.${simpleName}Builder</code> if not present.
      * 
      * @return full class name template for generated builder class
      */
@@ -31,8 +32,9 @@ public @interface Builder {
      * When the annotated class is an interface, returns template for construction
      * of generated implementation class full name that is returned by a builder.
      * Available parameters (related to the class that the annotation is placed on)
-     * are <code>${pkg}</code>, <code>${simpleName}</code>. Default is
-     * <code>${pkg}.builder.${simpleName}Impl</code>
+     * are <code>${pkg}</code>, <code>${simpleName}</code>. Default is the compiler
+     * argument {@code -AgeneratedImplementationClassName} or
+     * <code>${pkg}.builder.${simpleName}Impl</code> if not present.
      * 
      * @return template to use for the generated builder class full name
      */
