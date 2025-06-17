@@ -197,10 +197,41 @@ public final class Generator {
             o.line();
             o.line("public static final class CopyBuilder {");
             o.line();
-            o.line("private %s value;", o.add(className));
+            for (Parameter p : parameters) {
+                o.line("private %s %s;", o.add(p.type()), p.name());
+            }
             o.line();
             o.line("private CopyBuilder(%s value) {", o.add(className));
-            o.line("this.value = value;");
+            for (Parameter p : parameters) {
+                o.line("this.%s = value.%s();", p.name(), p.name());
+            }
+            o.close();
+            for (Parameter p : parameters) {
+                o.line();
+                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
+                o.line("this.%s = %s;", p.name(), p.name());
+                o.line("return this;");
+                o.close();
+
+                if (p.isOptional() && !p.isNullable()) {
+                    o.line();
+                    o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(innerType(p.type())),
+                            p.name());
+                    o.line("this.%s = %s.of(%s);", p.name(), Optional.class, p.name());
+                    o.line("return this;");
+                    o.close();
+                }
+            }
+            o.line();
+            o.line("public %s build() {", o.add(className));
+            String args = parameters.stream() //
+                    .map(p -> "this." + p.name()) //
+                    .collect(Collectors.joining(", "));
+            if (construction == Construction.REFLECTION) {
+                o.line("return create(%s);", args);
+            } else {
+                o.line("return new %s(%s);", o.add(className), args);
+            }
             o.close();
             if (construction == Construction.REFLECTION) {
                 o.line();
@@ -208,44 +239,6 @@ public final class Generator {
                 writeBuildStatement(o, className, parameters, construction, implementationClassName, "args");
                 o.close();
             }
-            for (Parameter p : parameters) {
-                {
-                    o.line();
-                    o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()),
-                            p.name());
-                    String args = parameters.stream() //
-                            .map(x -> x.name().equals(p.name()) ? p.name() : "value." + x.name() + "()") //
-                            .collect(Collectors.joining(", "));
-                    if (construction == Construction.REFLECTION) {
-                        o.line("this.value = create(%s);", args);
-                    } else {
-                        o.line("this.value = new %s(%s);", o.add(className), args);
-                    }
-                    o.line("return this;");
-                    o.close();
-                }
-
-                if (p.isOptional() && !p.isNullable()) {
-                    o.line();
-                    o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p),
-                            o.add(innerType(p.type())), p.name());
-                    String args = parameters.stream() //
-                            .map(x -> x.name().equals(p.name()) ? (o.add(Optional.class) + ".of(" + p.name() + ")")
-                                    : "value." + x.name() + "()") //
-                            .collect(Collectors.joining(", "));
-                    if (construction == Construction.REFLECTION) {
-                        o.line("this.value = create(%s);", args);
-                    } else {
-                        o.line("this.value = new %s(%s);", o.add(className), args);
-                    }
-                    o.line("return this;");
-                    o.close();
-                }
-            }
-            o.line();
-            o.line("public %s build() {", o.add(className));
-            o.line("return value;");
-            o.close();
             o.close();
         }
     }
@@ -651,9 +644,10 @@ public final class Generator {
 
         public Output left() {
             try {
-            indent = indent.substring(0, indent.length() - 4);
+                indent = indent.substring(0, indent.length() - 4);
             } catch (IndexOutOfBoundsException e) {
-                throw new IllegalStateException("cannot left indent when indent is empty, output contents so far:\n" + toString(), e);
+                throw new IllegalStateException(
+                        "cannot left indent when indent is empty, output contents so far:\n" + toString(), e);
             }
             return this;
         }
