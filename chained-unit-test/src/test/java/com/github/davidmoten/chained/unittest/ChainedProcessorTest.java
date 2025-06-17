@@ -221,4 +221,9 @@ public class ChainedProcessorTest {
         assertEquals("julia", b.name().get());
         assertEquals(10, (int) b.age().get());
     }
+
+    @Test(expected = NoSuchMethodException.class)
+    public void testNoCopy() throws NoSuchMethodException, SecurityException {
+        NoCopy.class.getMethod("copy", NoCopy.class);
+    }
 }
