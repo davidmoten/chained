@@ -396,7 +396,7 @@ public final class Generator {
                 String wrappedType = innerType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
-                o.line("public %s %s(%s %s) {", builderSimpleClassName, p.name(), o.add(wrappedType), p.name());
+                o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(wrappedType), p.name());
                 writeNullCheck(o, p);
                 o.line("this.%s = %s.of(%s);", p.name(), o.add(outerType(p.type())), p.name());
                 o.line("return this;");
