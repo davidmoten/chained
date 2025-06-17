@@ -195,7 +195,7 @@ public final class Generator {
             return;
         }
         o.line();
-        o.line("public static CopyBuilder copy(%s value) {", o.add(className));
+        o.line("public static CopyBuilder copy(@%s %s value) {", Nonnull.class, o.add(className));
         o.line("return new CopyBuilder(value);");
         o.close();
         o.line();
