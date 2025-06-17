@@ -18,11 +18,11 @@ public @interface Builder {
     String value() default "";
 
     /**
-     * Returns true if the generated builder of a class with only mandatory
+     * Returns false if and only if the generated builder of a class with only mandatory
      * properties should immediately return the built object (skipping the need to
      * call {@code build()}) when the last mandatory property is specified.
      * 
-     * @return true if should skip the final {@code build()} method when all
+     * @return false if should skip the final {@code build()} method when all
      *         properties are mandatory
      */
     boolean alwaysIncludeBuildMethod() default false;
