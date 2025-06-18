@@ -1,8 +1,8 @@
 package com.github.davidmoten.chained.unittest;
 
-import javax.annotation.Nullable;
-
 import com.github.davidmoten.chained.api.annotation.Builder;
+
+import jakarta.annotation.Nullable;
 
 @Builder
 public record SingleMandatoryNullable(@Nullable String name) {

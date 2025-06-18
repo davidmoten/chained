@@ -23,15 +23,15 @@ import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import javax.annotation.Generated;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.github.davidmoten.chained.api.Helpers;
 import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
 import com.github.davidmoten.chained.api.SetBuilder;
+
+import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 public final class Generator {
 

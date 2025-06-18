@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
@@ -29,6 +28,8 @@ import com.github.davidmoten.chained.api.annotation.BuilderConstructor;
 import com.github.davidmoten.chained.api.annotation.Check;
 import com.github.davidmoten.chained.processor.Generator.Construction;
 import com.github.davidmoten.chained.processor.Generator.Parameter;
+
+import jakarta.annotation.Nullable;
 
 @SupportedAnnotationTypes("com.github.davidmoten.chained.api.annotation.Builder")
 public final class BuilderProcessor extends AbstractProcessor {
