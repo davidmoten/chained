@@ -1,8 +1,9 @@
 package com.github.davidmoten.chained.unittest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.github.davidmoten.chained.unittest.builder.SingleMandatoryBuilder;
 import com.github.davidmoten.chained.unittest.builder.SingleOptionalBuilder;
@@ -122,9 +123,11 @@ public class ChainedProcessorTest {
         assertFalse(a.description().isPresent());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIsInterfaceCheck() {
-        IsInterface.builder().name("anne").yearOfBirth(0).build();
+        assertThrows(IllegalArgumentException.class, () -> {
+            IsInterface.builder().name("").yearOfBirth(0).build();
+        });
     }
 
     @Test
@@ -222,8 +225,10 @@ public class ChainedProcessorTest {
         assertEquals(10, (int) b.age().get());
     }
 
-    @Test(expected = NoSuchMethodException.class)
+    @Test
     public void testNoCopy() throws NoSuchMethodException, SecurityException {
-        NoCopy.class.getMethod("copy", NoCopy.class);
+        assertThrows(NoSuchMethodException.class, () -> {
+            NoCopy.class.getMethod("copy", NoCopy.class);
+        });
     }
 }

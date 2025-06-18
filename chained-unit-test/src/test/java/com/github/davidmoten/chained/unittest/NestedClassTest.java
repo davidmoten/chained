@@ -1,6 +1,8 @@
 package com.github.davidmoten.chained.unittest;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
 import com.github.davidmoten.chained.unittest.builder.InsideBuilder;
@@ -34,9 +36,11 @@ public class NestedClassTest {
         }
     }
 
-    @Test(expected = ClassNotFoundException.class)
+    @Test
     public void testInsideInnerBuilderNotGenerated() throws ClassNotFoundException {
-        Class.forName(NestedClassTest.class.getName() + ".builder.InsideInnerBuilder");
+        assertThrows(ClassNotFoundException.class, () -> {
+            Class.forName(NestedClassTest.class.getName() + ".builder.InsideInnerBuilder");
+        });
     }
 
 }

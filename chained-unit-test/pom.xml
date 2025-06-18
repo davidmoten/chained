@@ -66,10 +66,7 @@
 					</execution>
 				</executions>
 			</plugin>
-
-</plugins>
-
-
+        </plugins>
     </build>
 
     <dependencies>
@@ -87,10 +84,10 @@
             <scope>provided</scope>
         </dependency>
         
-            <!-- Test Dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+       <!-- Test Dependencies -->
+       <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
