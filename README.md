@@ -117,13 +117,21 @@ dependencies {
 
 `mvn clean install`
 
-or 
-
-`gradle clean publishToMavenLocal`
 
 ## Examples
 
 ### Record types
+
+A quick note that java record types (like example below), don't support method-level (getter) javadoc so all javadoc goes against the class.
+```java
+/**
+ * Represents a point in 2D space.
+ *
+ * @param x the x-coordinate of the point
+ * @param y the y-coordinate of the point
+ */
+public record Point(int x, int y) {}
+```
 
 #### Null-safe usage
 java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*, making use of `Optional` for optional fields:
