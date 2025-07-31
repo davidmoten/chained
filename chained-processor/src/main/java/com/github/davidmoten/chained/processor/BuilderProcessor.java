@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
@@ -20,6 +21,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
@@ -36,10 +38,17 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     private static final String DEFAULT_BUILDER_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Builder";
     private static final String DEFAULT_IMPLEMENTATION_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Impl";
+    private Elements utils;
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
+    }
+    
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        utils = processingEnv.getElementUtils();
     }
 
     @Override
@@ -198,13 +207,16 @@ public final class BuilderProcessor extends AbstractProcessor {
             String builderClassName, String implementationClassName, PrintWriter out) {
         String builderPackageName = Util.pkg(builderClassName);
         ExecutableElement constructor = constructor(typeElement);
+        String text = utils.getDocComment(typeElement);
+        // TODO extra javadoc for params and add to Parameter objects
+        if (text != null) System.out.println(text);
         List<Parameter> parameters = constructor //
                 .getParameters() //
                 .stream() //
                 .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString(),
                         p.getAnnotation(Nullable.class) != null)) //
                 .collect(Collectors.toList());
-
+        
         Set<Modifier> modifiers = constructor.getModifiers();
         boolean constructorVisible = //
                 modifiers.contains(Modifier.PUBLIC) //
