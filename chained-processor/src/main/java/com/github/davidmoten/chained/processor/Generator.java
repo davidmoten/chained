@@ -458,18 +458,51 @@ public final class Generator {
         } else {
             text = javadoc;
         }
+        {
+            List<String> lines = wrapJavadoc(text, 0);
+            lines.add("");
+            o.line("/**");
+            writeJavadocLines(o, lines);
+        }
+        {
+            List<String> lines = wrapJavadoc(String.format("@param %s %s", p.name(), p.javadoc().orElse("the value to assign")), p.name().length() + 8);
+            writeJavadocLines(o, lines);
+            o.line(" * @return builder");
+            o.line(" */");
+        }
+    }
+
+    private static void writeJavadocLines(Output o, List<String> lines) {
+        lines.stream() //
+                .map(line -> " * " + line) //
+                .forEach(o::line);
+    }
+
+    private static List<String> wrapJavadoc(String text, int nextLineIndent) {
         final int maxLength = MAX_JAVADOC_LINE_LENGTH;
         List<String> lines = new ArrayList<>();
         while (text.length() > maxLength) {
             char ch = text.charAt(maxLength);
             if (Character.isWhitespace(ch)) {
-                lines.add(text.substring(0, maxLength));
+                final String indent; 
+                if (!lines.isEmpty()) {
+                    indent = spaces(nextLineIndent);
+                } else {
+                    indent = "";
+                }
+                lines.add(indent + text.substring(0, maxLength));
                 text = text.substring(maxLength).trim();
             } else {
                 for (int i = maxLength - 1; i >= 0; i--) {
                     ch = text.charAt(i);
                     if (Character.isWhitespace(ch)) {
-                        lines.add(text.substring(0, i));
+                        final String indent;
+                        if (!lines.isEmpty()) {
+                            indent = spaces(nextLineIndent);
+                        } else {
+                            indent = "";
+                        }
+                        lines.add(indent + text.substring(0, i));
                         text = text.substring(i).trim();
                         break;
                     }
@@ -479,14 +512,15 @@ public final class Generator {
         if (text.length() > 0) {
             lines.add(text);
         }
-        o.line("/**");
-        lines.stream() //
-                .map(line -> " * " + line) //
-                .forEach(o::line);
-        o.line(" *");
-        o.line(" * @param %s %s", p.name(), p.javadoc().orElse("the value to assign"));
-        o.line(" * @return builder");
-        o.line(" */");
+        return lines;
+    }
+
+    private static String spaces(int n) {
+          StringBuilder b = new StringBuilder();
+          for (int i = 0; i < n; i++) {
+                b.append(' ');
+          }
+          return b.toString();
     }
 
     public static String ann(Output o, Parameter p) {
