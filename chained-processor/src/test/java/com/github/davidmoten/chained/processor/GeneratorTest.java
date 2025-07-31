@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +18,8 @@ public class GeneratorTest {
     @Test
     public void test() {
         List<Parameter> list = new ArrayList<>();
-        list.add(new Parameter("String", "name", false));
-        list.add(new Parameter("java.util.Optional<Integer>", "age", false));
+        list.add(new Parameter("String", "name", false, Optional.empty()));
+        list.add(new Parameter("java.util.Optional<Integer>", "age", false, Optional.empty()));
         String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, Construction.DIRECT, false,
                 "blah.ThingImpl", true);
         System.out.println(code);

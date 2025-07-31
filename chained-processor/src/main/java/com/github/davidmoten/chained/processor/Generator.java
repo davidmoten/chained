@@ -444,13 +444,20 @@ public final class Generator {
 
     private static void writeOptionalFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload) {
         String text;
+        
+        String javadoc = "Sets " + p.javadoc().orElse("{@code " + p.name() + "}").trim();
+        if (!javadoc.endsWith(".")) {
+            javadoc += ".";
+        }
         if (isOptionalOverload) {
             text = String.format(
-                    "Sets {@code %s}. This parameter is <b>OPTIONAL</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
+                    "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
+                    javadoc,
                     p.name());
         } else {
             text = String.format(
-                    "Sets {@code %s}. This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
+                    "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
+                    javadoc,
                     p.name());
         }
         final int maxLength = MAX_JAVADOC_LINE_LENGTH;
@@ -812,11 +819,13 @@ public final class Generator {
         private final String type;
         private final String name;
         private final boolean nullable;
+        private final Optional<String> javadoc;
 
-        Parameter(String type, String name, boolean nullable) {
+        Parameter(String type, String name, boolean nullable, Optional<String> javadoc) {
             this.type = type;
             this.name = name;
             this.nullable = nullable;
+            this.javadoc = javadoc;
         }
 
         String type() {
@@ -837,6 +846,10 @@ public final class Generator {
 
         boolean isNullable() {
             return nullable;
+        }
+        
+        Optional<String> javadoc() {
+            return javadoc;
         }
 
         @Override

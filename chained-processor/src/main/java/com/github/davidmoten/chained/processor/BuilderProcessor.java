@@ -201,7 +201,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 .map(x -> (ExecutableElement) x) //
                 .filter(x -> x.getParameters().isEmpty()) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString(),
-                        x.getAnnotation(Nullable.class) != null)) //
+                        x.getAnnotation(Nullable.class) != null, Optional.empty())) //
                 .collect(Collectors.toList());
     }
 
@@ -213,8 +213,11 @@ public final class BuilderProcessor extends AbstractProcessor {
         List<Parameter> parameters = constructor //
                 .getParameters() //
                 .stream() //
-                .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString(),
-                        p.getAnnotation(Nullable.class) != null)) //
+                .map(p -> new Parameter( //
+                        p.asType().toString(), //
+                        p.getSimpleName().toString(), //
+                        p.getAnnotation(Nullable.class) != null, //
+                        Optional.ofNullable(fieldJavadoc.get(p.getSimpleName().toString())))) //
                 .collect(Collectors.toList());
 
         Set<Modifier> modifiers = constructor.getModifiers();
