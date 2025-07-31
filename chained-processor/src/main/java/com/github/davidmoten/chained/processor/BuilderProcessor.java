@@ -4,7 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -207,9 +209,7 @@ public final class BuilderProcessor extends AbstractProcessor {
             String builderClassName, String implementationClassName, PrintWriter out) {
         String builderPackageName = Util.pkg(builderClassName);
         ExecutableElement constructor = constructor(typeElement);
-        String text = utils.getDocComment(typeElement);
-        // TODO extra javadoc for params and add to Parameter objects
-        if (text != null) System.out.println(text);
+        Map<String, String> fieldJavadoc = fieldJavadoc(typeElement, utils);
         List<Parameter> parameters = constructor //
                 .getParameters() //
                 .stream() //
@@ -231,6 +231,15 @@ public final class BuilderProcessor extends AbstractProcessor {
                 constructorVisible ? Construction.DIRECT : Construction.REFLECTION, //
                 annotation.alwaysIncludeBuildMethod(), implementationClassName, annotation.copy()));
         out.println();
+    }
+
+    private static Map<String, String> fieldJavadoc(TypeElement typeElement, Elements utils) {
+        Map<String, String> map = new HashMap<>();
+        String text = utils.getDocComment(typeElement);
+        if (text != null) {
+            // todo
+        };
+        return map;
     }
 
     private static ExecutableElement constructor(TypeElement element) {
