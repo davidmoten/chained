@@ -218,7 +218,7 @@ public final class Generator {
             if (p.isOptional()) {
                 o.line();
                 writeOptionalFieldJavadoc(p, o);
-                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(innerType(p.type())), p.name());
+                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(toPrimitive(innerType(p.type()))), p.name());
                 o.line("this.%s = %s.of(%s);", p.name(), Optional.class, p.name());
                 o.line("return this;");
                 o.close();
@@ -477,7 +477,7 @@ public final class Generator {
                 .map(line -> " * " + line) //
                 .forEach(o::line);
         o.line(" *");
-        o.line(" * @param %s the value to set", p.name());
+        o.line(" * @param %s the value to assign to the field", p.name());
         o.line(" * @return this builder");
         o.line(" */");
     }
