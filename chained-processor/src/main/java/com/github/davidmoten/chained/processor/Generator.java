@@ -396,7 +396,9 @@ public final class Generator {
                 String wrappedType = innerType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
-                o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(wrappedType), p.name());
+                writeOptionalFieldJavadoc(p, o);
+                o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(wrappedType),
+                        p.name());
                 writeNullCheck(o, p);
                 o.line("this.%s = %s.of(%s);", p.name(), o.add(outerType(p.type())), p.name());
                 o.line("return this;");
@@ -404,6 +406,9 @@ public final class Generator {
             }
             writeBuilderForCollection(o, p, builderSimpleClassName, "this", "this");
             o.line();
+            if (p.isOptional()) {
+                writeOptionalFieldOverloadJavadoc(p, o);
+            }
             o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(p.type()), p.name());
             if (!p.isNullable()) {
                 writeNullCheck(o, p);
@@ -418,6 +423,56 @@ public final class Generator {
         o.close();
         writeCopyBuilder(className, parameters, construction, implementationClassName, includeCopyMethod, o);
         o.close();
+    }
+
+    private static void writeOptionalFieldJavadoc(Parameter p, Output o) {
+        writeOptionalFieldJavadoc(p, o, false);
+    }
+
+    private static void writeOptionalFieldOverloadJavadoc(Parameter p, Output o) {
+        writeOptionalFieldJavadoc(p, o, true);
+    }
+
+    private static void writeOptionalFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload) {
+        String text;
+        if (isOptionalOverload) {
+            text = String.format(
+                    "Sets %s. This parameter is <b>optional</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
+                    p.name());
+        } else {
+            text = String.format(
+                    "Sets %s. This parameter is <b>optional</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
+                    p.name());
+        }
+        final int maxLength = 80;
+        List<String> lines = new ArrayList<>();
+        while (text.length() > maxLength) {
+            char ch = text.charAt(maxLength);
+            if (Character.isWhitespace(ch)) {
+                lines.add(text.substring(0, maxLength));
+                text = text.substring(maxLength).trim();
+            } else {
+                for (int i = maxLength - 1; i >= 0; i--) {
+                    ch = text.charAt(i);
+                    if (Character.isWhitespace(ch)) {
+                        lines.add(text.substring(0, i));
+                        text = text.substring(i).trim();
+                        break;
+                    }
+                }
+            }
+        }
+        if (text.length() > 0) {
+            lines.add(text);
+        }
+        o.line("/**");
+        lines.stream() //
+                .map(line -> " * " + line) //
+                .forEach(o::line);
+        o.line(" *");
+        o.line(" * @param %s the value to set", p.name());
+        o.line(" * @return this builder");
+        o.line(" */");
     }
 
     public static String ann(Output o, Parameter p) {
