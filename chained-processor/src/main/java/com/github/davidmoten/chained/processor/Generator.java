@@ -35,6 +35,8 @@ import jakarta.annotation.Nullable;
 
 public final class Generator {
 
+    private static final int MAX_JAVADOC_LINE_LENGTH = 80;
+
     private Generator() {
         // prevent instantiation
     }
@@ -451,7 +453,7 @@ public final class Generator {
                     "Sets {@code %s}. This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
                     p.name());
         }
-        final int maxLength = 80;
+        final int maxLength = MAX_JAVADOC_LINE_LENGTH;
         List<String> lines = new ArrayList<>();
         while (text.length() > maxLength) {
             char ch = text.charAt(maxLength);
