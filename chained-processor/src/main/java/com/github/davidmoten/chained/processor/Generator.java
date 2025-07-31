@@ -227,7 +227,6 @@ public final class Generator {
             if (p.isOptional()) {
                 writeOptionalFieldOverloadJavadoc(p, o);
             }
-            writeOptionalFieldJavadoc(p, o);
             o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");
