@@ -163,6 +163,7 @@ public final class Generator {
         for (Parameter p : optionalOrNullable) {
             if (p.isOptional()) {
                 o.line();
+                writeOptionalFieldJavadoc(p, o);
                 o.line("public %s %s(@%s %s %s) {", lastBuilder, p.name(), Nonnull.class,
                         o.add(toPrimitive(innerType(p.type()))), p.name());
                 writeNullCheck(o, p);
@@ -171,6 +172,9 @@ public final class Generator {
                 o.close();
             }
             o.line();
+            if (p.isOptional()) {
+                writeOptionalFieldOverloadJavadoc(p, o);
+            }
             o.line("public %s %s(%s %s %s) {", lastBuilder, p.name(), ann(o, p), o.add(p.type()), p.name());
             if (!p.isNullable()) {
                 writeNullCheck(o, p);
@@ -211,19 +215,23 @@ public final class Generator {
         }
         o.close();
         for (Parameter p : parameters) {
-            o.line();
-            o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
-            o.line("this.%s = %s;", p.name(), p.name());
-            o.line("return this;");
-            o.close();
-
-            if (p.isOptional() && !p.isNullable()) {
+            if (p.isOptional()) {
                 o.line();
+                writeOptionalFieldJavadoc(p, o);
                 o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(innerType(p.type())), p.name());
                 o.line("this.%s = %s.of(%s);", p.name(), Optional.class, p.name());
                 o.line("return this;");
                 o.close();
             }
+            o.line();
+            if (p.isOptional()) {
+                writeOptionalFieldOverloadJavadoc(p, o);
+            }
+            writeOptionalFieldJavadoc(p, o);
+            o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
+            o.line("this.%s = %s;", p.name(), p.name());
+            o.line("return this;");
+            o.close();
         }
         o.line();
         o.line("public %s build() {", o.add(className));
