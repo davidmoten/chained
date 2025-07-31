@@ -465,7 +465,9 @@ public final class Generator {
             writeJavadocLines(o, lines);
         }
         {
-            List<String> lines = wrapJavadoc(String.format("@param %s %s", p.name(), p.javadoc().orElse("the value to assign")), p.name().length() + 8);
+            List<String> lines = wrapJavadoc(
+                    String.format("@param %s %s", p.name(), p.javadoc().orElse("the value to assign")),
+                    p.name().length() + 8);
             writeJavadocLines(o, lines);
             o.line(" * @return builder");
             o.line(" */");
@@ -479,18 +481,18 @@ public final class Generator {
     }
 
     private static List<String> wrapJavadoc(String text, int nextLineIndent) {
-        final int maxLength = MAX_JAVADOC_LINE_LENGTH;
+        int maxLength = MAX_JAVADOC_LINE_LENGTH;
         List<String> lines = new ArrayList<>();
         while (text.length() > maxLength) {
             char ch = text.charAt(maxLength);
             if (Character.isWhitespace(ch)) {
-                final String indent; 
+                final String indent;
                 if (!lines.isEmpty()) {
                     indent = spaces(nextLineIndent);
                 } else {
                     indent = "";
                 }
-                lines.add(indent + text.substring(0, maxLength));
+                lines.add(indent + text.substring(0, maxLength).trim());
                 text = text.substring(maxLength).trim();
             } else {
                 for (int i = maxLength - 1; i >= 0; i--) {
@@ -502,25 +504,34 @@ public final class Generator {
                         } else {
                             indent = "";
                         }
-                        lines.add(indent + text.substring(0, i));
+                        lines.add(indent + text.substring(0, i).trim());
                         text = text.substring(i).trim();
                         break;
                     }
                 }
             }
+            if (!lines.isEmpty()) {
+                maxLength = MAX_JAVADOC_LINE_LENGTH - nextLineIndent;
+            }
         }
         if (text.length() > 0) {
-            lines.add(text);
+            final String indent;
+            if (!lines.isEmpty()) {
+                indent = spaces(nextLineIndent);
+            } else {
+                indent = "";
+            }
+            lines.add(indent + text);
         }
         return lines;
     }
 
     private static String spaces(int n) {
-          StringBuilder b = new StringBuilder();
-          for (int i = 0; i < n; i++) {
-                b.append(' ');
-          }
-          return b.toString();
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            b.append(' ');
+        }
+        return b.toString();
     }
 
     public static String ann(Output o, Parameter p) {
