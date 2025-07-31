@@ -437,11 +437,11 @@ public final class Generator {
         String text;
         if (isOptionalOverload) {
             text = String.format(
-                    "Sets %s. This parameter is <b>optional</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
+                    "Sets %s. This parameter is <b>OPTIONAL</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
                     p.name());
         } else {
             text = String.format(
-                    "Sets %s. This parameter is <b>optional</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
+                    "Sets %s. This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
                     p.name());
         }
         final int maxLength = 80;
