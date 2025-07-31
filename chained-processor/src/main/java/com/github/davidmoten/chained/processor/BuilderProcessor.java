@@ -46,7 +46,7 @@ public final class BuilderProcessor extends AbstractProcessor {
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
     }
-    
+
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -216,7 +216,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 .map(p -> new Parameter(p.asType().toString(), p.getSimpleName().toString(),
                         p.getAnnotation(Nullable.class) != null)) //
                 .collect(Collectors.toList());
-        
+
         Set<Modifier> modifiers = constructor.getModifiers();
         boolean constructorVisible = //
                 modifiers.contains(Modifier.PUBLIC) //
@@ -237,8 +237,30 @@ public final class BuilderProcessor extends AbstractProcessor {
         Map<String, String> map = new HashMap<>();
         String text = utils.getDocComment(typeElement);
         if (text != null) {
-            // todo
-        };
+            while (text.contains("@param ")) {
+                int start = text.indexOf("@param ");
+                if (start == -1) {
+                    break;
+                }
+                int end = text.indexOf("@", start + 1);
+                if (end == -1) {
+                    end = text.length();
+                }
+                String parameterText = text.substring(start + 7, end).trim();
+                text = text.substring(end);
+                int spaceIndex = parameterText.indexOf(' ');
+                String parameterName = spaceIndex == -1 ? parameterText : parameterText.substring(0, spaceIndex);
+                String parameterDescription = spaceIndex == -1 ? "" : parameterText.substring(spaceIndex + 1).trim();
+                if (!parameterDescription.isEmpty()) {
+                    map.put(parameterName, parameterDescription);
+                }
+                map.put(parameterName, parameterDescription);
+            }
+        }
+        ;
+        if (!map.isEmpty()) {
+            System.out.println(map);
+        }
         return map;
     }
 
