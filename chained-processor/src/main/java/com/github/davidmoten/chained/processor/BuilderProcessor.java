@@ -249,7 +249,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 if (end == -1) {
                     end = text.length();
                 }
-                String parameterText = text.substring(start + 7, end).trim();
+                String parameterText = text.substring(start + 7, end).trim().replace("\n", " ").replaceAll("  +", " ");
                 text = text.substring(end);
                 int spaceIndex = parameterText.indexOf(' ');
                 String parameterName = spaceIndex == -1 ? parameterText : parameterText.substring(0, spaceIndex);
