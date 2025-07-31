@@ -120,6 +120,7 @@ public final class Generator {
                 if (!alwaysIncludeBuildMethod) {
                     writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
                     o.line();
+                    writeFieldJavadoc(q, o);
                     o.line("public %s %s(%s %s %s) {", o.add(className), q.name(), ann(o, p), o.add(q.type()),
                             q.name());
                     writeNullCheck(o, q);
@@ -127,6 +128,7 @@ public final class Generator {
                 } else {
                     writeBuilderForCollection(o, q, builder, "_b.", "this");
                     o.line();
+                    writeFieldJavadoc(q, o);
                     o.line("public %s %s(%s %s %s) {", builder, q.name(), ann(o, p), o.add(q.type()), q.name());
                     writeNullCheck(o, q);
                     assignBuilderField(o, q);
@@ -144,6 +146,7 @@ public final class Generator {
             } else {
                 String nextBuilder = builderClassName(q.name());
                 o.line();
+                writeFieldJavadoc(q, o);
                 o.line("public %s %s(%s %s %s) {", nextBuilder, q.name(), ann(o, p), o.add(q.type()), q.name());
                 writeNullCheck(o, q);
                 assignBuilderField(o, q);
@@ -165,7 +168,7 @@ public final class Generator {
         for (Parameter p : optionalOrNullable) {
             if (p.isOptional()) {
                 o.line();
-                writeOptionalFieldJavadoc(p, o);
+                writeFieldJavadoc(p, o);
                 o.line("public %s %s(@%s %s %s) {", lastBuilder, p.name(), Nonnull.class,
                         o.add(toPrimitive(innerType(p.type()))), p.name());
                 writeNullCheck(o, p);
@@ -174,9 +177,7 @@ public final class Generator {
                 o.close();
             }
             o.line();
-            if (p.isOptional()) {
-                writeOptionalFieldOverloadJavadoc(p, o);
-            }
+            writeFieldOverloadJavadoc(p, o);
             o.line("public %s %s(%s %s %s) {", lastBuilder, p.name(), ann(o, p), o.add(p.type()), p.name());
             if (!p.isNullable()) {
                 writeNullCheck(o, p);
@@ -219,16 +220,15 @@ public final class Generator {
         for (Parameter p : parameters) {
             if (p.isOptional()) {
                 o.line();
-                writeOptionalFieldJavadoc(p, o);
-                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(toPrimitive(innerType(p.type()))), p.name());
+                writeFieldJavadoc(p, o);
+                o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p),
+                        o.add(toPrimitive(innerType(p.type()))), p.name());
                 o.line("this.%s = %s.of(%s);", p.name(), Optional.class, p.name());
                 o.line("return this;");
                 o.close();
             }
             o.line();
-            if (p.isOptional()) {
-                writeOptionalFieldOverloadJavadoc(p, o);
-            }
+            writeFieldOverloadJavadoc(p, o);
             o.line("public CopyBuilder %s(%s %s %s) {", p.name(), ann(o, p), o.add(p.type()), p.name());
             o.line("this.%s = %s;", p.name(), p.name());
             o.line("return this;");
@@ -363,6 +363,7 @@ public final class Generator {
 
     private static void writeMandatorySetter(Output o, Parameter p) {
         String nextBuilder = builderClassName(p.name());
+        writeFieldJavadoc(p, o);
         o.line("public %s %s(%s %s %s) {", nextBuilder, p.name(), ann(o, p), o.add(p.type()), p.name());
         if (!p.isNullable()) {
             writeNullCheck(o, p);
@@ -405,7 +406,7 @@ public final class Generator {
                 String wrappedType = innerType(p.type());
                 wrappedType = toPrimitive(wrappedType);
                 o.line();
-                writeOptionalFieldJavadoc(p, o);
+                writeFieldJavadoc(p, o);
                 o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(wrappedType),
                         p.name());
                 writeNullCheck(o, p);
@@ -415,9 +416,7 @@ public final class Generator {
             }
             writeBuilderForCollection(o, p, builderSimpleClassName, "this", "this");
             o.line();
-            if (p.isOptional()) {
-                writeOptionalFieldOverloadJavadoc(p, o);
-            }
+            writeFieldOverloadJavadoc(p, o);
             o.line("public %s %s(%s %s %s) {", builderSimpleClassName, p.name(), ann(o, p), o.add(p.type()), p.name());
             if (!p.isNullable()) {
                 writeNullCheck(o, p);
@@ -434,31 +433,30 @@ public final class Generator {
         o.close();
     }
 
-    private static void writeOptionalFieldJavadoc(Parameter p, Output o) {
-        writeOptionalFieldJavadoc(p, o, false);
+    private static void writeFieldJavadoc(Parameter p, Output o) {
+        writeFieldJavadoc(p, o, false);
     }
 
-    private static void writeOptionalFieldOverloadJavadoc(Parameter p, Output o) {
-        writeOptionalFieldJavadoc(p, o, true);
+    private static void writeFieldOverloadJavadoc(Parameter p, Output o) {
+        writeFieldJavadoc(p, o, true);
     }
 
-    private static void writeOptionalFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload) {
-        String text;
-        
+    private static void writeFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload) {
         String javadoc = "Sets " + p.javadoc().orElse("{@code " + p.name() + "}").trim();
         if (!javadoc.endsWith(".")) {
             javadoc += ".";
         }
-        if (isOptionalOverload) {
+        String text;
+        if (p.isOptional() && isOptionalOverload) {
             text = String.format(
                     "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
-                    javadoc,
-                    p.name());
-        } else {
+                    javadoc, p.name());
+        } else if (p.isOptional()) {
             text = String.format(
                     "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
-                    javadoc,
-                    p.name());
+                    javadoc, p.name());
+        } else {
+            text = javadoc;
         }
         final int maxLength = MAX_JAVADOC_LINE_LENGTH;
         List<String> lines = new ArrayList<>();
@@ -486,8 +484,8 @@ public final class Generator {
                 .map(line -> " * " + line) //
                 .forEach(o::line);
         o.line(" *");
-        o.line(" * @param %s the value to assign to the field", p.name());
-        o.line(" * @return this builder");
+        o.line(" * @param %s %s", p.name(), p.javadoc().orElse("the value to assign"));
+        o.line(" * @return builder");
         o.line(" */");
     }
 
@@ -847,7 +845,7 @@ public final class Generator {
         boolean isNullable() {
             return nullable;
         }
-        
+
         Optional<String> javadoc() {
             return javadoc;
         }
