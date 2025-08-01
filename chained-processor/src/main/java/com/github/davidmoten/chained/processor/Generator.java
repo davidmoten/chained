@@ -120,7 +120,7 @@ public final class Generator {
                 if (!alwaysIncludeBuildMethod) {
                     writeBuilderForCollection(o, q, o.add(className), "_b.", "_b.build()");
                     o.line();
-                    writeFieldJavadoc(q, o);
+                    writeFieldJavadoc(q, o, "built " + o.add(className));
                     o.line("public %s %s(%s %s %s) {", o.add(className), q.name(), ann(o, p), o.add(q.type()),
                             q.name());
                     writeNullCheck(o, q);
@@ -433,15 +433,20 @@ public final class Generator {
         o.close();
     }
 
+    private static void writeFieldJavadoc(Parameter p, Output o, String returns) {
+        Preconditions.checkNotNull(false, returns);
+        writeFieldJavadoc(p, o, false, Optional.of(returns));
+    }
+    
     private static void writeFieldJavadoc(Parameter p, Output o) {
-        writeFieldJavadoc(p, o, false);
+        writeFieldJavadoc(p, o, false, Optional.empty());
     }
 
     private static void writeFieldOverloadJavadoc(Parameter p, Output o) {
-        writeFieldJavadoc(p, o, true);
+        writeFieldJavadoc(p, o, true, Optional.empty());
     }
 
-    private static void writeFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload) {
+    private static void writeFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload, Optional<String> returns) {
         String javadoc = "Sets " + p.javadoc().orElse("{@code " + p.name() + "}").trim();
         if (!javadoc.endsWith(".")) {
             javadoc += ".";
@@ -469,7 +474,7 @@ public final class Generator {
                     String.format("@param %s %s", p.name(), p.javadoc().orElse("the value to assign")),
                     p.name().length() + 8);
             writeJavadocLines(o, lines);
-            o.line(" * @return builder");
+            o.line(" * @return %s", returns.orElse("builder"));
             o.line(" */");
         }
     }
