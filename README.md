@@ -1,12 +1,13 @@
 # chained
 
-Java annotation processor to generate chained immutable builders including map and list builders.
+Java annotation processor to generate chained (staged) immutable builders (see [java-builder-pattern-tricks](https://github.com/davidmoten/java-builder-pattern-tricks) for background).
 * chained builders provide compile-time *type-safety* to ensure mandatory fields are always set
 * builders include map, list, and set builders (supporting multiple implementations)
 * supports **null-safe** usage (`java.util.Optional` used for optional fields and optional return values)
 * supports **null** usage (use `javax.annotation.Nullable` to pass `null` to optional values)
 * especially concise usage with java `record` types
 * generates builders for `class`, `record` and `interface` types
+* supports building from a copy
 * supports JDK 8+, Maven, Gradle
 * generates source (as well as compiled classes) so is IDE friendly as long as the IDE is *build-helper-maven-plugin* aware.
 * no internal class references (no funky stuff, follows public api of javac annotation processor)
