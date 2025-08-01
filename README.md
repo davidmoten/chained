@@ -231,10 +231,11 @@ From a discoverability perspective this is not great because a user has to know 
 package mine;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
+import javax.annotation.Nullable;
 import mine.builder.PersonBuilder.BuilderWithName;
 
 @Builder
-public final record Person(String name, int yearOfBirth, Optional<String> comments) {
+public final record Person(String name, int yearOfBirth, @Nullable String comments) {
     public static BuilderWithName name(String name) {
         return PersonBuilder.builder().name(name);
     }
