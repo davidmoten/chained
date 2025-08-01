@@ -225,7 +225,7 @@ Person p = PersonBuilder
     .comments("enjoyed the event")
     .build();
 ```
-From a discoverability perspective this is not great because a user has to know of the existence of `PersonBuilder`. Let's improve this by adding a static builder method to `Person` class:
+From a discoverability perspective this is not great because a user has to know of the existence of `PersonBuilder`. Let's improve this by adding a static builder method to `Person` class (it's easiest to do this after having generated the builder once so the IDE is aware of available classes):
 
 ```java
 package mine;
