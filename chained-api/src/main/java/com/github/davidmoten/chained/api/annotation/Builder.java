@@ -47,4 +47,5 @@ public @interface Builder {
      * @return true if the generated builder should have a static `copy` method
      */
     boolean copy() default true;
+    
 }

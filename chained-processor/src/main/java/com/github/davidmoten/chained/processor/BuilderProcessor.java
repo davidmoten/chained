@@ -116,7 +116,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                             try (PrintWriter out = new PrintWriter(file.openWriter())) {
                                 if (typeElement.getKind() == ElementKind.INTERFACE) {
                                     String className = typeElement.getQualifiedName().toString();
-                                    String code = Generator.generateImplemetationClass(className,
+                                    String code = Generator.generateImplementationClass(className,
                                             parametersFromInterface(typeElement), implementationClassName,
                                             checkMethodName(typeElement));
                                     out.println(code);
