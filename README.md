@@ -291,7 +291,10 @@ Usage:
 ```java
 Point point = Point.x(12).y(22);
 ```
-If you don't want  to shortcut the `build` method then set the annotation as `@Builder(alwaysIncludeBuildMethod = true)`.
+If you don't want  to shortcut the `build` method then set the annotation as `@Builder(alwaysIncludeBuildMethod = true)`. If you do this then usage will be
+```java
+Point point = Point.x(12).y(22).build();
+```
 
 ### Copy 
 Let's look at the `Person` record example again, and we'll add a `copy` method:
