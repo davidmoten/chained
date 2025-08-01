@@ -277,6 +277,21 @@ Person a = Person
     .comments("cool person")
     .build();
 ```
+### Shortcutting the `build` method
+If all parameters are mandatory then the default generated builder provides the built object from the setter of the last parameter:
+```java
+@Builder
+public record Point(int x, int y) {
+    public static BuilderWithX x(int x) {
+        return PointBuilder.builder().x(x);
+    } 
+}
+```
+Usage:
+```java
+Point point = Point.x(12).y(22);
+```
+If you don't want  to shortcut the `build` method then set the annotation as `@Builder(alwaysIncludeBuildMethod = true)`.
 
 ### Copy 
 Let's look at the `Person` record example again, and we'll add a `copy` method:
