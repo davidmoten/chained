@@ -353,7 +353,7 @@ public final record Person(String name, int yearOfBirth, Optional<String> commen
 ```
 
 ### Generating from interface types
-This generation method is especially useful for JDK < 17 (when `record` type was introduced).
+This generation method is especially useful for JDKs before JDK 16 (when `record` type was introduced).
 
 ```java
 package mine;
