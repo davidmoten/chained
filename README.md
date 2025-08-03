@@ -1,5 +1,5 @@
 # chained
-[![ci](https://github.com/davidmoten/chained/actions/workflows/ci.yml/badge.svg)](https://github.com/davidmoten/chained/actions/workflows/ci.yml)
+[![ci](https://github.com/davidmoten/chained/actions/workflows/ci.yml/badge.svg)](https://github.com/davidmoten/chained/actions/workflows/ci.yml)<br/>
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.davidmoten/chained-maven-plugin)](https://central.sonatype.com/artifact/com.github.davidmoten/chained-maven-plugin)<br/>
 
 Java annotation processor to generate chained (staged) immutable builders (see [java-builder-pattern-tricks](https://github.com/davidmoten/java-builder-pattern-tricks) for background). Targets JDK 16+ `record` types in particular (but also generates from JDK 8+ classes and interfaces).
