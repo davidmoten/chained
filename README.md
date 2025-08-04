@@ -416,7 +416,36 @@ public interface Person {
 
 ### Generating from class types
 
-TODO
+```java
+@Builder
+public final class Point2 { 
+    
+    private final int x;
+    private final int y;
+
+    public Point2(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public static BuilderWithX x(int x) {
+        return Point2Builder.builder().x(x);
+    }
+    
+    public int x() {
+        return x;
+    }
+    
+    public int y() {
+        return y;
+    }
+}
+```
+After generating the builder for the class the static `x(int x)` method was added. We build an instance of `Point2` like this:
+```java
+Point2 p = Point2.x(123).y(456);
+```
+The above class example is immutable but you can also generate a class for a mutable class (say with a no-args constructor even). However, you do have to ensure that an all-args constructor is present for the generator to find fields.
 
 ### Javadoc
 
