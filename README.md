@@ -445,7 +445,9 @@ After generating the builder for the class the static `x(int x)` method was adde
 ```java
 Point2 p = Point2.x(123).y(456);
 ```
-The above class example is immutable but you can also generate a class for a mutable class (say with a no-args constructor even). However, you do have to ensure that an all-args constructor is present for the generator to find fields.
+The above class example is immutable but you can also generate a class for a mutable class (say with a no-args constructor even). However, you do have to ensure that an all-args constructor is present for the generator to find fields. 
+
+The all-args constructor can be private by the way (which allows the coder to ensure that creation occurs through the builder only).
 
 ### Javadoc
 
