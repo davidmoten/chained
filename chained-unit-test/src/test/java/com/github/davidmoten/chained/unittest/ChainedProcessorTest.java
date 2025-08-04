@@ -231,4 +231,15 @@ public class ChainedProcessorTest {
             NoCopy.class.getMethod("copy", NoCopy.class);
         });
     }
+    
+    @Test
+    public void testClassWithNoArgsConstructor() {
+        ClassWithNoArgsConstructor a = ClassWithNoArgsConstructor.builder().x(10).y(20);
+        assertEquals(10, a.x());
+        assertEquals(20, a.y());
+        
+        ClassWithNoArgsConstructor b = a.copy().x(30).build();
+        assertEquals(30, b.x());
+        assertEquals(20, b.y());
+    }
 }
