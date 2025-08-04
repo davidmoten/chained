@@ -138,7 +138,7 @@ import com.github.davidmoten.chained.api.annotation.Builder;
 @Builder
 public final record Person(String name, int yearOfBirth, Optional<String> comments) {}
 ```
-Using defaults this will generate the [class](https://github.com/davidmoten/chained/blob/master/src/main/docs/PersonBuilder.java) `mine.builder.PersonBuilder`
+Using defaults this will generate the `mine.builder.PersonBuilder` ([src](https://github.com/davidmoten/chained/blob/master/src/main/docs/PersonBuilder.java))`mine.builder.PersonBuilder`
 
 We can use it like this:
 
