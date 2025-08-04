@@ -3,6 +3,8 @@ package com.github.davidmoten.chained.unittest;
 import java.util.Objects;
 
 import com.github.davidmoten.chained.api.annotation.Builder;
+import com.github.davidmoten.chained.unittest.builder.Point2Builder;
+import com.github.davidmoten.chained.unittest.builder.Point2Builder.BuilderWithX;
 
 @Builder
 public final class Point2 { 
@@ -13,6 +15,10 @@ public final class Point2 {
     public Point2(int x, int y) {
         this.x = x;
         this.y = y;
+    }
+    
+    public static BuilderWithX x(int x) {
+        return Point2Builder.builder().x(x);
     }
     
     public int x() {
