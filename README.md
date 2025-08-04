@@ -122,6 +122,10 @@ dependencies {
 
 
 ## Examples
+Builders are generated like this:
+* fields are detected as parameters on the constructor with the most parameters. If there is more than one constructor with the max number of parameters then the fields are detected from the constructor which has been annotated with `@BuilderConstructor`.
+* field javadoc is extracted for record types from the class-level javadoc
+* optional parameters should be typed as `Optional<TYPE_HERE>` or should be annotated with `@Nullable`
 
 #### Null-safe usage
 java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*, making use of `Optional` for optional fields:
