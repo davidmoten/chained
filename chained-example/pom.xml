@@ -14,7 +14,8 @@
     </parent>
 
     <name>chained-example</name>
-
+    <description>Example usage of chained</description>
+    
     <dependencies>
         <dependency>
             <groupId>com.github.davidmoten</groupId>

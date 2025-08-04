@@ -13,6 +13,7 @@
     </parent>
 
     <name>chained-api</name>
+    <description>Annotations and runtime for chained</description> 
 
     <dependencies>
         <dependency>
