@@ -328,7 +328,7 @@ Now we can do this:
 ```java
 Person a = Person.name("fred").age(23).build();
 
-Person b = a.copy().withName("anne").build();
+Person b = a.copy().name("anne").build(); // we don't need to set age, will be 23 due to copy
 ```
 
 Of course you can do this without adding the `copy` method too:
@@ -336,7 +336,7 @@ Of course you can do this without adding the `copy` method too:
 ```java
 Person a = Person.name("fred").age(23).build();
 
-Person b = PersonBuilder.copy(a).withName("anne").build();
+Person b = PersonBuilder.copy(a).name("anne").build();
 ```
 
 ### Providing the full class name of the generated classes
