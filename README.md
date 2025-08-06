@@ -41,6 +41,7 @@ Make these changes to your `pom.xml`:
             <configuration>
                 <generatedSourcesDirectory>
                     ${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+                <!-- if you use the @Builder annotation in test classes as well then include this directory -->
                 <generatedTestSourcesDirectory>
                        ${project.build.directory}/generated-test-sources/test-annotations</generatedTestSourcesDirectory>
                 <annotationProcessorPaths>
