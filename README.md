@@ -66,8 +66,7 @@ Make these changes to your `pom.xml`:
                     </goals>
                     <configuration>
                         <sources>
-                            <source>
-                                ${project.build.directory}/generated-sources/annotations</source>
+                            <source>${project.build.directory}/generated-sources/annotations</source>
                         </sources>
                     </configuration>
                 </execution>
@@ -80,8 +79,7 @@ Make these changes to your `pom.xml`:
                     </goals>
                     <configuration>
                         <sources>
-                            <source>
-                                ${project.build.directory}/generated-test-sources/test-annotations</source>
+                            <source>${project.build.directory}/generated-test-sources/test-annotations</source>
                         </sources>
                     </configuration>
                 </execution>
