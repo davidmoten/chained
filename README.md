@@ -40,10 +40,12 @@ Make these changes to your `pom.xml`:
             <version>3.14.0</version>
             <configuration>
                 <generatedSourcesDirectory>
-                    ${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+                    ${project.build.directory}/generated-sources/annotations
+                </generatedSourcesDirectory>
                 <!-- if you use the @Builder annotation in test classes as well then include this directory -->
                 <generatedTestSourcesDirectory>
-                       ${project.build.directory}/generated-test-sources/test-annotations</generatedTestSourcesDirectory>
+                       ${project.build.directory}/generated-test-sources/test-annotations
+                </generatedTestSourcesDirectory>
                 <annotationProcessorPaths>
                     <path>
                         <groupId>com.github.davidmoten</groupId>
