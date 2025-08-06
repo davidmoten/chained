@@ -209,7 +209,7 @@ Person a = Person
 ```
 
 #### Nullable usage
-java `record` types are a big boost in concise coding and offer more flexibility than generation from `interface` types. Let's create a builder for the `Person` class below using *chained*, making use of `null` for optional fields:
+Let's create a builder for the `Person` class below using *chained*, making use of `null` for optional fields:
 
 ```java
 package mine;
