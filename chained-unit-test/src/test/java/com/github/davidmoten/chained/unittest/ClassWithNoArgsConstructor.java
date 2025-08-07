@@ -14,6 +14,12 @@ public class ClassWithNoArgsConstructor {
         // no-args constructor
     }
     
+    /**
+     * Constructor.
+     * 
+     * @param x the x coordinate of the point
+     * @param y the y coordinate of the point
+     */
     public ClassWithNoArgsConstructor(int x, int y) {
         this.x = x;
         this.y = y;

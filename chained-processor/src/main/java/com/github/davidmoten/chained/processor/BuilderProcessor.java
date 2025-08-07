@@ -238,7 +238,11 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     private static Map<String, String> fieldJavadoc(TypeElement typeElement, Elements utils) {
         Map<String, String> map = new HashMap<>();
-        String text = utils.getDocComment(typeElement);
+        ExecutableElement constructor = constructor(typeElement);
+        String text = utils.getDocComment(constructor);
+        if (text == null || !text.contains("@param ")) {
+            text = utils.getDocComment(typeElement);
+        } 
         if (text != null) {
             while (text.contains("@param ")) {
                 int start = text.indexOf("@param ");
@@ -259,8 +263,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 }
                 map.put(parameterName, parameterDescription);
             }
-        }
-        ;
+        } 
         if (!map.isEmpty()) {
             System.out.println(map);
         }
