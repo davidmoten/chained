@@ -28,6 +28,7 @@ import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
 import com.github.davidmoten.chained.api.SetBuilder;
+import com.github.davidmoten.chained.processor.BuilderProcessor.Javadocs;
 
 import jakarta.annotation.Generated;
 import jakarta.annotation.Nonnull;

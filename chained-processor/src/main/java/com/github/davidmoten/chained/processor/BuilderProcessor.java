@@ -1,9 +1,13 @@
 package com.github.davidmoten.chained.processor;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +44,7 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     private static final String DEFAULT_BUILDER_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Builder";
     private static final String DEFAULT_IMPLEMENTATION_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Impl";
+    private static final String DEFAULT_JAVADOCS_LOCATION = "src/main/javadocs";
     private Elements utils;
 
     @Override
@@ -55,6 +60,7 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        Javadocs javadocs = new Javadocs(processingEnv);
         try {
             for (Element element : roundEnv.getElementsAnnotatedWith(Builder.class)) {
                 if (element instanceof TypeElement) {
@@ -100,11 +106,11 @@ public final class BuilderProcessor extends AbstractProcessor {
                             try (PrintWriter out = new PrintWriter(file.openWriter())) {
                                 if (typeElement.getKind() == ElementKind.INTERFACE) {
                                     generateFromInterface(typeElement, packageName, annotation, builderClassName,
-                                            implementationClassName, out);
+                                            implementationClassName, javadocs, out);
                                 } else if (typeElement.getKind() == ElementKind.CLASS
                                         || typeElement.getKind().name().equals("RECORD")) {
                                     generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName,
-                                            implementationClassName, out);
+                                            implementationClassName, javadocs, out);
                                 } else {
                                     log(Kind.WARNING, "class type " + typeElement.getKind()
                                             + " not supported for builder generation");
@@ -116,9 +122,10 @@ public final class BuilderProcessor extends AbstractProcessor {
                             try (PrintWriter out = new PrintWriter(file.openWriter())) {
                                 if (typeElement.getKind() == ElementKind.INTERFACE) {
                                     String className = typeElement.getQualifiedName().toString();
-                                    String code = Generator.generateImplementationClass(className,
-                                            parametersFromInterface(typeElement), implementationClassName,
-                                            checkMethodName(typeElement));
+                                    List<Parameter> parameters = parametersFromInterface(typeElement,
+                                            implementationClassName, javadocs);
+                                    String code = Generator.generateImplementationClass(className, parameters,
+                                            implementationClassName, checkMethodName(typeElement));
                                     out.println(code);
                                 }
                             }
@@ -142,6 +149,62 @@ public final class BuilderProcessor extends AbstractProcessor {
             }
             log(Kind.ERROR, new String(b.toByteArray(), StandardCharsets.UTF_8));
             return false;
+        }
+    }
+
+    public static final class Javadocs {
+        private static final String JAVADOC_FILE_EXTENSION = ".txt";
+        private final Map<String, String> map;
+
+        Javadocs(ProcessingEnvironment processingEnv) {
+            String javadocsLocation = processingEnv //
+                    .getOptions() //
+                    .getOrDefault("javadocs", DEFAULT_JAVADOCS_LOCATION);
+            File javadocsDir = new File(javadocsLocation);
+            File[] files = javadocsDir.listFiles();
+            if (files != null) {
+                map = Arrays.stream(files) //
+                        .filter(file -> file.isDirectory()) //
+                        .flatMap(file -> Arrays.stream(file.listFiles())
+                                .filter(f -> f.isFile() && f.getName().endsWith(JAVADOC_FILE_EXTENSION)) //
+                                .map(f -> toPair(file, f)))
+                        .collect(Collectors.toMap(Pair::key, Pair::value));
+            } else {
+                map = Collections.emptyMap();
+            }
+        }
+
+        private static Pair toPair(File file, File f) {
+            String name = f.getName().substring(0, file.getName().length() - JAVADOC_FILE_EXTENSION.length());
+            try {
+                String text = new String(java.nio.file.Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
+                return new Pair(file.getName() + ":" + name, text);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        private static final class Pair {
+            final String key;
+            final String value;
+
+            Pair(String key, String value) {
+                this.key = key;
+                this.value = value;
+            }
+
+            String key() {
+                return key;
+            }
+
+            String value() {
+                return value;
+            }
+        }
+
+        public Optional<String> get(String fullClassName, String fieldName) {
+            String key = fullClassName + ":" + fieldName;
+            return Optional.ofNullable(map.get(key));
         }
     }
 
@@ -178,8 +241,8 @@ public final class BuilderProcessor extends AbstractProcessor {
     }
 
     private void generateFromInterface(TypeElement typeElement, String packageName, Builder annotation,
-            String builderClassName, String implementationClassName, PrintWriter out) {
-        List<Parameter> parameters = parametersFromInterface(typeElement);
+            String builderClassName, String implementationClassName, Javadocs javadocs, PrintWriter out) {
+        List<Parameter> parameters = parametersFromInterface(typeElement, implementationClassName, javadocs);
         out.print(Generator.chainedBuilder( //
                 typeElement.getQualifiedName().toString(), //
                 builderClassName, //
@@ -191,7 +254,8 @@ public final class BuilderProcessor extends AbstractProcessor {
         out.println();
     }
 
-    private static List<Parameter> parametersFromInterface(TypeElement typeElement) {
+    private static List<Parameter> parametersFromInterface(TypeElement typeElement, String implementationClassName,
+            Javadocs javadocs) {
         return typeElement //
                 .getEnclosedElements() //
                 .stream() //
@@ -201,12 +265,13 @@ public final class BuilderProcessor extends AbstractProcessor {
                 .map(x -> (ExecutableElement) x) //
                 .filter(x -> x.getParameters().isEmpty()) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString(),
-                        x.getAnnotation(Nullable.class) != null, Optional.empty())) //
+                        x.getAnnotation(Nullable.class) != null,
+                        javadocs.get(implementationClassName, x.getSimpleName().toString()))) //
                 .collect(Collectors.toList());
     }
 
     private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,
-            String builderClassName, String implementationClassName, PrintWriter out) {
+            String builderClassName, String implementationClassName, Javadocs javadocs, PrintWriter out) {
         String builderPackageName = Util.pkg(builderClassName);
         ExecutableElement constructor = constructor(typeElement);
         Map<String, String> fieldJavadoc = fieldJavadoc(typeElement, utils);
@@ -217,7 +282,8 @@ public final class BuilderProcessor extends AbstractProcessor {
                         p.asType().toString(), //
                         p.getSimpleName().toString(), //
                         p.getAnnotation(Nullable.class) != null, //
-                        Optional.ofNullable(fieldJavadoc.get(p.getSimpleName().toString())))) //
+                        Optional.ofNullable(javadocs.get(implementationClassName, p.getSimpleName().toString())
+                                .orElse(fieldJavadoc.get(p.getSimpleName().toString()))))) //
                 .collect(Collectors.toList());
 
         Set<Modifier> modifiers = constructor.getModifiers();
@@ -242,7 +308,7 @@ public final class BuilderProcessor extends AbstractProcessor {
         String text = utils.getDocComment(constructor);
         if (text == null || !text.contains("@param ")) {
             text = utils.getDocComment(typeElement);
-        } 
+        }
         if (text != null) {
             while (text.contains("@param ")) {
                 int start = text.indexOf("@param ");
@@ -263,7 +329,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                 }
                 map.put(parameterName, parameterDescription);
             }
-        } 
+        }
         if (!map.isEmpty()) {
             System.out.println(map);
         }
