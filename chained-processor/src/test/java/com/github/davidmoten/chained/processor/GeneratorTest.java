@@ -18,8 +18,8 @@ public class GeneratorTest {
     @Test
     public void test() {
         List<Parameter> list = new ArrayList<>();
-        list.add(new Parameter("String", "name", false, Optional.empty()));
-        list.add(new Parameter("java.util.Optional<Integer>", "age", false, Optional.empty()));
+        list.add(new Parameter("String", "name", false, Optional.empty(), false));
+        list.add(new Parameter("java.util.Optional<Integer>", "age", false, Optional.empty(), false));
         String code = Generator.chainedBuilder("me.Thing", "me.builder.ThingBuilder", list, Construction.DIRECT, false,
                 "blah.ThingImpl", true);
         System.out.println(code);

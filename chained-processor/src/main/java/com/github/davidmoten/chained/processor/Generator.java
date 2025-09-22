@@ -3,6 +3,7 @@ package com.github.davidmoten.chained.processor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +29,6 @@ import com.github.davidmoten.chained.api.ListBuilder;
 import com.github.davidmoten.chained.api.MapBuilder;
 import com.github.davidmoten.chained.api.Preconditions;
 import com.github.davidmoten.chained.api.SetBuilder;
-import com.github.davidmoten.chained.processor.BuilderProcessor.Javadocs;
 
 import jakarta.annotation.Generated;
 import jakarta.annotation.Nonnull;
@@ -438,7 +438,7 @@ public final class Generator {
         Preconditions.checkNotNull(false, returns);
         writeFieldJavadoc(p, o, false, Optional.of(returns));
     }
-    
+
     private static void writeFieldJavadoc(Parameter p, Output o) {
         writeFieldJavadoc(p, o, false, Optional.empty());
     }
@@ -448,35 +448,42 @@ public final class Generator {
     }
 
     private static void writeFieldJavadoc(Parameter p, Output o, boolean isOptionalOverload, Optional<String> returns) {
-        String javadoc = "Sets " + p.javadoc().orElse("{@code " + p.name() + "}").trim();
-        if (!javadoc.endsWith(".")) {
-            javadoc += ".";
-        }
-        String text;
-        if (p.isOptional() && isOptionalOverload) {
-            text = String.format(
-                    "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
-                    javadoc, p.name());
-        } else if (p.isOptional()) {
-            text = String.format(
-                    "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
-                    javadoc, p.name());
-        } else {
-            text = javadoc;
-        }
-        {
-            List<String> lines = wrapJavadoc(text, 0);
-            lines.add("");
+        if (p.javadoc().isPresent() && p.isJavadocPrerendered()) {
             o.line("/**");
+            List<String> lines = Arrays.asList(p.javadoc().get().split("\n"));
             writeJavadocLines(o, lines);
-        }
-        {
-            List<String> lines = wrapJavadoc(
-                    String.format("@param %s %s", p.name(), p.javadoc().orElse("the value to assign")),
-                    p.name().length() + 8);
-            writeJavadocLines(o, lines);
-            o.line(" * @return %s", returns.orElse("builder"));
             o.line(" */");
+        } else {
+            String javadoc = "Sets " + p.javadoc().orElse("{@code " + p.name() + "}").trim();
+            if (!javadoc.endsWith(".")) {
+                javadoc += ".";
+            }
+            String text;
+            if (p.isOptional() && isOptionalOverload) {
+                text = String.format(
+                        "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or this method can be called with {@code Optional.empty()}.",
+                        javadoc, p.name());
+            } else if (p.isOptional()) {
+                text = String.format(
+                        "%s This parameter is <b>OPTIONAL</b>, the call can be omitted or an overload can be called with {@code Optional.empty()}.",
+                        javadoc, p.name());
+            } else {
+                text = javadoc;
+            }
+            {
+                List<String> lines = wrapJavadoc(text, 0);
+                lines.add("");
+                o.line("/**");
+                writeJavadocLines(o, lines);
+            }
+            {
+                List<String> lines = wrapJavadoc(
+                        String.format("@param %s %s", p.name(), p.javadoc().orElse("the value to assign")),
+                        p.name().length() + 8);
+                writeJavadocLines(o, lines);
+                o.line(" * @return %s", returns.orElse("builder"));
+                o.line(" */");
+            }
         }
     }
 
@@ -869,12 +876,14 @@ public final class Generator {
         private final String name;
         private final boolean nullable;
         private final Optional<String> javadoc;
+        private final boolean javadocPrerendered;
 
-        Parameter(String type, String name, boolean nullable, Optional<String> javadoc) {
+        Parameter(String type, String name, boolean nullable, Optional<String> javadoc, boolean javadocPrerendered) {
             this.type = type;
             this.name = name;
             this.nullable = nullable;
             this.javadoc = javadoc;
+            this.javadocPrerendered = javadocPrerendered;
         }
 
         String type() {
@@ -901,9 +910,13 @@ public final class Generator {
             return javadoc;
         }
 
+        boolean isJavadocPrerendered() {
+            return javadocPrerendered;
+        }
+
         @Override
         public String toString() {
-            return "Parameter [type=" + type + ", name=" + name + "]";
+            return "Parameter [type=" + type + ", name=" + name + ", javadoc=" + javadoc + "]";
         }
     }
 

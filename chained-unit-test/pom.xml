@@ -57,6 +57,9 @@
                             <version>${project.parent.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-AjavadocDir=${project.basedir}/src/main/javadoc</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
 

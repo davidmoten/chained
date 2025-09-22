@@ -44,7 +44,7 @@ public final class BuilderProcessor extends AbstractProcessor {
 
     private static final String DEFAULT_BUILDER_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Builder";
     private static final String DEFAULT_IMPLEMENTATION_CLASS_NAME_TEMPLATE = "${pkg}.builder.${simpleName}Impl";
-    private static final String DEFAULT_JAVADOCS_LOCATION = "src/main/javadocs";
+    private static final String DEFAULT_JAVADOCS_LOCATION = "src/main/javadoc";
     private Elements utils;
 
     @Override
@@ -78,6 +78,8 @@ public final class BuilderProcessor extends AbstractProcessor {
                             .getPackageOf(typeElement) //
                             .getQualifiedName().toString();
                     String simpleClassName = typeElement.getSimpleName().toString();
+                    String fullClassName = packageName.isEmpty() ? simpleClassName
+                            : packageName + "." + simpleClassName;
 
                     String defaultBuilderClassName = processingEnv //
                             .getOptions() //
@@ -110,7 +112,7 @@ public final class BuilderProcessor extends AbstractProcessor {
                                 } else if (typeElement.getKind() == ElementKind.CLASS
                                         || typeElement.getKind().name().equals("RECORD")) {
                                     generateFromClassOrRecord(typeElement, packageName, annotation, builderClassName,
-                                            implementationClassName, javadocs, out);
+                                            implementationClassName, javadocs, fullClassName, out);
                                 } else {
                                     log(Kind.WARNING, "class type " + typeElement.getKind()
                                             + " not supported for builder generation");
@@ -159,7 +161,7 @@ public final class BuilderProcessor extends AbstractProcessor {
         Javadocs(ProcessingEnvironment processingEnv) {
             String javadocsLocation = processingEnv //
                     .getOptions() //
-                    .getOrDefault("javadocs", DEFAULT_JAVADOCS_LOCATION);
+                    .getOrDefault("javadocDir", DEFAULT_JAVADOCS_LOCATION);
             File javadocsDir = new File(javadocsLocation);
             File[] files = javadocsDir.listFiles();
             if (files != null) {
@@ -174,8 +176,13 @@ public final class BuilderProcessor extends AbstractProcessor {
             }
         }
 
+        public Optional<String> get(String fullClassName, String fieldName) {
+            String key = fullClassName + ":" + fieldName;
+            return Optional.ofNullable(map.get(key));
+        }
+
         private static Pair toPair(File file, File f) {
-            String name = f.getName().substring(0, file.getName().length() - JAVADOC_FILE_EXTENSION.length());
+            String name = f.getName().substring(0, f.getName().length() - JAVADOC_FILE_EXTENSION.length());
             try {
                 String text = new String(java.nio.file.Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
                 return new Pair(file.getName() + ":" + name, text);
@@ -202,9 +209,9 @@ public final class BuilderProcessor extends AbstractProcessor {
             }
         }
 
-        public Optional<String> get(String fullClassName, String fieldName) {
-            String key = fullClassName + ":" + fieldName;
-            return Optional.ofNullable(map.get(key));
+        @Override
+        public String toString() {
+            return "Javadocs [map=" + map + "]";
         }
     }
 
@@ -266,26 +273,30 @@ public final class BuilderProcessor extends AbstractProcessor {
                 .filter(x -> x.getParameters().isEmpty()) //
                 .map(x -> new Parameter(x.getReturnType().toString(), x.getSimpleName().toString(),
                         x.getAnnotation(Nullable.class) != null,
-                        javadocs.get(implementationClassName, x.getSimpleName().toString()))) //
+                        javadocs.get(implementationClassName, x.getSimpleName().toString()), true)) //
                 .collect(Collectors.toList());
     }
 
     private void generateFromClassOrRecord(TypeElement typeElement, String packageName, Builder annotation,
-            String builderClassName, String implementationClassName, Javadocs javadocs, PrintWriter out) {
+            String builderClassName, String implementationClassName, Javadocs javadocs, String fullClassName,
+            PrintWriter out) {
         String builderPackageName = Util.pkg(builderClassName);
         ExecutableElement constructor = constructor(typeElement);
         Map<String, String> fieldJavadoc = fieldJavadoc(typeElement, utils);
         List<Parameter> parameters = constructor //
                 .getParameters() //
                 .stream() //
-                .map(p -> new Parameter( //
-                        p.asType().toString(), //
-                        p.getSimpleName().toString(), //
-                        p.getAnnotation(Nullable.class) != null, //
-                        Optional.ofNullable(javadocs.get(implementationClassName, p.getSimpleName().toString())
-                                .orElse(fieldJavadoc.get(p.getSimpleName().toString()))))) //
+                .map(p -> {
+                    Optional<String> prerenderedJavadoc = javadocs.get(fullClassName, p.getSimpleName().toString());
+                    return new Parameter( //
+                            p.asType().toString(), //
+                            p.getSimpleName().toString(), //
+                            p.getAnnotation(Nullable.class) != null, //
+                            Optional.ofNullable(prerenderedJavadoc //
+                                    .orElse(fieldJavadoc.get(p.getSimpleName().toString()))),
+                            prerenderedJavadoc.isPresent());
+                }) //
                 .collect(Collectors.toList());
-
         Set<Modifier> modifiers = constructor.getModifiers();
         boolean constructorVisible = //
                 modifiers.contains(Modifier.PUBLIC) //
