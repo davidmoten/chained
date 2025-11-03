@@ -8,7 +8,7 @@
     <parent>
         <groupId>com.github.davidmoten</groupId>
         <artifactId>chained</artifactId>
-        <version>0.1.3</version>
+        <version>0.1.4-SNAPSHOT</version>
     </parent>
 
     <name>${project.artifactId}</name>
