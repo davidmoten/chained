@@ -417,6 +417,14 @@ public interface Person {
 }
 
 ```
+To use:
+```java
+Person p = Person
+    .name("Marie Curie")
+    .yearOfBirth(1867)
+    .description("Double Nobel Prize winner")
+    .build();
+```
 
 ### Generating from class types
 
