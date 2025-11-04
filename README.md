@@ -16,7 +16,7 @@ Java annotation processor to generate chained (staged) builders (see [java-build
 * no internal class references (no funky stuff, follows public api of javac annotation processor)
 * no dedicated support for Jackson or other annotations (just use JDK 16+ `record` and annotate normally!)
 
-**Status**: published to Maven Central
+**Status**: published to [Maven Central](https://central.sonatype.com/artifact/com.github.davidmoten/chained-processor)
 
 ## Getting started
 
