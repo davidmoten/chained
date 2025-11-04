@@ -676,7 +676,16 @@ public Order(String id, Optional<Integer> number) {
     }
 }
 ```
-
+or using nullable fields:
+```java
+public Order(String id, @Nullable Integer number) {
+    public Order {
+        if (number == null) {
+            number = 1;
+        }
+    }
+}
+```
 This is also achievable with the `interface` type but not as cleanly because we choose to expose two `number` accessors in the public API:
 
 ```java
