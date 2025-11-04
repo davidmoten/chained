@@ -128,7 +128,7 @@ dependencies {
 ## Examples
 Builders are generated like this:
 * fields are detected as parameters on the constructor with the most parameters. If there is more than one constructor with the max number of parameters then the fields are detected from the constructor which has been annotated with `@BuilderConstructor`.
-* builder field settter javadoc is extracted for record types from the class-level javadoc
+* builder field settter javadoc is extracted for record types from the class-level javadoc (`@param` declarations)
 * optional parameters should be typed as `Optional<TYPE_HERE>` or should be annotated with `@Nullable`
 
 #### Null-safe usage
