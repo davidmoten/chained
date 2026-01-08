@@ -24,7 +24,7 @@
 
         <!-- versions of test dependencies -->
         <junit.version>5.14.2</junit.version>
-        <publishing.version>0.9.0</publishing.version>
+        <publishing.version>0.10.0</publishing.version>
         <jacoco.version>0.8.14</jacoco.version>
     </properties>
 
